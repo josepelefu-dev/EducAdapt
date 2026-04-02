@@ -1,0 +1,2 @@
+# EducAdapt
+Adaptar apuntes fácilmente
