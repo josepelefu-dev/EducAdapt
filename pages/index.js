@@ -2,6 +2,7 @@ import { useState } from "react";
 
 export default function Home() {
   const [text, setText] = useState("");
+  const [file, setFile] = useState(null);
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("5primaria");
   const [lang, setLang] = useState("es");
@@ -9,12 +10,22 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const handleAdapt = async () => {
-    if (!text.trim()) {
-      alert(lang === "es" ? "Introduce texto" : "Introdueix text");
+    if (!text.trim() && !file) {
+      alert(lang === "es" ? "Introduce texto o archivo" : "Introdueix text o arxiu");
       return;
     }
 
     setLoading(true);
+
+    let fileData = null;
+
+    if (file) {
+      const base64 = await toBase64(file);
+      fileData = {
+        data: base64.split(",")[1],
+        type: file.type
+      };
+    }
 
     try {
       const res = await fetch("/api/adapt", {
@@ -22,14 +33,19 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ text, type, level })
+        body: JSON.stringify({
+          text,
+          type,
+          level,
+          file: fileData
+        })
       });
 
       const data = await res.json();
-
       setResult(data.result);
+
     } catch (error) {
-      setResult(lang === "es" ? "Error procesando texto" : "Error processant text");
+      setResult(lang === "es" ? "Error procesando" : "Error processant");
     }
 
     setLoading(false);
@@ -42,7 +58,7 @@ export default function Home() {
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/logo.jpg" style={{ width: "45px" }} />
-          <h2 style={{ margin: 0 }}>EducAdapt</h2>
+          <h2>EducAdapt</h2>
         </div>
 
         <div>
@@ -51,18 +67,11 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CARD PRINCIPAL */}
+      {/* CARD */}
       <div style={cardStyle}>
 
-        <p style={{ textAlign: "center", color: "#555" }}>
-          {lang === "es"
-            ? "Adapta tus apuntes a diferentes necesidades educativas"
-            : "Adapta els teus apunts a diferents necessitats educatives"}
-        </p>
-
-        {/* TEXTAREA */}
         <textarea
-          rows="8"
+          rows="6"
           style={textareaStyle}
           placeholder={
             lang === "es"
@@ -75,9 +84,17 @@ export default function Home() {
 
         <br /><br />
 
+        {/* SUBIDA ARCHIVOS */}
+        <input
+          type="file"
+          accept=".txt,.pdf"
+          onChange={(e) => setFile(e.target.files[0])}
+        />
+
+        <br /><br />
+
         {/* SELECTORES */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">Fácil</option>
             <option value="tdah">TDAH</option>
@@ -93,7 +110,6 @@ export default function Home() {
             <option value="3eso">3º ESO</option>
             <option value="4eso">4º ESO</option>
           </select>
-
         </div>
 
         <br />
@@ -101,38 +117,40 @@ export default function Home() {
         {/* BOTÓN */}
         <button onClick={handleAdapt} style={mainButton}>
           {loading
-            ? (lang === "es" ? "Adaptando..." : "Adaptant...")
+            ? (lang === "es" ? "Procesando..." : "Processant...")
             : (lang === "es" ? "Adaptar" : "Adaptar")}
         </button>
 
-        <p style={smallText}>
-          {lang === "es"
-            ? "Herramienta educativa impulsada por IA"
-            : "Eina educativa impulsada per IA"}
-        </p>
-
-        <br />
+        <br /><br />
 
         {/* RESULTADO */}
         {result && (
           <div style={resultBox}>
-            <h3>{lang === "es" ? "Resultado:" : "Resultat:"}</h3>
             {result}
           </div>
         )}
 
       </div>
 
-      {/* AVISO LEGAL */}
+      {/* AVISO */}
       <p style={legalText}>
         {lang === "es"
-          ? "Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional."
-          : "Aquesta eina és un suport educatiu basat en IA i no substitueix diagnòstic professional."}
+          ? "Esta herramienta no sustituye diagnóstico profesional."
+          : "Aquesta eina no substitueix diagnòstic professional."}
       </p>
 
     </div>
   );
 }
+
+/* 🔧 FUNCIONES */
+
+const toBase64 = (file) => new Promise((resolve, reject) => {
+  const reader = new FileReader();
+  reader.readAsDataURL(file);
+  reader.onload = () => resolve(reader.result);
+  reader.onerror = reject;
+});
 
 /* 🎨 ESTILOS */
 
@@ -149,7 +167,7 @@ const headerStyle = {
   display: "flex",
   justifyContent: "space-between",
   alignItems: "center",
-  marginBottom: "30px"
+  marginBottom: "20px"
 };
 
 const cardStyle = {
@@ -157,17 +175,15 @@ const cardStyle = {
   margin: "auto",
   background: "white",
   color: "black",
-  padding: "30px",
-  borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  padding: "25px",
+  borderRadius: "15px"
 };
 
 const textareaStyle = {
   width: "100%",
-  padding: "15px",
-  borderRadius: "12px",
-  border: "1px solid #ddd",
-  fontSize: "15px"
+  padding: "12px",
+  borderRadius: "10px",
+  border: "1px solid #ccc"
 };
 
 const selectStyle = {
@@ -177,24 +193,20 @@ const selectStyle = {
 
 const mainButton = {
   width: "100%",
-  padding: "15px",
-  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
+  padding: "14px",
+  background: "#4f46e5",
   color: "white",
   border: "none",
-  borderRadius: "12px",
+  borderRadius: "10px",
   fontSize: "16px",
-  cursor: "pointer",
-  fontWeight: "bold"
+  cursor: "pointer"
 };
 
 const resultBox = {
-  background: "#f8fafc",
+  background: "#f1f5f9",
   padding: "20px",
-  borderRadius: "12px",
-  fontFamily: "monospace",
-  whiteSpace: "pre-wrap",
-  lineHeight: "1.7",
-  border: "1px solid #e2e8f0"
+  borderRadius: "10px",
+  whiteSpace: "pre-wrap"
 };
 
 const btnLang = {
@@ -203,13 +215,6 @@ const btnLang = {
   borderRadius: "6px",
   border: "none",
   cursor: "pointer"
-};
-
-const smallText = {
-  fontSize: "12px",
-  color: "#888",
-  textAlign: "center",
-  marginTop: "10px"
 };
 
 const legalText = {
