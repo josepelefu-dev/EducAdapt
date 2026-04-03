@@ -5,6 +5,7 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
+  const [lang, setLang] = useState("es"); // 🟢 idioma
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -22,7 +23,7 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ text, type, mode, level })
+        body: JSON.stringify({ text, type, mode, level, lang })
       });
 
       const data = await res.json();
@@ -47,17 +48,22 @@ export default function Home() {
   return (
     <div style={pageStyle}>
 
-      {/* HEADER CON LOGO */}
+      {/* HEADER CON LOGO + IDIOMA */}
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
           <h2 style={{ margin: 0 }}>EducAdapt</h2>
         </div>
+
+        {/* 🌍 IDIOMAS */}
+        <div>
+          <button onClick={() => setLang("es")} style={langBtn}>🇪🇸</button>
+          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+        </div>
       </div>
 
       <div style={cardStyle}>
 
-        {/* TEXTAREA */}
         <textarea
           rows="8"
           style={textareaStyle}
@@ -68,10 +74,8 @@ export default function Home() {
 
         <br /><br />
 
-        {/* SELECTORES */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
 
-          {/* TIPO */}
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">Resumen</option>
             <option value="tdah">TDAH</option>
@@ -79,14 +83,12 @@ export default function Home() {
             <option value="esquema">Esquema</option>
           </select>
 
-          {/* NIVEL NUEVO */}
           <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
             <option value="basico">🟢 Básico</option>
             <option value="intermedio">🔵 Intermedio</option>
             <option value="avanzado">🟣 Avanzado</option>
           </select>
 
-          {/* MODO */}
           <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
             <option value="alumno">Alumno</option>
             <option value="profesor">Profesor</option>
@@ -96,14 +98,12 @@ export default function Home() {
 
         <br />
 
-        {/* BOTÓN */}
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? "Procesando..." : "Adaptar"}
         </button>
 
         <br /><br />
 
-        {/* RESULTADO */}
         {result && (
           <div style={resultBox}>
             {formatResult(result)}
@@ -112,7 +112,6 @@ export default function Home() {
 
       </div>
 
-      {/* AVISO */}
       <p style={legalText}>
         Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
       </p>
@@ -134,6 +133,7 @@ const headerStyle = {
   maxWidth: "900px",
   margin: "auto",
   display: "flex",
+  justifyContent: "space-between",
   alignItems: "center",
   marginBottom: "20px"
 };
@@ -178,6 +178,14 @@ const resultBox = {
   whiteSpace: "pre-wrap",
   lineHeight: "1.8",
   border: "1px solid #e2e8f0"
+};
+
+const langBtn = {
+  margin: "5px",
+  padding: "6px 10px",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer"
 };
 
 const legalText = {
