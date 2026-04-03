@@ -93,18 +93,18 @@ export default function Home() {
 
   // 🎨 RESALTADO INTELIGENTE (TDAH / DISLEXIA)
   const highlightKeywords = (text) => {
-    if (!text) return "";
+  if (!text) return "";
 
-    return text.replace(/\b[A-ZÁÉÍÓÚÜÑ]{3,}\b/g, (word) => {
-      return `<span style="
-        color:#1d4ed8;
-        font-weight:600;
-        background:#e0f2fe;
-        padding:2px 6px;
-        border-radius:4px;
-      ">${word}</span>`;
-    });
-  };
+  return text.replace(/\b\w{6,}\b/g, (word) => {
+    return `<span style="
+      color:#1d4ed8;
+      font-weight:600;
+      background:#e0f2fe;
+      padding:2px 4px;
+      border-radius:4px;
+    ">${word}</span>`;
+  });
+};
 
   const getFinalResult = () => {
     const formatted = formatResult(result);
