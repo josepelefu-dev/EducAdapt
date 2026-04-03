@@ -15,14 +15,16 @@ export default function Home() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
 
-  // 🆕 VOZ
   const [speaking, setSpeaking] = useState(false);
 
+  // Fuente dislexia
   useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
+    if (typeof window !== "undefined") {
+      const link = document.createElement("link");
+      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
   }, []);
 
   const translations = {
@@ -92,7 +94,7 @@ export default function Home() {
       const data = await res.json();
       setResult(data.result || "");
       setCurrentLine(0);
-    } catch (error) {
+    } catch {
       setResult("Error procesando");
     }
 
@@ -110,13 +112,11 @@ export default function Home() {
 
   const getLines = () => {
     if (!result) return [];
-    return formatResult(result)
-      .split("\n")
-      .filter(l => l.trim() !== "");
+    return formatResult(result).split("\n").filter(l => l.trim() !== "");
   };
 
-  // 🆕 VOZ (AÑADIDO)
   const speakText = () => {
+    if (typeof window === "undefined") return;
     if (!result) return;
 
     const textToRead = guidedMode
@@ -126,19 +126,19 @@ export default function Home() {
     const utterance = new SpeechSynthesisUtterance(textToRead);
     utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
 
-    speechSynthesis.cancel();
-    speechSynthesis.speak(utterance);
+    window.speechSynthesis.cancel();
+    window.speechSynthesis.speak(utterance);
 
     setSpeaking(true);
     utterance.onend = () => setSpeaking(false);
   };
 
   const stopSpeech = () => {
-    speechSynthesis.cancel();
+    if (typeof window === "undefined") return;
+    window.speechSynthesis.cancel();
     setSpeaking(false);
   };
 
-  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -159,16 +159,14 @@ export default function Home() {
     whiteSpace: "pre-wrap",
     lineHeight: "2",
     border: "1px solid #e2e8f0",
-    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
-    fontSize: "17px"
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial"
   };
 
   return (
     <div style={pageStyle}>
-
       <div style={headerStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src="/logo.jpg" style={{ width: "50px" }} />
+        <div style={{ display: "flex", gap: "10px" }}>
+          <img src="/logo.jpg" width="50" />
           <h2>{t.title}</h2>
         </div>
 
@@ -190,67 +188,27 @@ export default function Home() {
 
         <br /><br />
 
-        {/* 🔥 TUS SELECTS SIGUEN EXACTAMENTE IGUAL */}
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
-            <option value="facil">{t.resumen}</option>
-            <option value="tdah">{t.tdah}</option>
-            <option value="dislexia">{t.dislexia}</option>
-            <option value="esquema">{t.esquema}</option>
-          </select>
-
-          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
-            <option value="basico">{t.basico}</option>
-            <option value="intermedio">{t.intermedio}</option>
-            <option value="avanzado">{t.avanzado}</option>
-          </select>
-
-          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
-            <option value="alumno">{t.alumno}</option>
-            <option value="profesor">{t.profesor}</option>
-          </select>
-        </div>
-
-        <br />
-
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button
-          onClick={() => {
-            setGuidedMode(!guidedMode);
-            setCurrentLine(0);
-          }}
-          style={{ marginTop: "10px", ...mainButton }}
-        >
+        <button onClick={() => setGuidedMode(!guidedMode)} style={mainButton}>
           {guidedMode ? t.normal : t.guided}
         </button>
 
         {guidedMode && (
           <div>
-            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={mainButton}>
               {autoPlay ? t.stop : t.auto}
             </button>
 
-            {/* 🆕 SOLO ESTO AÑADIDO */}
-            <button onClick={speakText} style={{ marginTop: "10px", background: "#10b981", ...mainButton }}>
+            <button onClick={speakText} style={mainButton}>
               {t.speak}
             </button>
 
-            <button onClick={stopSpeech} style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}>
+            <button onClick={stopSpeech} style={mainButton}>
               {t.stopSpeak}
             </button>
-
-            <input
-              type="range"
-              min="1000"
-              max="5000"
-              step="500"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              style={{ width: "100%", marginTop: "10px" }}
-            />
           </div>
         )}
 
@@ -261,25 +219,21 @@ export default function Home() {
         )}
 
         {guidedMode && result && (
-          <div style={{ ...resultStyle, textAlign: "center" }}>
-            <div style={{
-              fontSize: "22px",
-              fontWeight: "600",
-              background: "#e0f2fe",
-              padding: "20px",
-              borderRadius: "10px"
-            }}>
-              {getLines()[currentLine] || ""}
-            </div>
+          <div style={resultStyle}>
+            {getLines()[currentLine] || ""}
           </div>
         )}
 
       </div>
-
-      <p style={legalText}>
-        Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
-      </p>
-
     </div>
   );
 }
+
+/* estilos */
+
+const pageStyle = { padding: 20 };
+const headerStyle = { display: "flex", justifyContent: "space-between" };
+const cardStyle = { background: "white", padding: 20 };
+const textareaStyle = { width: "100%" };
+const mainButton = { marginTop: 10 };
+const langBtn = { margin: 5 };
