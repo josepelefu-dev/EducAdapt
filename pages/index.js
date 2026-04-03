@@ -6,6 +6,11 @@ export default function Home() {
   const [level, setLevel] = useState("5primaria");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
+  const [lang, setLang] = useState("es");
+  <div style={{ textAlign: "center", marginBottom: "10px" }}>
+  <button onClick={() => setLang("es")}>🇪🇸 Español</button>
+  <button onClick={() => setLang("ca")}>🇨🇦 Català</button>
+</div>
 
   const handleAdapt = async () => {
     setLoading(true);
@@ -29,8 +34,15 @@ export default function Home() {
     }}>
       
       <h1 style={{ textAlign: "center" }}>
-        🧠 EduAdapt
+        🧠 EducAdapt
       </h1>
+          <h1>{lang === "es" ? "🧠 EducAdapt" : "🧠 EducAdapt"}</h1>
+
+<p>
+{lang === "es"
+  ? "Adapta tus apuntes a cualquier necesidad educativa"
+  : "Adapta els teus apunts a qualsevol necessitat educativa"}
+</p>
 
       <p style={{ textAlign: "center", color: "#666" }}>
         Adapta tus apuntes a cualquier necesidad educativa
@@ -44,9 +56,11 @@ export default function Home() {
           borderRadius: "10px",
           border: "1px solid #ccc"
         }}
-        placeholder="Pega aquí tus apuntes..."
-        value={text}
-        onChange={(e) => setText(e.target.value)}
+        placeholder={
+  lang === "es"
+    ? "Pega aquí tus apuntes..."
+    : "Enganxa aquí els teus apunts..."
+}
       />
 
       <br /><br />
@@ -58,6 +72,7 @@ export default function Home() {
           <option value="facil">Fácil</option>
           <option value="tdah">TDAH</option>
           <option value="dislexia">Dislexia</option>
+          <option value="esquema">Esquema</option>
         </select>
 
         {/* Nivel académico */}
@@ -87,7 +102,9 @@ export default function Home() {
           cursor: "pointer"
         }}
       >
-        {loading ? "Adaptando..." : "Adaptar"}
+        {loading
+  ? (lang === "es" ? "Adaptando..." : "Adaptant...")
+  : (lang === "es" ? "Adaptar" : "Adaptar")}
       </button>
 
       <br /><br />
