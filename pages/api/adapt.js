@@ -1,76 +1,40 @@
-import { v2 as cloudinary } from "cloudinary";
-import pdf from "pdf-parse";
-
-// 🔐 Config Cloudinary
-cloudinary.config({
-  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY,
-  api_secret: process.env.CLOUDINARY_API_SECRET,
-});
-
 export default async function handler(req, res) {
   try {
     let { text, type, fileUrl } = req.body;
 
-    // 📄 SI VIENE PDF DESDE CLOUDINARY
-    if ((!text || text.trim() === "") && fileUrl) {
-      try {
-        const response = await fetch(fileUrl);
-        const buffer = Buffer.from(await response.arrayBuffer());
-
-        const pdfData = await pdf(buffer);
-        text = pdfData.text;
-      } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-          result: "Error leyendo el PDF"
-        });
-      }
+    // 🔒 VALIDACIÓN
+    if (!text && !fileUrl) {
+      return res.status(400).json({
+        result: "No hay texto ni archivo"
+      });
     }
 
-    // 🔒 VALIDACIÓN
-    if (!text || text.trim() === "") {
+    // 📄 si viene PDF → NO lo procesamos aún (evita romper build)
+    if (!text && fileUrl) {
       return res.status(400).json({
-        result: "No hay texto válido"
+        result: "PDF subido correctamente, pero procesamiento en desarrollo"
       });
     }
 
     let prompt = "";
 
     if (type === "facil") {
-      prompt = `Simplifica este texto para un niño de 10 años:\n\n${text}`;
+      prompt = `Simplifica este texto:\n\n${text}`;
     }
 
     if (type === "tdah") {
-      prompt = `Reescribe este texto para alguien con TDAH:
-- Frases cortas
-- Usa listas
-- Destaca lo importante
-
-${text}`;
+      prompt = `Adapta este texto para TDAH:\n\n${text}`;
     }
 
     if (type === "dislexia") {
-      prompt = `Adapta este texto para dislexia:
-- Lenguaje simple
-- Frases cortas
-- Estructura clara
-
-${text}`;
+      prompt = `Adapta este texto para dislexia:\n\n${text}`;
     }
 
     if (type === "esquema") {
-      prompt = `Convierte este texto en esquema tipo árbol:
-
-Tema
- ├── Idea
- │    ├── Detalle
-
-${text}`;
+      prompt = `Convierte en esquema:\n\n${text}`;
     }
 
-    // 🧠 LLAMADA A IA
-    const responseAI = await fetch("https://api.openai.com/v1/chat/completions", {
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
         Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
@@ -82,7 +46,7 @@ ${text}`;
       })
     });
 
-    const data = await responseAI.json();
+    const data = await response.json();
 
     return res.status(200).json({
       result: data.choices?.[0]?.message?.content || "Sin resultado"
@@ -91,7 +55,7 @@ ${text}`;
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      result: "Error interno del servidor"
+      result: "Error interno"
     });
   }
 }
