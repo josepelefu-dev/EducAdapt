@@ -162,7 +162,7 @@ export default function Home() {
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" || type === "tdah" ? "1.5" : "2",
+    lineHeight: type === "dislexia" || type === "tdah" ? "1" : "1.5",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px"
