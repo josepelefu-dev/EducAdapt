@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   try {
-    const { text, type, mode, level } = req.body;
+    const { text, type, mode, level, lang } = req.body;
 
     if (!text || text.trim() === "") {
       return res.status(400).json({
@@ -8,14 +8,21 @@ export default async function handler(req, res) {
       });
     }
 
-    // 🎯 CONFIGURACIÓN SEGÚN NIVEL
+    // 🌍 IDIOMA
+    let languageInstruction = "";
+    if (lang === "ca") {
+      languageInstruction = "Respon en català.";
+    } else {
+      languageInstruction = "Responde en castellano.";
+    }
+
+    // 🎯 NIVEL
     let levelInstruction = "";
 
     if (level === "basico") {
       levelInstruction = `
 - Lenguaje muy sencillo
 - Frases muy cortas
-- Explicación clara y fácil
 - Evitar palabras difíciles
 `;
     }
@@ -24,15 +31,13 @@ export default async function handler(req, res) {
       levelInstruction = `
 - Lenguaje claro
 - Explicación estructurada
-- Mantener conceptos importantes
 `;
     }
 
     if (level === "avanzado") {
       levelInstruction = `
-- Lenguaje más completo
 - Mantener términos técnicos
-- Explicación detallada
+- Explicación más completa
 `;
     }
 
@@ -40,7 +45,9 @@ export default async function handler(req, res) {
 
     // 👨‍🏫 MODO PROFESOR
     if (mode === "profesor") {
-      prompt = `Adapta este contenido para uso docente.
+      prompt = `${languageInstruction}
+
+Adapta este contenido para uso docente.
 
 REGLAS:
 - Explicación clara
@@ -62,11 +69,13 @@ ${text}`;
 
       // 🟢 RESUMEN
       if (type === "facil") {
-        prompt = `Simplifica el siguiente texto.
+        prompt = `${languageInstruction}
+
+Simplifica el siguiente texto.
 
 ${levelInstruction}
 
-Devuelve SOLO el texto final.
+Devuelve SOLO el texto.
 SIN introducciones ni comentarios.
 
 Texto:
@@ -75,7 +84,9 @@ ${text}`;
 
       // 🟡 TDAH
       if (type === "tdah") {
-        prompt = `Adapta este texto para TDAH.
+        prompt = `${languageInstruction}
+
+Adapta este texto para TDAH.
 
 ${levelInstruction}
 
@@ -92,14 +103,15 @@ ${text}`;
 
       // 🔵 DISLEXIA
       if (type === "dislexia") {
-        prompt = `Adapta este texto para dislexia.
+        prompt = `${languageInstruction}
+
+Adapta este texto para dislexia.
 
 ${levelInstruction}
 
 REGLAS:
 - Una frase por línea
 - Muy fácil de leer
-- Estructura clara
 
 Devuelve SOLO el texto.
 
@@ -109,7 +121,9 @@ ${text}`;
 
       // 🌳 ESQUEMA
       if (type === "esquema") {
-        prompt = `Convierte este texto en un esquema tipo árbol.
+        prompt = `${languageInstruction}
+
+Convierte este texto en un esquema tipo árbol.
 
 ${levelInstruction}
 
