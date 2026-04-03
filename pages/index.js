@@ -59,19 +59,21 @@ export default function Home() {
       </p>
 
       <textarea
-        rows="8"
-        style={{
-          width: "100%",
-          padding: "10px",
-          borderRadius: "10px",
-          border: "1px solid #ccc"
-        }}
-        placeholder={
-  lang === "es"
-    ? "Pega aquí tus apuntes..."
-    : "Enganxa aquí els teus apunts..."
-}
-      />
+  rows="8"
+  style={{
+    width: "100%",
+    padding: "10px",
+    borderRadius: "10px",
+    border: "1px solid #ccc"
+  }}
+  placeholder={
+    lang === "es"
+      ? "Pega aquí tus apuntes..."
+      : "Enganxa aquí els teus apunts..."
+  }
+  value={text}
+  onChange={(e) => setText(e.target.value)}
+/>
 
       <br /><br />
 
