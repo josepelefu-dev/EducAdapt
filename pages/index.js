@@ -16,7 +16,7 @@ export default function Home() {
     formData.append("upload_preset", "unsigned_preset");
 
     const res = await fetch(
-      `https://api.cloudinary.com/v1_1/TU_CLOUD_NAME/auto/upload`,
+      `https://api.cloudinary.com/v1_1/EducAdapt/auto/upload`,
       {
         method: "POST",
         body: formData
