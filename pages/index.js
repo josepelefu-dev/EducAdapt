@@ -15,6 +15,7 @@ export default function Home() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
 
+  // 🆕 VOZ
   const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
@@ -114,6 +115,7 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
+  // 🆕 VOZ (AÑADIDO)
   const speakText = () => {
     if (!result) return;
 
@@ -136,6 +138,7 @@ export default function Home() {
     setSpeaking(false);
   };
 
+  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -187,6 +190,29 @@ export default function Home() {
 
         <br /><br />
 
+        {/* 🔥 TUS SELECTS SIGUEN EXACTAMENTE IGUAL */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
@@ -207,6 +233,7 @@ export default function Home() {
               {autoPlay ? t.stop : t.auto}
             </button>
 
+            {/* 🆕 SOLO ESTO AÑADIDO */}
             <button onClick={speakText} style={{ marginTop: "10px", background: "#10b981", ...mainButton }}>
               {t.speak}
             </button>
@@ -256,63 +283,3 @@ export default function Home() {
     </div>
   );
 }
-
-/* 🔥 ESTILOS (ESTO ERA LO QUE TE FALTABA) */
-
-const pageStyle = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg, #0f172a, #1e293b)",
-  padding: "20px",
-  color: "white"
-};
-
-const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "20px"
-};
-
-const cardStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  background: "white",
-  color: "black",
-  padding: "30px",
-  borderRadius: "20px"
-};
-
-const textareaStyle = {
-  width: "100%",
-  padding: "15px",
-  borderRadius: "10px",
-  border: "1px solid #ddd",
-  resize: "none"
-};
-
-const mainButton = {
-  width: "100%",
-  padding: "15px",
-  background: "#6366f1",
-  color: "white",
-  border: "none",
-  borderRadius: "12px",
-  cursor: "pointer"
-};
-
-const langBtn = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
-};
-
-const legalText = {
-  textAlign: "center",
-  fontSize: "12px",
-  marginTop: "20px",
-  opacity: 0.7
-};
