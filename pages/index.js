@@ -1,5 +1,4 @@
 import { useState } from "react";
-import jsPDF from "jspdf";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -16,21 +15,25 @@ export default function Home() {
 
     setLoading(true);
 
-    const res = await fetch("/api/adapt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text, type, mode })
-    });
+    try {
+      const res = await fetch("/api/adapt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text, type, mode })
+      });
 
-    const data = await res.json();
-    setResult(data.result);
+      const data = await res.json();
+      setResult(data.result);
+
+    } catch (error) {
+      setResult("Error procesando");
+    }
 
     setLoading(false);
   };
 
-  // 🎨 FORMATO VISUAL
   const formatResult = (text) => {
     if (!text) return "";
 
@@ -40,25 +43,13 @@ export default function Home() {
       .replace(/│/g, "");
   };
 
-  // 📄 DESCARGAR PDF
-  const downloadPDF = () => {
-    const doc = new jsPDF();
-    const lines = doc.splitTextToSize(result, 180);
-
-    doc.text(lines, 10, 10);
-    doc.save("educadapt_resultado.pdf");
-  };
-
   return (
     <div style={pageStyle}>
 
-      {/* HEADER */}
       <h1 style={{ textAlign: "center" }}>EducAdapt</h1>
 
-      {/* CARD */}
       <div style={cardStyle}>
 
-        {/* TEXTAREA */}
         <textarea
           rows="8"
           style={textareaStyle}
@@ -69,7 +60,6 @@ export default function Home() {
 
         <br /><br />
 
-        {/* SELECTORES */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
 
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
@@ -88,31 +78,20 @@ export default function Home() {
 
         <br />
 
-        {/* BOTÓN */}
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? "Procesando..." : "Adaptar"}
         </button>
 
         <br /><br />
 
-        {/* RESULTADO */}
         {result && (
-          <>
-            <div style={resultBox}>
-              {formatResult(result)}
-            </div>
-
-            <br />
-
-            <button onClick={downloadPDF} style={mainButton}>
-              Descargar PDF
-            </button>
-          </>
+          <div style={resultBox}>
+            {formatResult(result)}
+          </div>
         )}
 
       </div>
 
-      {/* AVISO */}
       <p style={legalText}>
         Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
       </p>
