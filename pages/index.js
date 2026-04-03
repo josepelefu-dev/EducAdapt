@@ -17,10 +17,12 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
+    if (typeof window !== "undefined") {
+      const link = document.createElement("link");
+      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.rel = "stylesheet";
+      document.head.appendChild(link);
+    }
   }, []);
 
   const translations = {
@@ -113,7 +115,7 @@ export default function Home() {
   };
 
   const speakText = () => {
-    if (!result) return;
+    if (!result || typeof window === "undefined") return;
 
     const lines = getLines();
     let index = 0;
@@ -134,16 +136,18 @@ export default function Home() {
         speakLine();
       };
 
-      speechSynthesis.speak(utterance);
+      window.speechSynthesis.speak(utterance);
     };
 
-    speechSynthesis.cancel();
+    window.speechSynthesis.cancel();
     setSpeaking(true);
     speakLine();
   };
 
   const stopSpeech = () => {
-    speechSynthesis.cancel();
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
     setSpeaking(false);
   };
 
@@ -175,8 +179,8 @@ export default function Home() {
   return (
     <div style={pageStyle}>
 
-      {/* 🔴 TEST */}
-      <h1 style={{color:"red"}}>TEST NUEVO</h1>
+      {/* TEST */}
+      <h1 style={{ color: "red" }}>TEST NUEVO</h1>
 
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
@@ -189,3 +193,105 @@ export default function Home() {
           <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
         </div>
       </div>
+
+      <div style={cardStyle}>
+        <textarea
+          rows="8"
+          style={textareaStyle}
+          placeholder={t.placeholder}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
+
+        <br /><br />
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
+        <button onClick={handleAdapt} style={mainButton}>
+          {loading ? t.loading : t.adapt}
+        </button>
+
+        <button
+          onClick={() => {
+            setGuidedMode(!guidedMode);
+            setCurrentLine(0);
+          }}
+          style={{ marginTop: "10px", ...mainButton }}
+        >
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <button onClick={speakText} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
+
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.stopSpeak}
+            </button>
+
+            <input
+              type="range"
+              min="1000"
+              max="5000"
+              step="500"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              style={{ width: "100%", marginTop: "10px" }}
+            />
+          </div>
+        )}
+
+        <br /><br />
+
+        {!guidedMode && result && (
+          <div style={resultStyle}>{formatResult(result)}</div>
+        )}
+
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} style={{ background: i === currentLine ? "#dbeafe" : "transparent" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+/* estilos */
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
