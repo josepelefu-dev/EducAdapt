@@ -14,14 +14,11 @@ export default function Home() {
 
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
-
   const [speaking, setSpeaking] = useState(false);
 
-  // Fuente dislexia
   useEffect(() => {
     const link = document.createElement("link");
-    link.href =
-      "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+    link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }, []);
@@ -115,7 +112,6 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
-  // 🔊 VOZ
   const speakText = () => {
     if (!result) return;
 
@@ -151,7 +147,6 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -170,10 +165,7 @@ export default function Home() {
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight:
-      type === "dislexia" ? "1.4" :
-      type === "tdah" ? "1.45" :
-      "1.6",
+    lineHeight: type === "dislexia" ? "1.4" : type === "tdah" ? "1.45" : "1.6",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px",
@@ -243,28 +235,15 @@ export default function Home() {
 
         {guidedMode && (
           <div>
-            <button
-              onClick={() => setAutoPlay(!autoPlay)}
-              style={{
-                marginTop: "10px",
-                background: autoPlay ? "#ef4444" : "#f59e0b",
-                ...mainButton
-              }}
-            >
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
               {autoPlay ? t.stop : t.auto}
             </button>
 
-            <button
-              onClick={speakText}
-              style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
-            >
+            <button onClick={speakText} style={{ marginTop: "10px", ...mainButton }}>
               {t.speak}
             </button>
 
-            <button
-              onClick={stopSpeech}
-              style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}
-            >
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
               {t.stopSpeak}
             </button>
 
@@ -289,78 +268,22 @@ export default function Home() {
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
-              <div
-                key={i}
-                style={{
-                  background: i === currentLine ? "#dbeafe" : "transparent",
-                  padding: "6px",
-                  borderRadius: "6px"
-                }}
-              >
+              <div key={i} style={{ background: i === currentLine ? "#dbeafe" : "transparent" }}>
                 {line}
               </div>
             ))}
           </div>
         )}
-
       </div>
     </div>
   );
 }
 
-/* ESTILOS */
-const pageStyle = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg, #0f172a, #1e293b)",
-  padding: "20px",
-  color: "white"
-};
-
-const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center"
-};
-
-const cardStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  background: "white",
-  color: "black",
-  padding: "30px",
-  borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
-};
-
-const textareaStyle = {
-  width: "100%",
-  padding: "15px",
-  borderRadius: "10px",
-  border: "1px solid #ddd",
-  resize: "none"
-};
-
-const selectStyle = {
-  padding: "10px",
-  borderRadius: "8px"
-};
-
-const mainButton = {
-  width: "100%",
-  padding: "15px",
-  background: "#6366f1",
-  color: "white",
-  border: "none",
-  borderRadius: "12px",
-  cursor: "pointer"
-};
-
-const langBtn = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
-};
+/* estilos */
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
