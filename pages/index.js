@@ -38,10 +38,10 @@ export default function Home() {
       {/* HEADER */}
       <div style={{ textAlign: "center", marginBottom: "20px" }}>
         <img 
-          src="/logo.jpg" 
-          alt="EducAdapt Logo"
-          style={{ width: "140px", marginBottom: "10px" }}
-        />
+  src="/logo.jpg?v=1" 
+  alt="EducAdapt Logo"
+  style={{ width: "140px" }}
+/>
         <h1 style={{ margin: 0 }}>EducAdapt</h1>
 
         {/* IDIOMA */}
