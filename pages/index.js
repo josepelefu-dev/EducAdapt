@@ -9,9 +9,12 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🆕 NUEVO
   const [guidedMode, setGuidedMode] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
+
+  // 🆕 AUTO LECTURA
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [speed, setSpeed] = useState(2000);
 
   useEffect(() => {
     const link = document.createElement("link");
@@ -19,6 +22,21 @@ export default function Home() {
     link.rel = "stylesheet";
     document.head.appendChild(link);
   }, []);
+
+  // 🆕 EFECTO AUTOMÁTICO
+  useEffect(() => {
+    if (!autoPlay || !guidedMode) return;
+
+    const interval = setInterval(() => {
+      setCurrentLine((prev) => {
+        const lines = getLines();
+        if (prev < lines.length - 1) return prev + 1;
+        return prev;
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [autoPlay, speed, guidedMode, result]);
 
   const translations = {
     es: {
@@ -40,7 +58,9 @@ export default function Home() {
       guided: "Modo lectura guiada",
       normal: "Modo normal",
       next: "Siguiente →",
-      prev: "← Anterior"
+      prev: "← Anterior",
+      auto: "Lectura automática",
+      stop: "Detener"
     },
     ca: {
       title: "EducAdapt",
@@ -61,7 +81,9 @@ export default function Home() {
       guided: "Mode lectura guiada",
       normal: "Mode normal",
       next: "Següent →",
-      prev: "← Anterior"
+      prev: "← Anterior",
+      auto: "Lectura automàtica",
+      stop: "Aturar"
     }
   };
 
@@ -84,7 +106,7 @@ export default function Home() {
 
       const data = await res.json();
       setResult(data.result);
-      setCurrentLine(0); // reset lectura guiada
+      setCurrentLine(0);
     } catch (error) {
       setResult("Error procesando");
     }
@@ -102,7 +124,6 @@ export default function Home() {
       .replace(/\. /g, ".\n\n");
   };
 
-  // 🆕 dividir en líneas
   const getLines = () => {
     return formatResult(result)
       .split("\n")
@@ -175,24 +196,38 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
-        {/* 🆕 BOTÓN GUIADO */}
+        {/* GUIADO */}
         <button
           onClick={() => {
             setGuidedMode(!guidedMode);
             setCurrentLine(0);
           }}
-          style={{
-            marginTop: "10px",
-            padding: "10px",
-            borderRadius: "10px",
-            background: "#22c55e",
-            color: "white",
-            border: "none",
-            cursor: "pointer"
-          }}
+          style={{ marginTop: "10px", ...mainButton }}
         >
           {guidedMode ? t.normal : t.guided}
         </button>
+
+        {/* AUTO */}
+        {guidedMode && (
+          <>
+            <button
+              onClick={() => setAutoPlay(!autoPlay)}
+              style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
+            >
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <input
+              type="range"
+              min="1000"
+              max="5000"
+              step="500"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              style={{ width: "100%", marginTop: "10px" }}
+            />
+          </>
+        )}
 
         <br /><br />
 
@@ -203,7 +238,7 @@ export default function Home() {
           </div>
         )}
 
-        {/* 🆕 GUIADO */}
+        {/* GUIADO */}
         {result && guidedMode && (
           <div style={{ ...resultStyle, textAlign: "center" }}>
             <div style={{
@@ -216,26 +251,6 @@ export default function Home() {
             }}>
               {getLines()[currentLine]}
             </div>
-
-            <button
-              onClick={() =>
-                setCurrentLine(prev =>
-                  prev < getLines().length - 1 ? prev + 1 : prev
-                )
-              }
-              style={mainButton}
-            >
-              {t.next}
-            </button>
-
-            <button
-              onClick={() =>
-                setCurrentLine(prev => (prev > 0 ? prev - 1 : 0))
-              }
-              style={{ ...mainButton, marginTop: "10px", background: "#64748b" }}
-            >
-              {t.prev}
-            </button>
           </div>
         )}
 
@@ -248,69 +263,3 @@ export default function Home() {
     </div>
   );
 }
-
-/* estilos igual que antes */
-
-const pageStyle = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg, #0f172a, #1e293b)",
-  padding: "20px",
-  color: "white"
-};
-
-const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "20px"
-};
-
-const cardStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  background: "white",
-  color: "black",
-  padding: "30px",
-  borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
-};
-
-const textareaStyle = {
-  width: "100%",
-  padding: "15px",
-  borderRadius: "10px",
-  border: "1px solid #ddd"
-};
-
-const selectStyle = {
-  padding: "10px",
-  borderRadius: "8px"
-};
-
-const mainButton = {
-  width: "100%",
-  padding: "15px",
-  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-  color: "white",
-  border: "none",
-  borderRadius: "12px",
-  fontSize: "16px",
-  cursor: "pointer"
-};
-
-const langBtn = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
-};
-
-const legalText = {
-  textAlign: "center",
-  fontSize: "12px",
-  marginTop: "20px",
-  opacity: 0.7
-};
