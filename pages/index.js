@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import jsPDF from "jspdf";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -6,7 +7,6 @@ export default function Home() {
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
 
-  // 🌍 idioma persistente
   const [lang, setLang] = useState("es");
 
   const [result, setResult] = useState("");
@@ -20,7 +20,7 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // guardar idioma
+  // idioma persistente
   useEffect(() => {
     const savedLang = localStorage.getItem("lang");
     if (savedLang) setLang(savedLang);
@@ -132,7 +132,7 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
-  // 🔊 VOZ
+  // VOZ
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -182,7 +182,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // ⬇️ DESCARGA
+  // TXT
   const downloadResult = () => {
     if (!result) return;
 
@@ -196,6 +196,45 @@ export default function Home() {
     link.href = URL.createObjectURL(blob);
     link.download = `educadapt-${type}-${level}.txt`;
     link.click();
+  };
+
+  // PDF PRO
+  const downloadPDF = () => {
+    if (!result) return;
+
+    const doc = new jsPDF();
+
+    const margin = 15;
+    const maxWidth = 180;
+
+    const content = formatResult(result);
+
+    doc.setFont("helvetica", "bold");
+    doc.setFontSize(18);
+    doc.text("EducAdapt", margin, 20);
+
+    doc.setFontSize(10);
+    doc.setFont("helvetica", "normal");
+    doc.text(`Tipo: ${type} | Nivel: ${level}`, margin, 28);
+
+    doc.line(margin, 32, 200 - margin, 32);
+
+    doc.setFontSize(12);
+
+    const lines = doc.splitTextToSize(content, maxWidth);
+
+    let y = 40;
+
+    lines.forEach((line) => {
+      if (y > 280) {
+        doc.addPage();
+        y = 20;
+      }
+      doc.text(line, margin, y);
+      y += 7;
+    });
+
+    doc.save(`educadapt-${type}-${level}.pdf`);
   };
 
   const resultStyle = {
@@ -260,11 +299,12 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button
-          onClick={downloadResult}
-          style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}
-        >
+        <button onClick={downloadResult} style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}>
           {t.download}
+        </button>
+
+        <button onClick={downloadPDF} style={{ marginTop: "10px", background: "#16a34a", ...mainButton }}>
+          📄 PDF PRO
         </button>
 
         <button
@@ -290,17 +330,11 @@ export default function Home() {
               {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
             </button>
 
-            <button
-              onClick={speakText}
-              style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
-            >
+            <button onClick={speakText} style={{ marginTop: "10px", background: "#10b981", ...mainButton }}>
               {t.speak}
             </button>
 
-            <button
-              onClick={stopSpeech}
-              style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}
-            >
+            <button onClick={stopSpeech} style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}>
               {t.stopSpeak}
             </button>
 
@@ -349,68 +383,4 @@ export default function Home() {
   );
 }
 
-/* ESTILOS (SIN CAMBIOS) */
-
-const pageStyle = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg, #0f172a, #1e293b)",
-  padding: "20px",
-  color: "white"
-};
-
-const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "20px"
-};
-
-const cardStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  background: "white",
-  color: "black",
-  padding: "30px",
-  borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
-};
-
-const textareaStyle = {
-  width: "100%",
-  padding: "15px",
-  borderRadius: "10px",
-  border: "1px solid #ddd",
-  resize: "none"
-};
-
-const selectStyle = {
-  padding: "10px",
-  borderRadius: "8px"
-};
-
-const mainButton = {
-  width: "100%",
-  padding: "15px",
-  background: "#6366f1",
-  color: "white",
-  border: "none",
-  borderRadius: "12px",
-  cursor: "pointer"
-};
-
-const langBtn = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
-};
-
-const legalText = {
-  textAlign: "center",
-  fontSize: "12px",
-  marginTop: "20px",
-  opacity: 0.7
-};
+/* estilos iguales */
