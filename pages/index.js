@@ -110,17 +110,19 @@ export default function Home() {
       <br /><br />
 
       {result && (
-        <div style={{
-          background: "white",
-          padding: "20px",
-          borderRadius: "10px",
-          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-          whiteSpace: "pre-wrap"
-        }}>
-          <h3>Resultado:</h3>
-          {result}
-        </div>
-      )}
+  <div style={{
+    background: "white",
+    padding: "20px",
+    borderRadius: "10px",
+    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+    whiteSpace: "pre-wrap",
+    fontFamily: "monospace",
+    lineHeight: "1.6"
+  }}>
+    <h3>Resultado:</h3>
+    {result}
+  </div>
+)}
     </div>
   );
 }
