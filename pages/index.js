@@ -5,10 +5,7 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
-
-  // 🌍 idioma persistente
   const [lang, setLang] = useState("es");
-
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -20,24 +17,13 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // guardar idioma
+  // Fuente dislexia
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang) setLang(savedLang);
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem("lang", lang);
-  }, [lang]);
-
-  // fuente dislexia
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const link = document.createElement("link");
-      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
-      link.rel = "stylesheet";
-      document.head.appendChild(link);
-    }
+    const link = document.createElement("link");
+    link.href =
+      "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
   }, []);
 
   const translations = {
@@ -61,8 +47,7 @@ export default function Home() {
       auto: "Lectura automática",
       stop: "Detener",
       speak: "🔊 Escuchar",
-      stopSpeak: "⏹ Parar",
-      download: "⬇️ Descargar resultado",
+      stopSpeak: "⏹ Parar"
     },
     ca: {
       title: "EducAdapt",
@@ -84,8 +69,7 @@ export default function Home() {
       auto: "Lectura automàtica",
       stop: "Aturar",
       speak: "🔊 Escoltar",
-      stopSpeak: "⏹ Parar",
-      download: "⬇️ Descarregar resultat",
+      stopSpeak: "⏹ Parar"
     }
   };
 
@@ -122,19 +106,18 @@ export default function Home() {
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
       .replace(/│/g, " ")
-      .replace(/\.\s/g, ".\n");
+      .replace(/\. /g, ".\n\n");
   };
 
   const getLines = () => {
-    if (!result) return [];
     return formatResult(result)
       .split("\n")
-      .filter((l) => l.trim() !== "");
+      .filter(l => l.trim() !== "");
   };
 
   // 🔊 VOZ
   const speakText = () => {
-    if (!result || typeof window === "undefined") return;
+    if (!result) return;
 
     const lines = getLines();
     let index = 0;
@@ -155,16 +138,16 @@ export default function Home() {
         speakLine();
       };
 
-      window.speechSynthesis.speak(utterance);
+      speechSynthesis.speak(utterance);
     };
 
-    window.speechSynthesis.cancel();
+    speechSynthesis.cancel();
     setSpeaking(true);
     speakLine();
   };
 
   const stopSpeech = () => {
-    window.speechSynthesis.cancel();
+    speechSynthesis.cancel();
     setSpeaking(false);
   };
 
@@ -173,7 +156,7 @@ export default function Home() {
     if (!autoPlay || !guidedMode) return;
 
     const interval = setInterval(() => {
-      setCurrentLine((prev) => {
+      setCurrentLine(prev => {
         const lines = getLines();
         return prev < lines.length - 1 ? prev + 1 : prev;
       });
@@ -182,31 +165,19 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // ⬇️ DESCARGA
-  const downloadResult = () => {
-    if (!result) return;
-
-    const content = formatResult(result);
-
-    const blob = new Blob([content], {
-      type: "text/plain;charset=utf-8;"
-    });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `educadapt-${type}-${level}.txt`;
-    link.click();
-  };
-
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.3" : "1.5",
+    lineHeight:
+      type === "dislexia" ? "1.4" :
+      type === "tdah" ? "1.45" :
+      "1.6",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
-    fontSize: "17px"
+    fontSize: "17px",
+    color: "#111827"
   };
 
   return (
@@ -261,13 +232,6 @@ export default function Home() {
         </button>
 
         <button
-          onClick={downloadResult}
-          style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}
-        >
-          {t.download}
-        </button>
-
-        <button
           onClick={() => {
             setGuidedMode(!guidedMode);
             setCurrentLine(0);
@@ -287,7 +251,7 @@ export default function Home() {
                 ...mainButton
               }}
             >
-              {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
+              {autoPlay ? t.stop : t.auto}
             </button>
 
             <button
@@ -324,14 +288,13 @@ export default function Home() {
 
         {guidedMode && result && (
           <div style={resultStyle}>
-            {(getLines() || []).map((line, index) => (
+            {getLines().map((line, i) => (
               <div
-                key={index}
+                key={i}
                 style={{
-                  padding: "12px",
-                  margin: "6px 0",
-                  borderRadius: "8px",
-                  background: index === currentLine ? "#dbeafe" : "transparent"
+                  background: i === currentLine ? "#dbeafe" : "transparent",
+                  padding: "6px",
+                  borderRadius: "6px"
                 }}
               >
                 {line}
@@ -341,16 +304,11 @@ export default function Home() {
         )}
 
       </div>
-
-      <p style={legalText}>
-        Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
-      </p>
     </div>
   );
 }
 
-/* ESTILOS (SIN CAMBIOS) */
-
+/* ESTILOS */
 const pageStyle = {
   minHeight: "100vh",
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
@@ -363,8 +321,7 @@ const headerStyle = {
   margin: "auto",
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "20px"
+  alignItems: "center"
 };
 
 const cardStyle = {
@@ -406,11 +363,4 @@ const langBtn = {
   borderRadius: "6px",
   border: "none",
   cursor: "pointer"
-};
-
-const legalText = {
-  textAlign: "center",
-  fontSize: "12px",
-  marginTop: "20px",
-  opacity: 0.7
 };
