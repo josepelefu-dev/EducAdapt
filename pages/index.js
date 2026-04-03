@@ -293,10 +293,10 @@ export default function Home() {
         )}
 
         {guidedMode && result && (
-  <div style={{ ...resultStyle }}>
-
-    {getLines().map((line, index) => (
+  <div style={resultStyle}>
+    {(getLines() || []).map((line, index) => (
       <div
+        id={"line-" + index}
         key={index}
         style={{
           padding: "12px",
@@ -305,9 +305,7 @@ export default function Home() {
           transition: "all 0.3s ease",
 
           background:
-            index === currentLine
-              ? "#dbeafe"
-              : "transparent",
+            index === currentLine ? "#dbeafe" : "transparent",
 
           boxShadow:
             index === currentLine
@@ -324,7 +322,6 @@ export default function Home() {
         {line}
       </div>
     ))}
-
   </div>
 )}
 
