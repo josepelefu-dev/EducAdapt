@@ -9,46 +9,65 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // 🌍 TRADUCCIONES
+  const translations = {
+    es: {
+      title: "EducAdapt",
+      placeholder: "Pega aquí tus apuntes...",
+      adapt: "Adaptar",
+      loading: "Procesando...",
+      result: "Resultado",
+      alumno: "Alumno",
+      profesor: "Profesor",
+      resumen: "Resumen",
+      tdah: "TDAH",
+      dislexia: "Dislexia",
+      esquema: "Esquema",
+      basico: "🟢 Básico",
+      intermedio: "🔵 Intermedio",
+      avanzado: "🟣 Avanzado",
+      error: "Introduce texto"
+    },
+    ca: {
+      title: "EducAdapt",
+      placeholder: "Enganxa aquí els teus apunts...",
+      adapt: "Adaptar",
+      loading: "Processant...",
+      result: "Resultat",
+      alumno: "Alumne",
+      profesor: "Professor",
+      resumen: "Resum",
+      tdah: "TDAH",
+      dislexia: "Dislèxia",
+      esquema: "Esquema",
+      basico: "🟢 Bàsic",
+      intermedio: "🔵 Intermedi",
+      avanzado: "🟣 Avançat",
+      error: "Introdueix text"
+    }
+  };
+
+  const t = translations[lang];
+
   const handleAdapt = async () => {
     if (!text.trim()) {
-      alert("Introduce texto");
+      alert(t.error);
       return;
     }
 
     setLoading(true);
 
-    try {
-      const res = await fetch("/api/adapt", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-          text,
-          type,
-          level,
-          mode,
-          lang // 🔥 AQUÍ ESTÁ LA CLAVE
-        })
-      });
+    const res = await fetch("/api/adapt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ text, type, level, mode, lang })
+    });
 
-      const data = await res.json();
-      setResult(data.result);
-
-    } catch (error) {
-      setResult("Error procesando");
-    }
-
+    const data = await res.json();
+    setResult(data.result);
     setLoading(false);
-  };
-
-  const formatResult = (text) => {
-    if (!text) return "";
-
-    return text
-      .replace(/^- (.*)$/gm, "🔹 $1")
-      .replace(/├──/g, "👉")
-      .replace(/│/g, "");
   };
 
   return (
@@ -58,13 +77,12 @@ export default function Home() {
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
-          <h2 style={{ margin: 0 }}>EducAdapt</h2>
+          <h2>{t.title}</h2>
         </div>
 
-        {/* 🌍 IDIOMA */}
         <div>
-          <button onClick={() => setLang("es")} style={langBtn}>🇪🇸</button>
-          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+          <button onClick={() => setLang("es")}>🇪🇸</button>
+          <button onClick={() => setLang("ca")}>CAT</button>
         </div>
       </div>
 
@@ -73,130 +91,76 @@ export default function Home() {
         <textarea
           rows="8"
           style={textareaStyle}
-          placeholder="Pega aquí tus apuntes..."
+          placeholder={t.placeholder}
           value={text}
           onChange={(e) => setText(e.target.value)}
         />
 
         <br /><br />
 
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+        <div style={{ display: "flex", gap: "10px" }}>
 
-          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
-            <option value="facil">Resumen</option>
-            <option value="tdah">TDAH</option>
-            <option value="dislexia">Dislexia</option>
-            <option value="esquema">Esquema</option>
+          <select value={type} onChange={(e) => setType(e.target.value)}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
           </select>
 
-          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
-            <option value="basico">🟢 Básico</option>
-            <option value="intermedio">🔵 Intermedio</option>
-            <option value="avanzado">🟣 Avanzado</option>
+          <select value={level} onChange={(e) => setLevel(e.target.value)}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
           </select>
 
-          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
-            <option value="alumno">Alumno</option>
-            <option value="profesor">Profesor</option>
+          <select value={mode} onChange={(e) => setMode(e.target.value)}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
           </select>
 
         </div>
 
         <br />
 
-        <button onClick={handleAdapt} style={mainButton}>
-          {loading ? "Procesando..." : "Adaptar"}
+        <button onClick={handleAdapt}>
+          {loading ? t.loading : t.adapt}
         </button>
 
-        <br /><br />
+        <h2>{t.result}:</h2>
 
-        {result && (
-          <div style={resultBox}>
-            {formatResult(result)}
-          </div>
-        )}
+        <div style={{ whiteSpace: "pre-wrap" }}>
+          {result}
+        </div>
 
       </div>
-
-      <p style={legalText}>
-        Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
-      </p>
 
     </div>
   );
 }
 
-/* 🎨 ESTILOS */
+/* estilos básicos */
 
 const pageStyle = {
-  minHeight: "100vh",
-  background: "linear-gradient(135deg, #0f172a, #1e293b)",
   padding: "20px",
-  color: "white"
+  background: "#0f172a",
+  color: "white",
+  minHeight: "100vh"
 };
 
 const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
   display: "flex",
   justifyContent: "space-between",
-  alignItems: "center",
   marginBottom: "20px"
 };
 
 const cardStyle = {
-  maxWidth: "900px",
-  margin: "auto",
   background: "white",
   color: "black",
-  padding: "30px",
-  borderRadius: "20px",
-  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+  padding: "20px",
+  borderRadius: "10px"
 };
 
 const textareaStyle = {
   width: "100%",
-  padding: "15px",
-  borderRadius: "12px",
-  border: "1px solid #ddd"
-};
-
-const selectStyle = {
-  padding: "10px",
-  borderRadius: "8px"
-};
-
-const mainButton = {
-  width: "100%",
-  padding: "15px",
-  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
-  color: "white",
-  border: "none",
-  borderRadius: "12px",
-  fontSize: "16px",
-  cursor: "pointer"
-};
-
-const resultBox = {
-  background: "#f8fafc",
-  padding: "20px",
-  borderRadius: "12px",
-  whiteSpace: "pre-wrap",
-  lineHeight: "1.8",
-  border: "1px solid #e2e8f0"
-};
-
-const langBtn = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
-};
-
-const legalText = {
-  textAlign: "center",
-  fontSize: "12px",
-  marginTop: "20px",
-  opacity: 0.7
+  padding: "10px"
 };
