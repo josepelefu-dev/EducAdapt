@@ -12,11 +12,6 @@ export default function Home() {
   const [guidedMode, setGuidedMode] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
 
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [speed, setSpeed] = useState(2000);
-
-  const [speaking, setSpeaking] = useState(false);
-
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
@@ -44,13 +39,7 @@ export default function Home() {
       avanzado: "🟣 Avanzado",
       error: "Introduce texto",
       guided: "Modo lectura guiada",
-      normal: "Modo normal",
-      auto: "Lectura automática",
-      stop: "Detener",
-      speak: "🔊 Escuchar",
-      stopSpeak: "⏹ Parar",
-      download: "⬇️ Descargar resultado",
-      pdf: "📄 Descargar PDF"
+      normal: "Modo normal"
     },
     ca: {
       title: "EducAdapt",
@@ -68,13 +57,7 @@ export default function Home() {
       avanzado: "🟣 Avançat",
       error: "Introdueix text",
       guided: "Mode lectura guiada",
-      normal: "Mode normal",
-      auto: "Lectura automàtica",
-      stop: "Aturar",
-      speak: "🔊 Escoltar",
-      stopSpeak: "⏹ Parar",
-      download: "⬇️ Descarregar resultat",
-      pdf: "📄 Descarregar PDF"
+      normal: "Mode normal"
     }
   };
 
@@ -98,7 +81,6 @@ export default function Home() {
       const data = await res.json();
       setResult(data.result);
       setCurrentLine(0);
-
     } catch {
       setResult("Error procesando");
     }
@@ -122,90 +104,8 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
-  const speakText = () => {
-    if (!result || typeof window === "undefined") return;
-
-    const lines = getLines();
-    let index = 0;
-
-    const speakLine = () => {
-      if (index >= lines.length) {
-        setSpeaking(false);
-        return;
-      }
-
-      setCurrentLine(index);
-
-      const utterance = new SpeechSynthesisUtterance(lines[index]);
-      utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
-
-      utterance.onend = () => {
-        index++;
-        speakLine();
-      };
-
-      window.speechSynthesis.speak(utterance);
-    };
-
-    window.speechSynthesis.cancel();
-    setSpeaking(true);
-    speakLine();
-  };
-
-  const stopSpeech = () => {
-    if (typeof window !== "undefined") {
-      window.speechSynthesis.cancel();
-    }
-    setSpeaking(false);
-  };
-
-  useEffect(() => {
-    if (!autoPlay || !guidedMode) return;
-
-    const interval = setInterval(() => {
-      setCurrentLine(prev => {
-        const lines = getLines();
-        return prev < lines.length - 1 ? prev + 1 : prev;
-      });
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [autoPlay, speed, guidedMode, result]);
-
-  const downloadResult = () => {
-    if (!result || typeof window === "undefined") return;
-
-    const blob = new Blob([formatResult(result)], {
-      type: "text/plain;charset=utf-8;"
-    });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `educadapt-${type}-${level}.txt`;
-    link.click();
-  };
-
-  const downloadPDF = () => {
-    if (!result || typeof window === "undefined") return;
-
-    const newWindow = window.open("", "_blank");
-    if (!newWindow) return;
-
-    newWindow.document.write(`
-      <html>
-        <body style="font-family:Arial;padding:40px;">
-          <h1>EducAdapt</h1>
-          <pre>${formatResult(result)}</pre>
-        </body>
-      </html>
-    `);
-
-    newWindow.document.close();
-    newWindow.print();
-  };
-
   const resultStyle = {
-    background: "#f8fafc",
+    background: "#ffffff", // 👈 FIX CLAVE
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
@@ -213,7 +113,8 @@ export default function Home() {
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px",
-    color: "#1e293b"
+    color: "#000000", // 👈 FIX CLAVE
+    opacity: 1
   };
 
   return (
@@ -267,14 +168,6 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button onClick={downloadResult} style={{ marginTop: "10px", ...mainButton }}>
-          {t.download}
-        </button>
-
-        <button onClick={downloadPDF} style={{ marginTop: "10px", ...mainButton }}>
-          {t.pdf}
-        </button>
-
         <button
           onClick={() => {
             setGuidedMode(!guidedMode);
@@ -287,10 +180,16 @@ export default function Home() {
 
         <br /><br />
 
+        {/* NORMAL */}
         {!guidedMode && result && (
-          <div style={resultStyle}>{formatResult(result)}</div>
+          <div style={resultStyle}>
+            <span style={{ color: "#000000" }}>
+              {formatResult(result)}
+            </span>
+          </div>
         )}
 
+        {/* GUIADO */}
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
@@ -298,7 +197,7 @@ export default function Home() {
                 key={i}
                 style={{
                   background: i === currentLine ? "#dbeafe" : "transparent",
-                  color: "#1e293b"
+                  color: "#000000"
                 }}
               >
                 {line}
@@ -306,15 +205,54 @@ export default function Home() {
             ))}
           </div>
         )}
+
       </div>
     </div>
   );
 }
 
-const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
-const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
-const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
-const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
-const selectStyle = { padding: "10px", borderRadius: "8px" };
-const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
-const langBtn = { margin: "5px" };
+/* ESTILOS ORIGINALES */
+const pageStyle = {
+  minHeight: "100vh",
+  background: "#0f172a",
+  padding: "20px",
+  color: "white"
+};
+
+const headerStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  display: "flex",
+  justifyContent: "space-between"
+};
+
+const cardStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  background: "white",
+  padding: "30px",
+  borderRadius: "20px"
+};
+
+const textareaStyle = {
+  width: "100%",
+  padding: "15px",
+  borderRadius: "10px"
+};
+
+const selectStyle = {
+  padding: "10px",
+  borderRadius: "8px"
+};
+
+const mainButton = {
+  width: "100%",
+  padding: "15px",
+  background: "#6366f1",
+  color: "white",
+  border: "none"
+};
+
+const langBtn = {
+  margin: "5px"
+};
