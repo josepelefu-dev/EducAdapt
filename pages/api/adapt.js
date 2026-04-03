@@ -1,21 +1,20 @@
-import pdf from "pdf-parse";
-
 export default async function handler(req, res) {
   try {
     let { text, type, level, file } = req.body;
 
-    // 📄 PROCESAR ARCHIVO SI EXISTE
+    // 📄 PROCESAR ARCHIVO (solo TXT por ahora)
     if ((!text || text.trim() === "") && file) {
       try {
         const buffer = Buffer.from(file.data, "base64");
 
-        if (file.type === "application/pdf") {
-          const pdfData = await pdf(buffer);
-          text = pdfData.text;
-        }
-
         if (file.type === "text/plain") {
           text = buffer.toString("utf-8");
+        }
+
+        if (file.type === "application/pdf") {
+          return res.status(400).json({
+            result: "PDF no soportado todavía"
+          });
         }
 
       } catch (err) {
@@ -53,7 +52,7 @@ ${text}`;
       prompt = `Adapta este texto para TDAH (nivel ${level}):
 
 - Frases muy cortas
-- Listas claras
+- Usa listas
 - Destaca lo importante en MAYÚSCULAS
 - Elimina lo secundario
 
@@ -67,8 +66,8 @@ ${text}`;
     if (type === "dislexia") {
       prompt = `Adapta este texto para dislexia (nivel ${level}):
 
-- Frases cortas
 - Lenguaje simple
+- Frases cortas
 - Estructura clara
 
 Devuelve SOLO el texto adaptado.
@@ -92,7 +91,7 @@ Texto:
 ${text}`;
     }
 
-    // 🧠 LLAMADA A OPENAI
+    // 🧠 LLAMADA IA
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -113,10 +112,8 @@ ${text}`;
       });
     }
 
-    const result = data.choices?.[0]?.message?.content;
-
     return res.status(200).json({
-      result: result || "Sin resultado"
+      result: data.choices?.[0]?.message?.content || "Sin resultado"
     });
 
   } catch (error) {
