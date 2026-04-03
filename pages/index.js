@@ -21,12 +21,16 @@ export default function Home() {
 
   // 🌍 idioma persistente
   useEffect(() => {
-    const savedLang = localStorage.getItem("lang");
-    if (savedLang) setLang(savedLang);
+    if (typeof window !== "undefined") {
+      const savedLang = localStorage.getItem("lang");
+      if (savedLang) setLang(savedLang);
+    }
   }, []);
 
   useEffect(() => {
-    localStorage.setItem("lang", lang);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("lang", lang);
+    }
   }, [lang]);
 
   // 🧠 fuente dislexia
@@ -62,6 +66,7 @@ export default function Home() {
       speak: "🔊 Escuchar",
       stopSpeak: "⏹ Parar",
       download: "⬇️ Descargar resultado",
+      pdf: "📄 Descargar PDF"
     },
     ca: {
       title: "EducAdapt",
@@ -85,6 +90,7 @@ export default function Home() {
       speak: "🔊 Escoltar",
       stopSpeak: "⏹ Parar",
       download: "⬇️ Descarregar resultat",
+      pdf: "📄 Descarregar PDF"
     }
   };
 
@@ -163,6 +169,7 @@ export default function Home() {
   };
 
   const stopSpeech = () => {
+    if (typeof window === "undefined") return;
     window.speechSynthesis.cancel();
     setSpeaking(false);
   };
@@ -181,7 +188,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // ⬇️ TXT
+  // TXT
   const downloadResult = () => {
     if (!result) return;
 
@@ -197,44 +204,50 @@ export default function Home() {
     link.click();
   };
 
-  // 📄 PDF (SIN ERROR)
+  // PDF SIN ERROR
   const downloadPDF = async () => {
     if (!result) return;
+    if (typeof window === "undefined") return;
 
-    const { jsPDF } = await import("jspdf");
+    try {
+      const module = await import("jspdf");
+      const jsPDF = module.default;
 
-    const doc = new jsPDF();
+      const doc = new jsPDF();
 
-    const margin = 15;
-    const maxWidth = 180;
+      const margin = 15;
+      const maxWidth = 180;
 
-    const content = formatResult(result);
+      const content = formatResult(result);
 
-    doc.setFont("helvetica", "bold");
-    doc.setFontSize(18);
-    doc.text("EducAdapt", margin, 20);
+      doc.setFont("helvetica", "bold");
+      doc.setFontSize(18);
+      doc.text("EducAdapt", margin, 20);
 
-    doc.setFontSize(10);
-    doc.text(`Tipo: ${type} | Nivel: ${level}`, margin, 28);
+      doc.setFontSize(10);
+      doc.text(`Tipo: ${type} | Nivel: ${level}`, margin, 28);
 
-    doc.line(margin, 32, 200 - margin, 32);
+      doc.line(margin, 32, 200 - margin, 32);
 
-    doc.setFontSize(12);
+      doc.setFontSize(12);
 
-    const lines = doc.splitTextToSize(content, maxWidth);
+      const lines = doc.splitTextToSize(content, maxWidth);
 
-    let y = 40;
+      let y = 40;
 
-    lines.forEach((line) => {
-      if (y > 280) {
-        doc.addPage();
-        y = 20;
-      }
-      doc.text(line, margin, y);
-      y += 7;
-    });
+      lines.forEach((line) => {
+        if (y > 280) {
+          doc.addPage();
+          y = 20;
+        }
+        doc.text(line, margin, y);
+        y += 7;
+      });
 
-    doc.save(`educadapt-${type}-${level}.pdf`);
+      doc.save(`educadapt-${type}-${level}.pdf`);
+    } catch (err) {
+      console.error(err);
+    }
   };
 
   const resultStyle = {
@@ -304,7 +317,7 @@ export default function Home() {
         </button>
 
         <button onClick={downloadPDF} style={{ marginTop: "10px", background: "#16a34a", ...mainButton }}>
-          📄 PDF PRO
+          {t.pdf}
         </button>
 
         <button
@@ -383,4 +396,4 @@ export default function Home() {
   );
 }
 
-/* estilos iguales */
+/* estilos igual */
