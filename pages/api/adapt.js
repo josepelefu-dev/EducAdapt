@@ -1,5 +1,3 @@
-import pdf from "pdf-parse";
-
 export const config = {
   api: {
     bodyParser: {
@@ -10,36 +8,11 @@ export const config = {
 
 export default async function handler(req, res) {
   try {
-    let { text, type, level, file } = req.body;
+    let { text, type, level } = req.body;
 
-    // 📄 PROCESAR ARCHIVO
-    if ((!text || text.trim() === "") && file) {
-      try {
-        const buffer = Buffer.from(file.data, "base64");
-
-        // ✅ PDF REAL
-        if (file.type === "application/pdf") {
-          const pdfData = await pdf(buffer);
-          text = pdfData.text;
-        }
-
-        // ✅ TXT
-        if (file.type === "text/plain") {
-          text = buffer.toString("utf-8");
-        }
-
-      } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-          result: "Error leyendo el PDF"
-        });
-      }
-    }
-
-    // 🔒 VALIDACIÓN
     if (!text || text.trim() === "") {
       return res.status(400).json({
-        result: "No hay texto válido"
+        result: "No has introducido texto"
       });
     }
 
@@ -80,9 +53,8 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
-      result: "Error procesando"
+      result: "Error interno"
     });
   }
 }
