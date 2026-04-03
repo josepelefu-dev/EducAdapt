@@ -15,7 +15,6 @@ export default function Home() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
 
-  // 🆕 VOZ
   const [speaking, setSpeaking] = useState(false);
 
   useEffect(() => {
@@ -101,7 +100,6 @@ export default function Home() {
 
   const formatResult = (text) => {
     if (!text) return "";
-
     return text
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
@@ -116,7 +114,6 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
-  // 🆕 VOZ
   const speakText = () => {
     if (!result) return;
 
@@ -125,15 +122,12 @@ export default function Home() {
       : formatResult(result);
 
     const utterance = new SpeechSynthesisUtterance(textToRead);
-
     utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
-    utterance.rate = 0.9;
 
     speechSynthesis.cancel();
     speechSynthesis.speak(utterance);
 
     setSpeaking(true);
-
     utterance.onend = () => setSpeaking(false);
   };
 
@@ -142,15 +136,13 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // AUTO + VOZ sincronizada
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
     const interval = setInterval(() => {
       setCurrentLine(prev => {
         const lines = getLines();
-        if (prev < lines.length - 1) return prev + 1;
-        return prev;
+        return prev < lines.length - 1 ? prev + 1 : prev;
       });
     }, speed);
 
@@ -211,25 +203,15 @@ export default function Home() {
 
         {guidedMode && (
           <div>
-            <button
-              onClick={() => setAutoPlay(!autoPlay)}
-              style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
-            >
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}>
               {autoPlay ? t.stop : t.auto}
             </button>
 
-            {/* 🆕 VOZ */}
-            <button
-              onClick={speakText}
-              style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
-            >
+            <button onClick={speakText} style={{ marginTop: "10px", background: "#10b981", ...mainButton }}>
               {t.speak}
             </button>
 
-            <button
-              onClick={stopSpeech}
-              style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}
-            >
+            <button onClick={stopSpeech} style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}>
               {t.stopSpeak}
             </button>
 
@@ -248,9 +230,7 @@ export default function Home() {
         <br /><br />
 
         {!guidedMode && result && (
-          <div style={resultStyle}>
-            {formatResult(result)}
-          </div>
+          <div style={resultStyle}>{formatResult(result)}</div>
         )}
 
         {guidedMode && result && (
@@ -276,3 +256,63 @@ export default function Home() {
     </div>
   );
 }
+
+/* 🔥 ESTILOS (ESTO ERA LO QUE TE FALTABA) */
+
+const pageStyle = {
+  minHeight: "100vh",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
+  padding: "20px",
+  color: "white"
+};
+
+const headerStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "20px"
+};
+
+const cardStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  background: "white",
+  color: "black",
+  padding: "30px",
+  borderRadius: "20px"
+};
+
+const textareaStyle = {
+  width: "100%",
+  padding: "15px",
+  borderRadius: "10px",
+  border: "1px solid #ddd",
+  resize: "none"
+};
+
+const mainButton = {
+  width: "100%",
+  padding: "15px",
+  background: "#6366f1",
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  cursor: "pointer"
+};
+
+const langBtn = {
+  margin: "5px",
+  padding: "6px 10px",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer"
+};
+
+const legalText = {
+  textAlign: "center",
+  fontSize: "12px",
+  marginTop: "20px",
+  opacity: 0.7
+};
