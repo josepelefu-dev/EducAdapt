@@ -9,7 +9,10 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🧠 CARGAR FUENTE DISLEXIA
+  // 🆕 NUEVO
+  const [guidedMode, setGuidedMode] = useState(false);
+  const [currentLine, setCurrentLine] = useState(0);
+
   useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
@@ -17,7 +20,6 @@ export default function Home() {
     document.head.appendChild(link);
   }, []);
 
-  // 🌍 TRADUCCIONES
   const translations = {
     es: {
       title: "EducAdapt",
@@ -34,7 +36,11 @@ export default function Home() {
       basico: "🟢 Básico",
       intermedio: "🔵 Intermedio",
       avanzado: "🟣 Avanzado",
-      error: "Introduce texto"
+      error: "Introduce texto",
+      guided: "Modo lectura guiada",
+      normal: "Modo normal",
+      next: "Siguiente →",
+      prev: "← Anterior"
     },
     ca: {
       title: "EducAdapt",
@@ -51,7 +57,11 @@ export default function Home() {
       basico: "🟢 Bàsic",
       intermedio: "🔵 Intermedi",
       avanzado: "🟣 Avançat",
-      error: "Introdueix text"
+      error: "Introdueix text",
+      guided: "Mode lectura guiada",
+      normal: "Mode normal",
+      next: "Següent →",
+      prev: "← Anterior"
     }
   };
 
@@ -74,6 +84,7 @@ export default function Home() {
 
       const data = await res.json();
       setResult(data.result);
+      setCurrentLine(0); // reset lectura guiada
     } catch (error) {
       setResult("Error procesando");
     }
@@ -81,45 +92,39 @@ export default function Home() {
     setLoading(false);
   };
 
-  // 🔧 FORMATO ESQUEMA (FLECHAS)
   const formatResult = (text) => {
     if (!text) return "";
 
     return text
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
-      .replace(/│/g, " ");
+      .replace(/│/g, " ")
+      .replace(/\. /g, ".\n\n");
   };
 
-  
-
-  const getFinalResult = () => {
-    const formatted = formatResult(result);
-
-    if (type === "tdah" || type === "dislexia") {
-      return highlightKeywords(formatted);
-    }
-
-    return formatted;
+  // 🆕 dividir en líneas
+  const getLines = () => {
+    return formatResult(result)
+      .split("\n")
+      .filter(l => l.trim() !== "");
   };
 
-  // 🎨 ESTILO RESULTADO
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: "1.8",
+    lineHeight: "2",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     letterSpacing: type === "dislexia" ? "1px" : "normal",
-    wordSpacing: type === "dislexia" ? "2px" : "normal"
+    wordSpacing: type === "dislexia" ? "2px" : "normal",
+    fontSize: "17px"
   };
 
   return (
     <div style={pageStyle}>
 
-      {/* HEADER */}
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
@@ -145,7 +150,6 @@ export default function Home() {
         <br /><br />
 
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">{t.resumen}</option>
             <option value="tdah">{t.tdah}</option>
@@ -163,7 +167,6 @@ export default function Home() {
             <option value="alumno">{t.alumno}</option>
             <option value="profesor">{t.profesor}</option>
           </select>
-
         </div>
 
         <br />
@@ -172,13 +175,69 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
+        {/* 🆕 BOTÓN GUIADO */}
+        <button
+          onClick={() => {
+            setGuidedMode(!guidedMode);
+            setCurrentLine(0);
+          }}
+          style={{
+            marginTop: "10px",
+            padding: "10px",
+            borderRadius: "10px",
+            background: "#22c55e",
+            color: "white",
+            border: "none",
+            cursor: "pointer"
+          }}
+        >
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
         <br /><br />
 
-{result && (
-  <div style={resultStyle}>
-    {formatResult(result)}
-  </div>
-)}
+        {/* NORMAL */}
+        {result && !guidedMode && (
+          <div style={resultStyle}>
+            {formatResult(result)}
+          </div>
+        )}
+
+        {/* 🆕 GUIADO */}
+        {result && guidedMode && (
+          <div style={{ ...resultStyle, textAlign: "center" }}>
+            <div style={{
+              fontSize: "22px",
+              fontWeight: "600",
+              background: "#e0f2fe",
+              padding: "20px",
+              borderRadius: "10px",
+              marginBottom: "20px"
+            }}>
+              {getLines()[currentLine]}
+            </div>
+
+            <button
+              onClick={() =>
+                setCurrentLine(prev =>
+                  prev < getLines().length - 1 ? prev + 1 : prev
+                )
+              }
+              style={mainButton}
+            >
+              {t.next}
+            </button>
+
+            <button
+              onClick={() =>
+                setCurrentLine(prev => (prev > 0 ? prev - 1 : 0))
+              }
+              style={{ ...mainButton, marginTop: "10px", background: "#64748b" }}
+            >
+              {t.prev}
+            </button>
+          </div>
+        )}
 
       </div>
 
@@ -190,7 +249,7 @@ export default function Home() {
   );
 }
 
-/* 🎨 ESTILOS */
+/* estilos igual que antes */
 
 const pageStyle = {
   minHeight: "100vh",
@@ -222,7 +281,7 @@ const textareaStyle = {
   width: "100%",
   padding: "15px",
   borderRadius: "10px",
-  border: "1px solid #ddd",
+  border: "1px solid #ddd"
 };
 
 const selectStyle = {
