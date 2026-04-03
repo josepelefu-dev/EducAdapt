@@ -5,7 +5,7 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
-  const [lang, setLang] = useState("es"); // 🟢 idioma
+  const [lang, setLang] = useState("es");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -23,7 +23,13 @@ export default function Home() {
         headers: {
           "Content-Type": "application/json"
         },
-        body: JSON.stringify({ text, type, mode, level, lang })
+        body: JSON.stringify({
+          text,
+          type,
+          level,
+          mode,
+          lang // 🔥 AQUÍ ESTÁ LA CLAVE
+        })
       });
 
       const data = await res.json();
@@ -48,14 +54,14 @@ export default function Home() {
   return (
     <div style={pageStyle}>
 
-      {/* HEADER CON LOGO + IDIOMA */}
+      {/* HEADER */}
       <div style={headerStyle}>
         <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
           <h2 style={{ margin: 0 }}>EducAdapt</h2>
         </div>
 
-        {/* 🌍 IDIOMAS */}
+        {/* 🌍 IDIOMA */}
         <div>
           <button onClick={() => setLang("es")} style={langBtn}>🇪🇸</button>
           <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
