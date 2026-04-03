@@ -13,16 +13,26 @@ export default function Home() {
 </div>
 
   const handleAdapt = async () => {
-    setLoading(true);
-    const res = await fetch("/api/adapt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, type, level }),
-    });
-    const data = await res.json();
-    setResult(data.result);
-    setLoading(false);
-  };
+  console.log("Texto:", text); // 👈 DEBUG
+
+  setLoading(true);
+
+  const res = await fetch("/api/adapt", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      text: text,
+      type: type,
+      level: level
+    }),
+  });
+
+  const data = await res.json();
+  setResult(data.result);
+  setLoading(false);
+};
 
   return (
     <div style={{
