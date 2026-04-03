@@ -1,7 +1,9 @@
+import pdf from "pdf-parse";
+
 export const config = {
   api: {
     bodyParser: {
-      sizeLimit: "4mb", // límite máximo realista en Vercel
+      sizeLimit: "4mb",
     },
   },
 };
@@ -10,23 +12,26 @@ export default async function handler(req, res) {
   try {
     let { text, type, level, file } = req.body;
 
-    // 🚫 CONTROL DE ARCHIVO GRANDE
-    if (file && file.data.length > 4000000) {
-      return res.status(400).json({
-        result: "Archivo demasiado grande. Máximo permitido: 4MB"
-      });
-    }
-
-    // 📄 PROCESAR TXT (PDF lo dejamos para siguiente fase)
+    // 📄 PROCESAR ARCHIVO
     if ((!text || text.trim() === "") && file) {
-      if (file.type === "text/plain") {
+      try {
         const buffer = Buffer.from(file.data, "base64");
-        text = buffer.toString("utf-8");
-      }
 
-      if (file.type === "application/pdf") {
-        return res.status(400).json({
-          result: "PDF demasiado grande o no soportado todavía correctamente"
+        // ✅ PDF REAL
+        if (file.type === "application/pdf") {
+          const pdfData = await pdf(buffer);
+          text = pdfData.text;
+        }
+
+        // ✅ TXT
+        if (file.type === "text/plain") {
+          text = buffer.toString("utf-8");
+        }
+
+      } catch (err) {
+        console.error(err);
+        return res.status(500).json({
+          result: "Error leyendo el PDF"
         });
       }
     }
@@ -34,7 +39,7 @@ export default async function handler(req, res) {
     // 🔒 VALIDACIÓN
     if (!text || text.trim() === "") {
       return res.status(400).json({
-        result: "No has introducido texto"
+        result: "No hay texto válido"
       });
     }
 
@@ -77,7 +82,7 @@ export default async function handler(req, res) {
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      result: "Error interno"
+      result: "Error procesando"
     });
   }
 }
