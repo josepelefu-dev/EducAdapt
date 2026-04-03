@@ -19,7 +19,7 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // 🌍 idioma persistente
+  // idioma persistente
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedLang = localStorage.getItem("lang");
@@ -33,7 +33,7 @@ export default function Home() {
     }
   }, [lang]);
 
-  // 🧠 fuente dislexia
+  // fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
@@ -137,7 +137,7 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
-  // 🔊 VOZ
+  // VOZ
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -174,7 +174,7 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // 🔁 AUTO
+  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -204,50 +204,51 @@ export default function Home() {
     link.click();
   };
 
-  // PDF SIN ERROR
-  const downloadPDF = async () => {
+  // PDF seguro (print)
+  const downloadPDF = () => {
     if (!result) return;
-    if (typeof window === "undefined") return;
 
-    try {
-      const module = await import("jspdf");
-      const jsPDF = module.default;
+    const content = formatResult(result);
 
-      const doc = new jsPDF();
+    const newWindow = window.open("", "_blank");
 
-      const margin = 15;
-      const maxWidth = 180;
+    newWindow.document.write(`
+      <html>
+        <head>
+          <title>EducAdapt</title>
+          <style>
+            body {
+              font-family: Arial;
+              padding: 40px;
+              line-height: 1.5;
+            }
+            h1 {
+              color: #4f46e5;
+            }
+            .meta {
+              font-size: 12px;
+              color: #666;
+              margin-bottom: 20px;
+            }
+            .content {
+              white-space: pre-wrap;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>EducAdapt</h1>
+          <div class="meta">
+            Tipo: ${type} | Nivel: ${level}
+          </div>
+          <div class="content">
+            ${content}
+          </div>
+        </body>
+      </html>
+    `);
 
-      const content = formatResult(result);
-
-      doc.setFont("helvetica", "bold");
-      doc.setFontSize(18);
-      doc.text("EducAdapt", margin, 20);
-
-      doc.setFontSize(10);
-      doc.text(`Tipo: ${type} | Nivel: ${level}`, margin, 28);
-
-      doc.line(margin, 32, 200 - margin, 32);
-
-      doc.setFontSize(12);
-
-      const lines = doc.splitTextToSize(content, maxWidth);
-
-      let y = 40;
-
-      lines.forEach((line) => {
-        if (y > 280) {
-          doc.addPage();
-          y = 20;
-        }
-        doc.text(line, margin, y);
-        y += 7;
-      });
-
-      doc.save(`educadapt-${type}-${level}.pdf`);
-    } catch (err) {
-      console.error(err);
-    }
+    newWindow.document.close();
+    newWindow.print();
   };
 
   const resultStyle = {
