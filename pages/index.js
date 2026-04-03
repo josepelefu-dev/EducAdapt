@@ -3,6 +3,7 @@ import { useState } from "react";
 export default function Home() {
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
+  const [level, setLevel] = useState("5primaria");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -11,7 +12,7 @@ export default function Home() {
     const res = await fetch("/api/adapt", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, type }),
+      body: JSON.stringify({ text, type, level }),
     });
     const data = await res.json();
     setResult(data.result);
@@ -19,19 +20,90 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 40, fontFamily: "Arial" }}>
-      <h1>Adaptador de Apuntes 🧠</h1>
-      <textarea rows="10" cols="60" placeholder="Pega aquí tus apuntes..." value={text} onChange={(e) => setText(e.target.value)} />
+    <div style={{
+      maxWidth: "800px",
+      margin: "auto",
+      padding: "30px",
+      fontFamily: "Arial",
+      background: "#f5f7fb"
+    }}>
+      
+      <h1 style={{ textAlign: "center" }}>
+        🧠 EduAdapt
+      </h1>
+
+      <p style={{ textAlign: "center", color: "#666" }}>
+        Adapta tus apuntes a cualquier necesidad educativa
+      </p>
+
+      <textarea
+        rows="8"
+        style={{
+          width: "100%",
+          padding: "10px",
+          borderRadius: "10px",
+          border: "1px solid #ccc"
+        }}
+        placeholder="Pega aquí tus apuntes..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
+
       <br /><br />
-      <select value={type} onChange={(e) => setType(e.target.value)}>
-        <option value="facil">Fácil</option>
-        <option value="tdah">TDAH</option>
-        <option value="dislexia">Dislexia</option>
-      </select>
+
+      <div style={{ display: "flex", gap: "10px" }}>
+
+        {/* Tipo */}
+        <select value={type} onChange={(e) => setType(e.target.value)}>
+          <option value="facil">Fácil</option>
+          <option value="tdah">TDAH</option>
+          <option value="dislexia">Dislexia</option>
+        </select>
+
+        {/* Nivel académico */}
+        <select value={level} onChange={(e) => setLevel(e.target.value)}>
+          <option value="5primaria">5º Primaria</option>
+          <option value="6primaria">6º Primaria</option>
+          <option value="1eso">1º ESO</option>
+          <option value="2eso">2º ESO</option>
+          <option value="3eso">3º ESO</option>
+          <option value="4eso">4º ESO</option>
+        </select>
+
+      </div>
+
+      <br />
+
+      <button
+        onClick={handleAdapt}
+        style={{
+          width: "100%",
+          padding: "12px",
+          background: "#4f46e5",
+          color: "white",
+          border: "none",
+          borderRadius: "10px",
+          fontSize: "16px",
+          cursor: "pointer"
+        }}
+      >
+        {loading ? "Adaptando..." : "Adaptar"}
+      </button>
+
       <br /><br />
-      <button onClick={handleAdapt}>{loading ? "Adaptando..." : "Adaptar"}</button>
-      <h2>Resultado:</h2>
-      <div style={{ whiteSpace: "pre-wrap", marginTop: 20 }}>{result}</div>
+
+      {result && (
+        <div style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          whiteSpace: "pre-wrap"
+        }}>
+          <h3>Resultado:</h3>
+          {result}
+        </div>
+      )}
     </div>
   );
 }
