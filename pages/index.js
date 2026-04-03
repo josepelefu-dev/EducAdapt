@@ -5,7 +5,10 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
+
+  // 🌍 idioma persistente
   const [lang, setLang] = useState("es");
+
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,12 +20,21 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // Fuente dislexia
+  // guardar idioma
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang) setLang(savedLang);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("lang", lang);
+  }, [lang]);
+
+  // fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
-      link.href =
-        "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
@@ -49,7 +61,8 @@ export default function Home() {
       auto: "Lectura automática",
       stop: "Detener",
       speak: "🔊 Escuchar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      download: "⬇️ Descargar resultado",
     },
     ca: {
       title: "EducAdapt",
@@ -71,7 +84,8 @@ export default function Home() {
       auto: "Lectura automàtica",
       stop: "Aturar",
       speak: "🔊 Escoltar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      download: "⬇️ Descarregar resultat",
     }
   };
 
@@ -108,17 +122,17 @@ export default function Home() {
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
       .replace(/│/g, " ")
-      .replace(/\. /g, ".\n\n");
+      .replace(/\.\s/g, ".\n");
   };
 
   const getLines = () => {
     if (!result) return [];
     return formatResult(result)
       .split("\n")
-      .filter(l => l.trim() !== "");
+      .filter((l) => l.trim() !== "");
   };
 
-  // 🔊 VOZ (intacto)
+  // 🔊 VOZ
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -159,7 +173,7 @@ export default function Home() {
     if (!autoPlay || !guidedMode) return;
 
     const interval = setInterval(() => {
-      setCurrentLine(prev => {
+      setCurrentLine((prev) => {
         const lines = getLines();
         return prev < lines.length - 1 ? prev + 1 : prev;
       });
@@ -168,20 +182,31 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // 🔥 FIX VISUAL (AQUÍ ESTÁ LA CLAVE)
+  // ⬇️ DESCARGA
+  const downloadResult = () => {
+    if (!result) return;
+
+    const content = formatResult(result);
+
+    const blob = new Blob([content], {
+      type: "text/plain;charset=utf-8;"
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `educadapt-${type}-${level}.txt`;
+    link.click();
+  };
+
   const resultStyle = {
-    background: "#ffffff",
+    background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight:
-      type === "dislexia" ? "1.3" :
-      type === "tdah" ? "1.35" :
-      "1.5",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.3" : "1.5",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
-    fontSize: "17px",
-    color: "#111827" // 🔥 SIEMPRE VISIBLE
+    fontSize: "17px"
   };
 
   return (
@@ -236,6 +261,13 @@ export default function Home() {
         </button>
 
         <button
+          onClick={downloadResult}
+          style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}
+        >
+          {t.download}
+        </button>
+
+        <button
           onClick={() => {
             setGuidedMode(!guidedMode);
             setCurrentLine(0);
@@ -245,7 +277,6 @@ export default function Home() {
           {guidedMode ? t.normal : t.guided}
         </button>
 
-        {/* 🔥 CONTROLES COMPLETOS RESTAURADOS */}
         {guidedMode && (
           <div>
             <button
@@ -256,7 +287,7 @@ export default function Home() {
                 ...mainButton
               }}
             >
-              {autoPlay ? t.stop : t.auto}
+              {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
             </button>
 
             <button
@@ -293,13 +324,14 @@ export default function Home() {
 
         {guidedMode && result && (
           <div style={resultStyle}>
-            {getLines().map((line, i) => (
+            {(getLines() || []).map((line, index) => (
               <div
-                key={i}
+                key={index}
                 style={{
-                  background: i === currentLine ? "#dbeafe" : "transparent",
-                  padding: "6px",
-                  borderRadius: "6px"
+                  padding: "12px",
+                  margin: "6px 0",
+                  borderRadius: "8px",
+                  background: index === currentLine ? "#dbeafe" : "transparent"
                 }}
               >
                 {line}
@@ -307,15 +339,21 @@ export default function Home() {
             ))}
           </div>
         )}
+
       </div>
+
+      <p style={legalText}>
+        Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
+      </p>
     </div>
   );
 }
 
-/* ESTILOS */
+/* ESTILOS (SIN CAMBIOS) */
+
 const pageStyle = {
   minHeight: "100vh",
-  background: "#0f172a",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
   padding: "20px",
   color: "white"
 };
@@ -324,21 +362,27 @@ const headerStyle = {
   maxWidth: "900px",
   margin: "auto",
   display: "flex",
-  justifyContent: "space-between"
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "20px"
 };
 
 const cardStyle = {
   maxWidth: "900px",
   margin: "auto",
   background: "white",
+  color: "black",
   padding: "30px",
-  borderRadius: "20px"
+  borderRadius: "20px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
 };
 
 const textareaStyle = {
   width: "100%",
   padding: "15px",
-  borderRadius: "10px"
+  borderRadius: "10px",
+  border: "1px solid #ddd",
+  resize: "none"
 };
 
 const selectStyle = {
@@ -351,9 +395,22 @@ const mainButton = {
   padding: "15px",
   background: "#6366f1",
   color: "white",
-  border: "none"
+  border: "none",
+  borderRadius: "12px",
+  cursor: "pointer"
 };
 
 const langBtn = {
-  margin: "5px"
+  margin: "5px",
+  padding: "6px 10px",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer"
+};
+
+const legalText = {
+  textAlign: "center",
+  fontSize: "12px",
+  marginTop: "20px",
+  opacity: 0.7
 };
