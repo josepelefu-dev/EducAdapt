@@ -1,10 +1,10 @@
 import { useState } from "react";
+import jsPDF from "jspdf";
 
 export default function Home() {
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
-  const [level, setLevel] = useState("5primaria");
-  const [lang, setLang] = useState("es");
+  const [mode, setMode] = useState("alumno");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -21,7 +21,7 @@ export default function Home() {
       headers: {
         "Content-Type": "application/json"
       },
-      body: JSON.stringify({ text, type, level })
+      body: JSON.stringify({ text, type, mode })
     });
 
     const data = await res.json();
@@ -30,25 +30,35 @@ export default function Home() {
     setLoading(false);
   };
 
+  // 🎨 FORMATO VISUAL
+  const formatResult = (text) => {
+    if (!text) return "";
+
+    return text
+      .replace(/^- (.*)$/gm, "🔹 $1")
+      .replace(/├──/g, "👉")
+      .replace(/│/g, "");
+  };
+
+  // 📄 DESCARGAR PDF
+  const downloadPDF = () => {
+    const doc = new jsPDF();
+    const lines = doc.splitTextToSize(result, 180);
+
+    doc.text(lines, 10, 10);
+    doc.save("educadapt_resultado.pdf");
+  };
+
   return (
     <div style={pageStyle}>
 
       {/* HEADER */}
-      <div style={headerStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src="/logo.jpg" style={{ width: "45px" }} />
-          <h2>EducAdapt</h2>
-        </div>
-
-        <div>
-          <button onClick={() => setLang("es")} style={btnLang}>🇪🇸</button>
-          <button onClick={() => setLang("ca")} style={btnLang}>CAT</button>
-        </div>
-      </div>
+      <h1 style={{ textAlign: "center" }}>EducAdapt</h1>
 
       {/* CARD */}
       <div style={cardStyle}>
 
+        {/* TEXTAREA */}
         <textarea
           rows="8"
           style={textareaStyle}
@@ -59,7 +69,8 @@ export default function Home() {
 
         <br /><br />
 
-        <div style={{ display: "flex", gap: "10px" }}>
+        {/* SELECTORES */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
 
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">Fácil</option>
@@ -68,33 +79,40 @@ export default function Home() {
             <option value="esquema">Esquema</option>
           </select>
 
-          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
-            <option value="5primaria">5º Primaria</option>
-            <option value="6primaria">6º Primaria</option>
-            <option value="1eso">1º ESO</option>
-            <option value="2eso">2º ESO</option>
-            <option value="3eso">3º ESO</option>
-            <option value="4eso">4º ESO</option>
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">Alumno</option>
+            <option value="profesor">Profesor</option>
           </select>
 
         </div>
 
         <br />
 
+        {/* BOTÓN */}
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? "Procesando..." : "Adaptar"}
         </button>
 
         <br /><br />
 
+        {/* RESULTADO */}
         {result && (
-          <div style={resultBox}>
-            {result}
-          </div>
+          <>
+            <div style={resultBox}>
+              {formatResult(result)}
+            </div>
+
+            <br />
+
+            <button onClick={downloadPDF} style={mainButton}>
+              Descargar PDF
+            </button>
+          </>
         )}
 
       </div>
 
+      {/* AVISO */}
       <p style={legalText}>
         Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
       </p>
@@ -110,15 +128,6 @@ const pageStyle = {
   background: "linear-gradient(135deg, #0f172a, #1e293b)",
   padding: "20px",
   color: "white"
-};
-
-const headerStyle = {
-  maxWidth: "900px",
-  margin: "auto",
-  display: "flex",
-  justifyContent: "space-between",
-  alignItems: "center",
-  marginBottom: "30px"
 };
 
 const cardStyle = {
@@ -155,18 +164,12 @@ const mainButton = {
 };
 
 const resultBox = {
-  background: "#f1f5f9",
+  background: "#f8fafc",
   padding: "20px",
-  borderRadius: "10px",
-  whiteSpace: "pre-wrap"
-};
-
-const btnLang = {
-  margin: "5px",
-  padding: "6px 10px",
-  borderRadius: "6px",
-  border: "none",
-  cursor: "pointer"
+  borderRadius: "12px",
+  whiteSpace: "pre-wrap",
+  lineHeight: "1.8",
+  border: "1px solid #e2e8f0"
 };
 
 const legalText = {
