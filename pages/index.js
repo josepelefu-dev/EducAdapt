@@ -121,21 +121,36 @@ export default function Home() {
 
   // 🔊 VOZ
   const speakText = () => {
-    if (!result || typeof window === "undefined") return;
+  if (!result || typeof window === "undefined") return;
 
-    const textToRead = guidedMode
-      ? getLines()[currentLine]
-      : formatResult(result);
+  const lines = getLines();
 
-    const utterance = new SpeechSynthesisUtterance(textToRead);
+  let index = 0;
+
+  const speakLine = () => {
+    if (index >= lines.length) {
+      setSpeaking(false);
+      return;
+    }
+
+    setCurrentLine(index);
+
+    const utterance = new SpeechSynthesisUtterance(lines[index]);
     utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
+    utterance.rate = 0.9;
 
-    window.speechSynthesis.cancel();
+    utterance.onend = () => {
+      index++;
+      speakLine(); // siguiente línea automáticamente
+    };
+
     window.speechSynthesis.speak(utterance);
-
-    setSpeaking(true);
-    utterance.onend = () => setSpeaking(false);
   };
+
+  window.speechSynthesis.cancel();
+  setSpeaking(true);
+  speakLine();
+};
 
   const stopSpeech = () => {
     if (typeof window === "undefined") return;
