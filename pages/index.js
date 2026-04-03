@@ -1,166 +1,101 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 export default function Home() {
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
-  const [level, setLevel] = useState("basico");
-  const [mode, setMode] = useState("alumno");
-  const [lang, setLang] = useState("es");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🌍 TRADUCCIONES
-  const translations = {
-    es: {
-      title: "EducAdapt",
-      placeholder: "Pega aquí tus apuntes...",
-      adapt: "Adaptar",
-      loading: "Procesando...",
-      result: "Resultado",
-      alumno: "Alumno",
-      profesor: "Profesor",
-      resumen: "Resumen",
-      tdah: "TDAH",
-      dislexia: "Dislexia",
-      esquema: "Esquema",
-      basico: "🟢 Básico",
-      intermedio: "🔵 Intermedio",
-      avanzado: "🟣 Avanzado",
-      error: "Introduce texto"
-    },
-    ca: {
-      title: "EducAdapt",
-      placeholder: "Enganxa aquí els teus apunts...",
-      adapt: "Adaptar",
-      loading: "Processant...",
-      result: "Resultat",
-      alumno: "Alumne",
-      profesor: "Professor",
-      resumen: "Resum",
-      tdah: "TDAH",
-      dislexia: "Dislèxia",
-      esquema: "Esquema",
-      basico: "🟢 Bàsic",
-      intermedio: "🔵 Intermedi",
-      avanzado: "🟣 Avançat",
-      error: "Introdueix text"
-    }
-  };
-
-  const t = translations[lang];
+  // 🧠 CARGAR FUENTE DISLEXIA
+  useEffect(() => {
+    const link = document.createElement("link");
+    link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+    link.rel = "stylesheet";
+    document.head.appendChild(link);
+  }, []);
 
   const handleAdapt = async () => {
     if (!text.trim()) {
-      alert(t.error);
+      alert("Introduce texto");
       return;
     }
 
     setLoading(true);
 
-    const res = await fetch("/api/adapt", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ text, type, level, mode, lang })
-    });
+    try {
+      const res = await fetch("/api/adapt", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ text, type }),
+      });
 
-    const data = await res.json();
-    setResult(data.result);
+      const data = await res.json();
+      setResult(data.result);
+    } catch (error) {
+      setResult("Error procesando");
+    }
+
     setLoading(false);
   };
 
+  // 🎨 ESTILO DINÁMICO SEGÚN TIPO
+  const resultStyle = {
+    whiteSpace: "pre-wrap",
+    marginTop: 20,
+    padding: "20px",
+    borderRadius: "10px",
+    background: "#f8fafc",
+    border: "1px solid #ddd",
+    lineHeight: "1.8",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
+    letterSpacing: type === "dislexia" ? "1px" : "normal",
+    wordSpacing: type === "dislexia" ? "2px" : "normal"
+  };
+
   return (
-    <div style={pageStyle}>
+    <div style={{ padding: 40, fontFamily: "Arial", background: "#0f172a", color: "white", minHeight: "100vh" }}>
 
-      {/* HEADER */}
-      <div style={headerStyle}>
-        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-          <img src="/logo.jpg" style={{ width: "50px" }} />
-          <h2>{t.title}</h2>
-        </div>
+      <h1>EducAdapt 🧠</h1>
 
-        <div>
-          <button onClick={() => setLang("es")}>🇪🇸</button>
-          <button onClick={() => setLang("ca")}>CAT</button>
-        </div>
-      </div>
+      <textarea
+        rows="10"
+        style={{ width: "100%", padding: "15px", borderRadius: "10px" }}
+        placeholder="Pega aquí tus apuntes..."
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
 
-      <div style={cardStyle}>
+      <br /><br />
 
-        <textarea
-          rows="8"
-          style={textareaStyle}
-          placeholder={t.placeholder}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+      <select value={type} onChange={(e) => setType(e.target.value)} style={{ padding: "10px", borderRadius: "8px" }}>
+        <option value="facil">Resumen</option>
+        <option value="tdah">TDAH</option>
+        <option value="dislexia">Dislexia</option>
+        <option value="esquema">Esquema</option>
+      </select>
 
-        <br /><br />
+      <br /><br />
 
-        <div style={{ display: "flex", gap: "10px" }}>
+      <button
+        onClick={handleAdapt}
+        style={{
+          padding: "12px 20px",
+          borderRadius: "10px",
+          border: "none",
+          background: "#6366f1",
+          color: "white",
+          cursor: "pointer"
+        }}
+      >
+        {loading ? "Procesando..." : "Adaptar"}
+      </button>
 
-          <select value={type} onChange={(e) => setType(e.target.value)}>
-            <option value="facil">{t.resumen}</option>
-            <option value="tdah">{t.tdah}</option>
-            <option value="dislexia">{t.dislexia}</option>
-            <option value="esquema">{t.esquema}</option>
-          </select>
+      <h2 style={{ marginTop: 30 }}>Resultado:</h2>
 
-          <select value={level} onChange={(e) => setLevel(e.target.value)}>
-            <option value="basico">{t.basico}</option>
-            <option value="intermedio">{t.intermedio}</option>
-            <option value="avanzado">{t.avanzado}</option>
-          </select>
-
-          <select value={mode} onChange={(e) => setMode(e.target.value)}>
-            <option value="alumno">{t.alumno}</option>
-            <option value="profesor">{t.profesor}</option>
-          </select>
-
-        </div>
-
-        <br />
-
-        <button onClick={handleAdapt}>
-          {loading ? t.loading : t.adapt}
-        </button>
-
-        <h2>{t.result}:</h2>
-
-        <div style={{ whiteSpace: "pre-wrap" }}>
-          {result}
-        </div>
-
+      <div style={resultStyle}>
+        {result}
       </div>
 
     </div>
   );
 }
-
-/* estilos básicos */
-
-const pageStyle = {
-  padding: "20px",
-  background: "#0f172a",
-  color: "white",
-  minHeight: "100vh"
-};
-
-const headerStyle = {
-  display: "flex",
-  justifyContent: "space-between",
-  marginBottom: "20px"
-};
-
-const cardStyle = {
-  background: "white",
-  color: "black",
-  padding: "20px",
-  borderRadius: "10px"
-};
-
-const textareaStyle = {
-  width: "100%",
-  padding: "10px"
-};
