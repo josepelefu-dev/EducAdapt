@@ -4,35 +4,30 @@ export default function Home() {
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("5primaria");
+  const [lang, setLang] = useState("es");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
-  const [lang, setLang] = useState("es");
-  <div style={{ textAlign: "center", marginBottom: "10px" }}>
-  <button onClick={() => setLang("es")}>🇪🇸 Español</button>
-  <button onClick={() => setLang("ca")}>🇨🇦 Català</button>
-</div>
 
   const handleAdapt = async () => {
-  console.log("Texto:", text); // 👈 DEBUG
+    if (!text) {
+      alert(lang === "es" ? "Introduce texto" : "Introdueix text");
+      return;
+    }
 
-  setLoading(true);
+    setLoading(true);
 
-  const res = await fetch("/api/adapt", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      text: text,
-      type: type,
-      level: level
-    }),
-  });
+    const res = await fetch("/api/adapt", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ text, type, level }),
+    });
 
-  const data = await res.json();
-  setResult(data.result);
-  setLoading(false);
-};
+    const data = await res.json();
+    setResult(data.result);
+    setLoading(false);
+  };
 
   return (
     <div style={{
@@ -46,34 +41,35 @@ export default function Home() {
       <h1 style={{ textAlign: "center" }}>
         🧠 EducAdapt
       </h1>
-          <h1>{lang === "es" ? "🧠 EducAdapt" : "🧠 EducAdapt"}</h1>
 
-<p>
-{lang === "es"
-  ? "Adapta tus apuntes a cualquier necesidad educativa"
-  : "Adapta els teus apunts a qualsevol necessitat educativa"}
-</p>
+      {/* IDIOMA */}
+      <div style={{ textAlign: "center", marginBottom: "10px" }}>
+        <button onClick={() => setLang("es")}>🇪🇸 Español</button>
+        <button onClick={() => setLang("ca")}>Català</button>
+      </div>
 
       <p style={{ textAlign: "center", color: "#666" }}>
-        Adapta tus apuntes a cualquier necesidad educativa
+        {lang === "es"
+          ? "Adapta tus apuntes a cualquier necesidad educativa"
+          : "Adapta els teus apunts a qualsevol necessitat educativa"}
       </p>
 
       <textarea
-  rows="8"
-  style={{
-    width: "100%",
-    padding: "10px",
-    borderRadius: "10px",
-    border: "1px solid #ccc"
-  }}
-  placeholder={
-    lang === "es"
-      ? "Pega aquí tus apuntes..."
-      : "Enganxa aquí els teus apunts..."
-  }
-  value={text}
-  onChange={(e) => setText(e.target.value)}
-/>
+        rows="8"
+        style={{
+          width: "100%",
+          padding: "10px",
+          borderRadius: "10px",
+          border: "1px solid #ccc"
+        }}
+        placeholder={
+          lang === "es"
+            ? "Pega aquí tus apuntes..."
+            : "Enganxa aquí els teus apunts..."
+        }
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
 
       <br /><br />
 
@@ -87,7 +83,7 @@ export default function Home() {
           <option value="esquema">Esquema</option>
         </select>
 
-        {/* Nivel académico */}
+        {/* Nivel */}
         <select value={level} onChange={(e) => setLevel(e.target.value)}>
           <option value="5primaria">5º Primaria</option>
           <option value="6primaria">6º Primaria</option>
@@ -115,26 +111,26 @@ export default function Home() {
         }}
       >
         {loading
-  ? (lang === "es" ? "Adaptando..." : "Adaptant...")
-  : (lang === "es" ? "Adaptar" : "Adaptar")}
+          ? (lang === "es" ? "Adaptando..." : "Adaptant...")
+          : (lang === "es" ? "Adaptar" : "Adaptar")}
       </button>
 
       <br /><br />
 
       {result && (
-  <div style={{
-    background: "white",
-    padding: "20px",
-    borderRadius: "10px",
-    boxShadow: "0 0 10px rgba(0,0,0,0.1)",
-    whiteSpace: "pre-wrap",
-    fontFamily: "monospace",
-    lineHeight: "1.6"
-  }}>
-    <h3>Resultado:</h3>
-    {result}
-  </div>
-)}
+        <div style={{
+          background: "white",
+          padding: "20px",
+          borderRadius: "10px",
+          boxShadow: "0 0 10px rgba(0,0,0,0.1)",
+          whiteSpace: "pre-wrap",
+          fontFamily: "monospace",
+          lineHeight: "1.6"
+        }}>
+          <h3>{lang === "es" ? "Resultado:" : "Resultat:"}</h3>
+          {result}
+        </div>
+      )}
     </div>
   );
 }
