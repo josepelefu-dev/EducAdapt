@@ -44,6 +44,19 @@ Responde únicamente con el resultado final.
 Texto:
 ${text}`;
 }
+    
+    if (type === "esquema") {
+  prompt = `Convierte el siguiente texto en un esquema tipo árbol para un estudiante de ${level}.
+
+- Usa estructura jerárquica
+- Usa guiones o indentación
+- Muy visual y ordenado
+
+Devuelve SOLO el esquema, sin explicaciones.
+
+Texto:
+${text}`;
+}
       
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
