@@ -12,6 +12,12 @@ export default function Home() {
   const [guidedMode, setGuidedMode] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
 
+  const [autoPlay, setAutoPlay] = useState(false);
+  const [speed, setSpeed] = useState(2000);
+
+  const [speaking, setSpeaking] = useState(false);
+
+  // Fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
@@ -39,7 +45,11 @@ export default function Home() {
       avanzado: "🟣 Avanzado",
       error: "Introduce texto",
       guided: "Modo lectura guiada",
-      normal: "Modo normal"
+      normal: "Modo normal",
+      auto: "Lectura automática",
+      stop: "Detener",
+      speak: "🔊 Escuchar",
+      stopSpeak: "⏹ Parar"
     },
     ca: {
       title: "EducAdapt",
@@ -57,7 +67,11 @@ export default function Home() {
       avanzado: "🟣 Avançat",
       error: "Introdueix text",
       guided: "Mode lectura guiada",
-      normal: "Mode normal"
+      normal: "Mode normal",
+      auto: "Lectura automàtica",
+      stop: "Aturar",
+      speak: "🔊 Escoltar",
+      stopSpeak: "⏹ Parar"
     }
   };
 
@@ -79,7 +93,7 @@ export default function Home() {
       });
 
       const data = await res.json();
-      setResult(data.result);
+      setResult(data.result || "");
       setCurrentLine(0);
     } catch {
       setResult("Error procesando");
@@ -104,17 +118,70 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
+  // 🔊 VOZ (intacto)
+  const speakText = () => {
+    if (!result || typeof window === "undefined") return;
+
+    const lines = getLines();
+    let index = 0;
+
+    const speakLine = () => {
+      if (index >= lines.length) {
+        setSpeaking(false);
+        return;
+      }
+
+      setCurrentLine(index);
+
+      const utterance = new SpeechSynthesisUtterance(lines[index]);
+      utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
+
+      utterance.onend = () => {
+        index++;
+        speakLine();
+      };
+
+      window.speechSynthesis.speak(utterance);
+    };
+
+    window.speechSynthesis.cancel();
+    setSpeaking(true);
+    speakLine();
+  };
+
+  const stopSpeech = () => {
+    window.speechSynthesis.cancel();
+    setSpeaking(false);
+  };
+
+  // AUTO
+  useEffect(() => {
+    if (!autoPlay || !guidedMode) return;
+
+    const interval = setInterval(() => {
+      setCurrentLine(prev => {
+        const lines = getLines();
+        return prev < lines.length - 1 ? prev + 1 : prev;
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [autoPlay, speed, guidedMode, result]);
+
+  // 🔥 FIX VISUAL (AQUÍ ESTÁ LA CLAVE)
   const resultStyle = {
-    background: "#ffffff", // 👈 FIX CLAVE
+    background: "#ffffff",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.3" : "1.5",
+    lineHeight:
+      type === "dislexia" ? "1.3" :
+      type === "tdah" ? "1.35" :
+      "1.5",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px",
-    color: "#000000", // 👈 FIX CLAVE
-    opacity: 1
+    color: "#111827" // 🔥 SIEMPRE VISIBLE
   };
 
   return (
@@ -178,18 +245,52 @@ export default function Home() {
           {guidedMode ? t.normal : t.guided}
         </button>
 
-        <br /><br />
+        {/* 🔥 CONTROLES COMPLETOS RESTAURADOS */}
+        {guidedMode && (
+          <div>
+            <button
+              onClick={() => setAutoPlay(!autoPlay)}
+              style={{
+                marginTop: "10px",
+                background: autoPlay ? "#ef4444" : "#f59e0b",
+                ...mainButton
+              }}
+            >
+              {autoPlay ? t.stop : t.auto}
+            </button>
 
-        {/* NORMAL */}
-        {!guidedMode && result && (
-          <div style={resultStyle}>
-            <span style={{ color: "#000000" }}>
-              {formatResult(result)}
-            </span>
+            <button
+              onClick={speakText}
+              style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
+            >
+              {t.speak}
+            </button>
+
+            <button
+              onClick={stopSpeech}
+              style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}
+            >
+              {t.stopSpeak}
+            </button>
+
+            <input
+              type="range"
+              min="1000"
+              max="5000"
+              step="500"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              style={{ width: "100%", marginTop: "10px" }}
+            />
           </div>
         )}
 
-        {/* GUIADO */}
+        <br /><br />
+
+        {!guidedMode && result && (
+          <div style={resultStyle}>{formatResult(result)}</div>
+        )}
+
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
@@ -197,7 +298,8 @@ export default function Home() {
                 key={i}
                 style={{
                   background: i === currentLine ? "#dbeafe" : "transparent",
-                  color: "#000000"
+                  padding: "6px",
+                  borderRadius: "6px"
                 }}
               >
                 {line}
@@ -205,13 +307,12 @@ export default function Home() {
             ))}
           </div>
         )}
-
       </div>
     </div>
   );
 }
 
-/* ESTILOS ORIGINALES */
+/* ESTILOS */
 const pageStyle = {
   minHeight: "100vh",
   background: "#0f172a",
