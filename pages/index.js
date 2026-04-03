@@ -28,38 +28,23 @@ export default function Home() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      background: "linear-gradient(135deg, #0f172a, #1e293b)",
-      color: "white",
-      padding: "20px"
-    }}>
+    <div style={pageStyle}>
 
       {/* HEADER */}
-      <div style={{ textAlign: "center", marginBottom: "20px" }}>
-        <img 
-  src="/logo.jpg?v=1" 
-  alt="EducAdapt Logo"
-  style={{ width: "140px" }}
-/>
-        <h1 style={{ margin: 0 }}>EducAdapt</h1>
+      <div style={headerStyle}>
+        <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+          <img src="/logo.jpg" style={{ width: "45px" }} />
+          <h2 style={{ margin: 0 }}>EducAdapt</h2>
+        </div>
 
-        {/* IDIOMA */}
-        <div style={{ marginTop: "10px" }}>
+        <div>
           <button onClick={() => setLang("es")} style={btnLang}>🇪🇸</button>
           <button onClick={() => setLang("ca")} style={btnLang}>CAT</button>
         </div>
       </div>
 
-      {/* CONTENIDO */}
-      <div style={{
-        maxWidth: "800px",
-        margin: "auto",
-        background: "#ffffff",
-        color: "#000",
-        padding: "20px",
-        borderRadius: "15px"
-      }}>
+      {/* CARD */}
+      <div style={cardStyle}>
 
         <p style={{ textAlign: "center", color: "#555" }}>
           {lang === "es"
@@ -112,7 +97,13 @@ export default function Home() {
             : (lang === "es" ? "Adaptar" : "Adaptar")}
         </button>
 
-        <br /><br />
+        <p style={smallText}>
+          {lang === "es"
+            ? "Herramienta educativa impulsada por IA"
+            : "Eina educativa impulsada per IA"}
+        </p>
+
+        <br />
 
         {/* RESULTADO */}
         {result && (
@@ -127,14 +118,40 @@ export default function Home() {
   );
 }
 
-/* 🎨 ESTILOS */
+/* 🎨 ESTILOS PRO */
+
+const pageStyle = {
+  minHeight: "100vh",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
+  padding: "20px",
+  color: "white"
+};
+
+const headerStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "30px"
+};
+
+const cardStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  background: "white",
+  color: "black",
+  padding: "30px",
+  borderRadius: "20px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+};
 
 const textareaStyle = {
   width: "100%",
-  padding: "12px",
-  borderRadius: "10px",
-  border: "1px solid #ccc",
-  fontSize: "14px"
+  padding: "15px",
+  borderRadius: "12px",
+  border: "1px solid #ddd",
+  fontSize: "15px"
 };
 
 const selectStyle = {
@@ -144,22 +161,24 @@ const selectStyle = {
 
 const mainButton = {
   width: "100%",
-  padding: "14px",
-  background: "#4f46e5",
+  padding: "15px",
+  background: "linear-gradient(135deg, #6366f1, #4f46e5)",
   color: "white",
   border: "none",
-  borderRadius: "10px",
+  borderRadius: "12px",
   fontSize: "16px",
-  cursor: "pointer"
+  cursor: "pointer",
+  fontWeight: "bold"
 };
 
 const resultBox = {
-  background: "#f9fafb",
+  background: "#f8fafc",
   padding: "20px",
-  borderRadius: "10px",
+  borderRadius: "12px",
   fontFamily: "monospace",
   whiteSpace: "pre-wrap",
-  lineHeight: "1.6"
+  lineHeight: "1.7",
+  border: "1px solid #e2e8f0"
 };
 
 const btnLang = {
@@ -168,4 +187,11 @@ const btnLang = {
   borderRadius: "6px",
   border: "none",
   cursor: "pointer"
+};
+
+const smallText = {
+  fontSize: "12px",
+  color: "#888",
+  textAlign: "center",
+  marginTop: "10px"
 };
