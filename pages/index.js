@@ -209,25 +209,25 @@ export default function Home() {
 
         {/* AUTO */}
         {guidedMode && (
-          <>
-            <button
-              onClick={() => setAutoPlay(!autoPlay)}
-              style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
-            >
-              {autoPlay ? t.stop : t.auto}
-            </button>
+  <div>
+    <button
+      onClick={() => setAutoPlay(!autoPlay)}
+      style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
+    >
+      {autoPlay ? t.stop : t.auto}
+    </button>
 
-            <input
-              type="range"
-              min="1000"
-              max="5000"
-              step="500"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              style={{ width: "100%", marginTop: "10px" }}
-            />
-          </>
-        )}
+    <input
+      type="range"
+      min="1000"
+      max="5000"
+      step="500"
+      value={speed}
+      onChange={(e) => setSpeed(Number(e.target.value))}
+      style={{ width: "100%", marginTop: "10px" }}
+    />
+  </div>
+)}
 
         <br /><br />
 
