@@ -5,7 +5,6 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
-
   const [lang, setLang] = useState("es");
 
   const [result, setResult] = useState("");
@@ -19,7 +18,7 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // idioma persistente
+  // idioma seguro
   useEffect(() => {
     if (typeof window !== "undefined") {
       const savedLang = localStorage.getItem("lang");
@@ -137,7 +136,7 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
-  // VOZ
+  // 🔊 VOZ SEGURA
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -160,17 +159,23 @@ export default function Home() {
         speakLine();
       };
 
-      window.speechSynthesis.speak(utterance);
+      if (typeof window !== "undefined") {
+        window.speechSynthesis.speak(utterance);
+      }
     };
 
-    window.speechSynthesis.cancel();
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
+
     setSpeaking(true);
     speakLine();
   };
 
   const stopSpeech = () => {
-    if (typeof window === "undefined") return;
-    window.speechSynthesis.cancel();
+    if (typeof window !== "undefined") {
+      window.speechSynthesis.cancel();
+    }
     setSpeaking(false);
   };
 
@@ -190,11 +195,9 @@ export default function Home() {
 
   // TXT
   const downloadResult = () => {
-    if (!result) return;
+    if (!result || typeof window === "undefined") return;
 
-    const content = formatResult(result);
-
-    const blob = new Blob([content], {
+    const blob = new Blob([formatResult(result)], {
       type: "text/plain;charset=utf-8;"
     });
 
@@ -204,45 +207,18 @@ export default function Home() {
     link.click();
   };
 
-  // PDF seguro (print)
+  // PDF SEGURO (NO ROMPE BUILD)
   const downloadPDF = () => {
-    if (!result) return;
-
-    const content = formatResult(result);
+    if (!result || typeof window === "undefined") return;
 
     const newWindow = window.open("", "_blank");
+    if (!newWindow) return;
 
     newWindow.document.write(`
       <html>
-        <head>
-          <title>EducAdapt</title>
-          <style>
-            body {
-              font-family: Arial;
-              padding: 40px;
-              line-height: 1.5;
-            }
-            h1 {
-              color: #4f46e5;
-            }
-            .meta {
-              font-size: 12px;
-              color: #666;
-              margin-bottom: 20px;
-            }
-            .content {
-              white-space: pre-wrap;
-            }
-          </style>
-        </head>
-        <body>
+        <body style="font-family:Arial;padding:40px;">
           <h1>EducAdapt</h1>
-          <div class="meta">
-            Tipo: ${type} | Nivel: ${level}
-          </div>
-          <div class="content">
-            ${content}
-          </div>
+          <pre>${formatResult(result)}</pre>
         </body>
       </html>
     `);
@@ -313,11 +289,11 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button onClick={downloadResult} style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}>
+        <button onClick={downloadResult} style={{ marginTop: "10px", ...mainButton }}>
           {t.download}
         </button>
 
-        <button onClick={downloadPDF} style={{ marginTop: "10px", background: "#16a34a", ...mainButton }}>
+        <button onClick={downloadPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
         </button>
 
@@ -333,34 +309,17 @@ export default function Home() {
 
         {guidedMode && (
           <div>
-            <button
-              onClick={() => setAutoPlay(!autoPlay)}
-              style={{
-                marginTop: "10px",
-                background: autoPlay ? "#ef4444" : "#f59e0b",
-                ...mainButton
-              }}
-            >
-              {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              Auto
             </button>
 
-            <button onClick={speakText} style={{ marginTop: "10px", background: "#10b981", ...mainButton }}>
+            <button onClick={speakText} style={{ marginTop: "10px", ...mainButton }}>
               {t.speak}
             </button>
 
-            <button onClick={stopSpeech} style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}>
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
               {t.stopSpeak}
             </button>
-
-            <input
-              type="range"
-              min="1000"
-              max="5000"
-              step="500"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              style={{ width: "100%", marginTop: "10px" }}
-            />
           </div>
         )}
 
@@ -372,22 +331,13 @@ export default function Home() {
 
         {guidedMode && result && (
           <div style={resultStyle}>
-            {(getLines() || []).map((line, index) => (
-              <div
-                key={index}
-                style={{
-                  padding: "12px",
-                  margin: "6px 0",
-                  borderRadius: "8px",
-                  background: index === currentLine ? "#dbeafe" : "transparent"
-                }}
-              >
+            {getLines().map((line, i) => (
+              <div key={i} style={{ background: i === currentLine ? "#dbeafe" : "transparent" }}>
                 {line}
               </div>
             ))}
           </div>
         )}
-
       </div>
 
       <p style={legalText}>
@@ -397,4 +347,12 @@ export default function Home() {
   );
 }
 
-/* estilos igual */
+/* estilos */
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
+const legalText = { textAlign: "center", fontSize: "12px", marginTop: "20px" };
