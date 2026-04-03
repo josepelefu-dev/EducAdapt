@@ -293,19 +293,40 @@ export default function Home() {
         )}
 
         {guidedMode && result && (
-          <div style={{ ...resultStyle, textAlign: "center" }}>
-            <div style={{
-              fontSize: "22px",
-              fontWeight: "600",
-              background: "#e0f2fe",
-              padding: "20px",
-              borderRadius: "10px"
-            }}>
-              {getLines()[currentLine] || ""}
-            </div>
-          </div>
-        )}
+  <div style={{ ...resultStyle }}>
+
+    {getLines().map((line, index) => (
+      <div
+        key={index}
+        style={{
+          padding: "12px",
+          margin: "6px 0",
+          borderRadius: "8px",
+          transition: "all 0.3s ease",
+
+          background:
+            index === currentLine
+              ? "#dbeafe"
+              : "transparent",
+
+          boxShadow:
+            index === currentLine
+              ? "0 0 10px rgba(59,130,246,0.5)"
+              : "none",
+
+          fontWeight:
+            index === currentLine ? "600" : "400",
+
+          transform:
+            index === currentLine ? "scale(1.02)" : "scale(1)"
+        }}
+      >
+        {line}
       </div>
+    ))}
+
+  </div>
+)}
 
       <p style={legalText}>
         Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
