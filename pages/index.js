@@ -125,10 +125,11 @@ export default function Home() {
   };
 
   const getLines = () => {
-    return formatResult(result)
-      .split("\n")
-      .filter(l => l.trim() !== "");
-  };
+  if (!result) return [];
+  return formatResult(result)
+    .split("\n")
+    .filter(l => l.trim() !== "");
+};
 
   const resultStyle = {
     background: "#f8fafc",
