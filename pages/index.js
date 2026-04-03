@@ -96,8 +96,6 @@ export default function Home() {
       });
 
       const data = await res.json();
-
-      // 🔥 EXACTAMENTE COMO ANTES
       setResult(data.result);
       setCurrentLine(0);
 
@@ -124,7 +122,6 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
-  // VOZ (igual que antes, solo protegido)
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -162,7 +159,6 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -176,7 +172,6 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // TXT
   const downloadResult = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -190,7 +185,6 @@ export default function Home() {
     link.click();
   };
 
-  // ✅ PDF SEGURO (NUEVO PERO NO ROMPE NADA)
   const downloadPDF = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -211,16 +205,16 @@ export default function Home() {
   };
 
   const resultStyle = {
-  background: "#f8fafc",
-  padding: "20px",
-  borderRadius: "12px",
-  whiteSpace: "pre-wrap",
-  lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.3" : "1.5",
-  border: "1px solid #e2e8f0",
-  fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
-  fontSize: "17px",
-  color: "#000" // 👈 ESTE ES EL FIX
-};
+    background: "#f8fafc",
+    padding: "20px",
+    borderRadius: "12px",
+    whiteSpace: "pre-wrap",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.3" : "1.5",
+    border: "1px solid #e2e8f0",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
+    fontSize: "17px",
+    color: "#1e293b"
+  };
 
   return (
     <div style={pageStyle}>
@@ -300,7 +294,13 @@ export default function Home() {
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
-              <div key={i} style={{ background: i === currentLine ? "#dbeafe" : "transparent" }}>
+              <div
+                key={i}
+                style={{
+                  background: i === currentLine ? "#dbeafe" : "transparent",
+                  color: "#1e293b"
+                }}
+              >
                 {line}
               </div>
             ))}
@@ -311,7 +311,6 @@ export default function Home() {
   );
 }
 
-/* estilos originales */
 const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
 const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
 const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
