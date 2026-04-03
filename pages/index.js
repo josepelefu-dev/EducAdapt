@@ -107,7 +107,7 @@ export default function Home() {
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
       .replace(/│/g, " ")
-      .replace(/\.\s/g, ".\n\n");
+      .replace(/\.\s/g, ".\n")
   };
 
   const getLines = () => {
