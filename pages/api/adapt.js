@@ -1,11 +1,11 @@
 export default async function handler(req, res) {
   try {
-    const { text, type } = req.body;
+    const { text, type, level } = req.body;
 
     let prompt = "";
 
     if (type === "facil") { 
-  prompt = `Simplifica el siguiente texto para un niño de 10 años.
+  prompt = `Simplifica el siguiente texto para un estudiante de ${level}.
 
 Devuelve SOLO el texto adaptado.
 NO añadas introducciones, explicaciones ni comentarios.
@@ -16,7 +16,7 @@ ${text}`;
 }
 
     if (type === "tdah") {
-  prompt = `Reescribe el siguiente texto para una persona con TDAH.
+  prompt = `Adapta este texto para un estudiante con TDAH de nivel ${level}.
 
 - Usa frases cortas
 - Usa listas
@@ -31,8 +31,8 @@ ${text}`;
 }
 
     if (type === "dislexia") {
-      prompt = `Adapta el siguiente texto para personas con dislexia.
-
+      prompt = `Adapta este texto para dislexia para nivel ${level}.
+      
 - Lenguaje simple
 - Frases cortas
 - Estructura clara
