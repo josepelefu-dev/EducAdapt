@@ -15,10 +15,8 @@ export default function Home() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
 
-  // 🆕 VOZ
   const [speaking, setSpeaking] = useState(false);
 
-  // Fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
@@ -109,7 +107,7 @@ export default function Home() {
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
       .replace(/│/g, " ")
-      .replace(/\. /g, ".\n\n");
+      .replace(/\.\s/g, ".\n\n");
   };
 
   const getLines = () => {
@@ -119,38 +117,35 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
-  // 🔊 VOZ
   const speakText = () => {
-  if (!result || typeof window === "undefined") return;
+    if (!result || typeof window === "undefined") return;
 
-  const lines = getLines();
+    const lines = getLines();
+    let index = 0;
 
-  let index = 0;
+    const speakLine = () => {
+      if (index >= lines.length) {
+        setSpeaking(false);
+        return;
+      }
 
-  const speakLine = () => {
-    if (index >= lines.length) {
-      setSpeaking(false);
-      return;
-    }
+      setCurrentLine(index);
 
-    setCurrentLine(index);
+      const utterance = new SpeechSynthesisUtterance(lines[index]);
+      utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
 
-    const utterance = new SpeechSynthesisUtterance(lines[index]);
-    utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
-    utterance.rate = 0.9;
+      utterance.onend = () => {
+        index++;
+        speakLine();
+      };
 
-    utterance.onend = () => {
-      index++;
-      speakLine(); // siguiente línea automáticamente
+      window.speechSynthesis.speak(utterance);
     };
 
-    window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.cancel();
+    setSpeaking(true);
+    speakLine();
   };
-
-  window.speechSynthesis.cancel();
-  setSpeaking(true);
-  speakLine();
-};
 
   const stopSpeech = () => {
     if (typeof window === "undefined") return;
@@ -158,7 +153,6 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -177,7 +171,7 @@ export default function Home() {
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" || type === "tdah" ? "1" : "1.5",
+    lineHeight: type === "dislexia" || type === "tdah" ? "1.4" : "1.8",
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px"
@@ -185,7 +179,6 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
-      {/* HEADER */}
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
@@ -209,7 +202,6 @@ export default function Home() {
 
         <br /><br />
 
-        {/* SELECTS (NO TOCADOS) */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">{t.resumen}</option>
@@ -249,17 +241,16 @@ export default function Home() {
         {guidedMode && (
           <div>
             <button
-  onClick={() => setAutoPlay(!autoPlay)}
-  style={{
-    marginTop: "10px",
-    background: autoPlay ? "#ef4444" : "#f59e0b",
-    ...mainButton
-  }}
->
-  {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
-</button>
+              onClick={() => setAutoPlay(!autoPlay)}
+              style={{
+                marginTop: "10px",
+                background: autoPlay ? "#ef4444" : "#f59e0b",
+                ...mainButton
+              }}
+            >
+              {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
+            </button>
 
-            {/* VOZ */}
             <button
               onClick={speakText}
               style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
@@ -293,37 +284,32 @@ export default function Home() {
         )}
 
         {guidedMode && result && (
-  <div style={resultStyle}>
-    {(getLines() || []).map((line, index) => (
-      <div
-        id={"line-" + index}
-        key={index}
-        style={{
-          padding: "12px",
-          margin: "6px 0",
-          borderRadius: "8px",
-          transition: "all 0.3s ease",
+          <div style={resultStyle}>
+            {(getLines() || []).map((line, index) => (
+              <div
+                id={"line-" + index}
+                key={index}
+                style={{
+                  padding: "12px",
+                  margin: "6px 0",
+                  borderRadius: "8px",
+                  transition: "all 0.3s ease",
+                  background: index === currentLine ? "#dbeafe" : "transparent",
+                  boxShadow:
+                    index === currentLine
+                      ? "0 0 10px rgba(59,130,246,0.5)"
+                      : "none",
+                  fontWeight: index === currentLine ? "600" : "400",
+                  transform: index === currentLine ? "scale(1.02)" : "scale(1)"
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
 
-          background:
-            index === currentLine ? "#dbeafe" : "transparent",
-
-          boxShadow:
-            index === currentLine
-              ? "0 0 10px rgba(59,130,246,0.5)"
-              : "none",
-
-          fontWeight:
-            index === currentLine ? "600" : "400",
-
-          transform:
-            index === currentLine ? "scale(1.02)" : "scale(1)"
-        }}
-      >
-        {line}
       </div>
-    ))}
-  </div>
-)}
 
       <p style={legalText}>
         Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
@@ -332,7 +318,7 @@ export default function Home() {
   );
 }
 
-/* 🎨 ESTILOS (RECUPERADOS) */
+/* ESTILOS */
 
 const pageStyle = {
   minHeight: "100vh",
