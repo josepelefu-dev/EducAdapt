@@ -249,11 +249,15 @@ export default function Home() {
         {guidedMode && (
           <div>
             <button
-              onClick={() => setAutoPlay(!autoPlay)}
-              style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
-            >
-              {autoPlay ? t.stop : t.auto}
-            </button>
+  onClick={() => setAutoPlay(!autoPlay)}
+  style={{
+    marginTop: "10px",
+    background: autoPlay ? "#ef4444" : "#f59e0b",
+    ...mainButton
+  }}
+>
+  {autoPlay ? "⏹ Stop auto" : "▶️ Auto"}
+</button>
 
             {/* VOZ */}
             <button
