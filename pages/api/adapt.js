@@ -1,45 +1,11 @@
-import pdf from "pdf-parse";
-
-export const config = {
-  api: {
-    bodyParser: {
-      sizeLimit: "4mb", // 🔥 importante para PDFs
-    },
-  },
-};
-
 export default async function handler(req, res) {
   try {
-    let { text, type, level, file } = req.body;
-
-    // 📄 PROCESAR ARCHIVO
-    if ((!text || text.trim() === "") && file) {
-      try {
-        const buffer = Buffer.from(file.data, "base64");
-
-        // ✅ PDF REAL
-        if (file.type === "application/pdf") {
-          const pdfData = await pdf(buffer);
-          text = pdfData.text;
-        }
-
-        // ✅ TXT
-        if (file.type === "text/plain") {
-          text = buffer.toString("utf-8");
-        }
-
-      } catch (err) {
-        console.error(err);
-        return res.status(500).json({
-          result: "Error leyendo el archivo PDF"
-        });
-      }
-    }
+    const { text, type, level } = req.body;
 
     // 🔒 VALIDACIÓN
     if (!text || text.trim() === "") {
       return res.status(400).json({
-        result: "No hay texto válido"
+        result: "No has introducido texto"
       });
     }
 
@@ -47,10 +13,13 @@ export default async function handler(req, res) {
 
     // 🟢 FÁCIL
     if (type === "facil") {
-      prompt = `Simplifica este texto para nivel ${level}:
+      prompt = `Simplifica el siguiente texto para un estudiante de nivel ${level}.
 
 - Lenguaje sencillo
 - Frases cortas
+- Explicación clara
+
+Devuelve SOLO el texto adaptado.
 
 Texto:
 ${text}`;
@@ -62,7 +31,10 @@ ${text}`;
 
 - Frases muy cortas
 - Usa listas
-- Destaca lo importante
+- Destaca lo importante en MAYÚSCULAS
+- Elimina lo secundario
+
+Devuelve SOLO el resultado.
 
 Texto:
 ${text}`;
@@ -76,27 +48,31 @@ ${text}`;
 - Frases cortas
 - Estructura clara
 
+Devuelve SOLO el texto adaptado.
+
 Texto:
 ${text}`;
     }
 
     // 🌳 ESQUEMA
     if (type === "esquema") {
-      prompt = `Convierte en esquema tipo árbol:
+      prompt = `Convierte este texto en un esquema tipo árbol:
 
 Tema
  ├── Idea
  │    ├── Detalle
 
+Devuelve SOLO el esquema.
+
 Texto:
 ${text}`;
     }
 
-    // 🧠 IA
+    // 🧠 LLAMADA IA
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
@@ -107,6 +83,12 @@ ${text}`;
 
     const data = await response.json();
 
+    if (!response.ok) {
+      return res.status(500).json({
+        result: "Error en la IA"
+      });
+    }
+
     return res.status(200).json({
       result: data.choices?.[0]?.message?.content || "Sin resultado"
     });
@@ -114,7 +96,7 @@ ${text}`;
   } catch (error) {
     console.error(error);
     return res.status(500).json({
-      result: "Error interno"
+      result: "Error interno del servidor"
     });
   }
 }
