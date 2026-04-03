@@ -15,13 +15,15 @@ export default function Home() {
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
 
+  // 🆕 VOZ
   const [speaking, setSpeaking] = useState(false);
 
   // Fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
-      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.href =
+        "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
@@ -112,12 +114,14 @@ export default function Home() {
 
   const getLines = () => {
     if (!result) return [];
-    return formatResult(result).split("\n").filter(l => l.trim() !== "");
+    return formatResult(result)
+      .split("\n")
+      .filter((l) => l.trim() !== "");
   };
 
+  // 🔊 VOZ
   const speakText = () => {
-    if (typeof window === "undefined") return;
-    if (!result) return;
+    if (!result || typeof window === "undefined") return;
 
     const textToRead = guidedMode
       ? getLines()[currentLine]
@@ -139,11 +143,12 @@ export default function Home() {
     setSpeaking(false);
   };
 
+  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
     const interval = setInterval(() => {
-      setCurrentLine(prev => {
+      setCurrentLine((prev) => {
         const lines = getLines();
         return prev < lines.length - 1 ? prev + 1 : prev;
       });
@@ -159,14 +164,16 @@ export default function Home() {
     whiteSpace: "pre-wrap",
     lineHeight: "2",
     border: "1px solid #e2e8f0",
-    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial"
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
+    fontSize: "17px"
   };
 
   return (
     <div style={pageStyle}>
+      {/* HEADER */}
       <div style={headerStyle}>
-        <div style={{ display: "flex", gap: "10px" }}>
-          <img src="/logo.jpg" width="50" />
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <img src="/logo.jpg" style={{ width: "50px" }} />
           <h2>{t.title}</h2>
         </div>
 
@@ -177,7 +184,6 @@ export default function Home() {
       </div>
 
       <div style={cardStyle}>
-
         <textarea
           rows="8"
           style={textareaStyle}
@@ -188,27 +194,76 @@ export default function Home() {
 
         <br /><br />
 
+        {/* SELECTS (NO TOCADOS) */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button onClick={() => setGuidedMode(!guidedMode)} style={mainButton}>
+        <button
+          onClick={() => {
+            setGuidedMode(!guidedMode);
+            setCurrentLine(0);
+          }}
+          style={{ marginTop: "10px", ...mainButton }}
+        >
           {guidedMode ? t.normal : t.guided}
         </button>
 
         {guidedMode && (
           <div>
-            <button onClick={() => setAutoPlay(!autoPlay)} style={mainButton}>
+            <button
+              onClick={() => setAutoPlay(!autoPlay)}
+              style={{ marginTop: "10px", background: "#f59e0b", ...mainButton }}
+            >
               {autoPlay ? t.stop : t.auto}
             </button>
 
-            <button onClick={speakText} style={mainButton}>
+            {/* VOZ */}
+            <button
+              onClick={speakText}
+              style={{ marginTop: "10px", background: "#10b981", ...mainButton }}
+            >
               {t.speak}
             </button>
 
-            <button onClick={stopSpeech} style={mainButton}>
+            <button
+              onClick={stopSpeech}
+              style={{ marginTop: "10px", background: "#ef4444", ...mainButton }}
+            >
               {t.stopSpeak}
             </button>
+
+            <input
+              type="range"
+              min="1000"
+              max="5000"
+              step="500"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              style={{ width: "100%", marginTop: "10px" }}
+            />
           </div>
         )}
 
@@ -219,21 +274,89 @@ export default function Home() {
         )}
 
         {guidedMode && result && (
-          <div style={resultStyle}>
-            {getLines()[currentLine] || ""}
+          <div style={{ ...resultStyle, textAlign: "center" }}>
+            <div style={{
+              fontSize: "22px",
+              fontWeight: "600",
+              background: "#e0f2fe",
+              padding: "20px",
+              borderRadius: "10px"
+            }}>
+              {getLines()[currentLine] || ""}
+            </div>
           </div>
         )}
-
       </div>
+
+      <p style={legalText}>
+        Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional.
+      </p>
     </div>
   );
 }
 
-/* estilos */
+/* 🎨 ESTILOS (RECUPERADOS) */
 
-const pageStyle = { padding: 20 };
-const headerStyle = { display: "flex", justifyContent: "space-between" };
-const cardStyle = { background: "white", padding: 20 };
-const textareaStyle = { width: "100%" };
-const mainButton = { marginTop: 10 };
-const langBtn = { margin: 5 };
+const pageStyle = {
+  minHeight: "100vh",
+  background: "linear-gradient(135deg, #0f172a, #1e293b)",
+  padding: "20px",
+  color: "white"
+};
+
+const headerStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  display: "flex",
+  justifyContent: "space-between",
+  alignItems: "center",
+  marginBottom: "20px"
+};
+
+const cardStyle = {
+  maxWidth: "900px",
+  margin: "auto",
+  background: "white",
+  color: "black",
+  padding: "30px",
+  borderRadius: "20px",
+  boxShadow: "0 10px 30px rgba(0,0,0,0.2)"
+};
+
+const textareaStyle = {
+  width: "100%",
+  padding: "15px",
+  borderRadius: "10px",
+  border: "1px solid #ddd",
+  resize: "none"
+};
+
+const selectStyle = {
+  padding: "10px",
+  borderRadius: "8px"
+};
+
+const mainButton = {
+  width: "100%",
+  padding: "15px",
+  background: "#6366f1",
+  color: "white",
+  border: "none",
+  borderRadius: "12px",
+  cursor: "pointer"
+};
+
+const langBtn = {
+  margin: "5px",
+  padding: "6px 10px",
+  borderRadius: "6px",
+  border: "none",
+  cursor: "pointer"
+};
+
+const legalText = {
+  textAlign: "center",
+  fontSize: "12px",
+  marginTop: "20px",
+  opacity: 0.7
+};
