@@ -236,7 +236,8 @@ const textareaStyle = {
   width: "100%",
   padding: "15px",
   borderRadius: "12px",
-  border: "1px solid #ddd"
+  border: "1px solid #ddd",
+  resize: "none" // 🔥 BLOQUEA REDIMENSIONAR
 };
 
 const selectStyle = {
