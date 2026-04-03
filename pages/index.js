@@ -13,7 +13,7 @@ export default function Home() {
     formData.append("file", file);
 
     // ⚠️ IMPORTANTE: cambia esto por tu cloud_name
-    formData.append("upload_preset", "unsigned_preset");
+    formData.append("upload_preset", "educadapt_upload");
 
     const res = await fetch(
       `https://api.cloudinary.com/v1_1/EducAdapt/auto/upload`,
