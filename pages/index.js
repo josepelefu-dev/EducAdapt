@@ -107,7 +107,7 @@ export default function Home() {
       .replace(/^- (.*)$/gm, "• $1")
       .replace(/├──/g, "↳")
       .replace(/│/g, " ")
-      .replace(/\.\s/g, ".\n")
+      .replace(/\.\s/g, ".\n");
   };
 
   const getLines = () => {
@@ -117,6 +117,7 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
+  // 🔊 VOZ
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -153,6 +154,7 @@ export default function Home() {
     setSpeaking(false);
   };
 
+  // 🔁 AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -165,6 +167,22 @@ export default function Home() {
 
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
+
+  // ⬇️ DESCARGA
+  const downloadResult = () => {
+    if (!result) return;
+
+    const content = formatResult(result);
+
+    const blob = new Blob([content], {
+      type: "text/plain;charset=utf-8;"
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `educadapt-${type}-${level}.txt`;
+    link.click();
+  };
 
   const resultStyle = {
     background: "#f8fafc",
@@ -229,6 +247,13 @@ export default function Home() {
         </button>
 
         <button
+          onClick={downloadResult}
+          style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}
+        >
+          ⬇️ Descargar resultado
+        </button>
+
+        <button
           onClick={() => {
             setGuidedMode(!guidedMode);
             setCurrentLine(0);
@@ -287,20 +312,12 @@ export default function Home() {
           <div style={resultStyle}>
             {(getLines() || []).map((line, index) => (
               <div
-                id={"line-" + index}
                 key={index}
                 style={{
                   padding: "12px",
                   margin: "6px 0",
                   borderRadius: "8px",
-                  transition: "all 0.3s ease",
-                  background: index === currentLine ? "#dbeafe" : "transparent",
-                  boxShadow:
-                    index === currentLine
-                      ? "0 0 10px rgba(59,130,246,0.5)"
-                      : "none",
-                  fontWeight: index === currentLine ? "600" : "400",
-                  transform: index === currentLine ? "scale(1.02)" : "scale(1)"
+                  background: index === currentLine ? "#dbeafe" : "transparent"
                 }}
               >
                 {line}
