@@ -1,26 +1,14 @@
 export default async function handler(req, res) {
   try {
-    let { text, type, fileUrl } = req.body;
+    const { text, type, level } = req.body;
 
-    // 🔒 VALIDACIÓN
-    if (!text && !fileUrl) {
+    if (!text || text.trim() === "") {
       return res.status(400).json({
-        result: "No hay texto ni archivo"
+        result: "No has introducido texto"
       });
     }
 
-    // 📄 si viene PDF → NO lo procesamos aún (evita romper build)
-    if (!text && fileUrl) {
-      return res.status(400).json({
-        result: "PDF subido correctamente, pero procesamiento en desarrollo"
-      });
-    }
-
-    let prompt = "";
-
-    if (type === "facil") {
-      prompt = `Simplifica este texto:\n\n${text}`;
-    }
+    let prompt = `Adapta este texto para nivel ${level}:\n\n${text}`;
 
     if (type === "tdah") {
       prompt = `Adapta este texto para TDAH:\n\n${text}`;
@@ -53,7 +41,6 @@ export default async function handler(req, res) {
     });
 
   } catch (error) {
-    console.error(error);
     return res.status(500).json({
       result: "Error interno"
     });
