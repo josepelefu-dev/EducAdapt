@@ -1,6 +1,11 @@
 export default async function handler(req, res) {
   try {
     const { text, type, level } = req.body;
+    if (!text) {
+  return res.status(400).json({
+    result: "No has introducido texto"
+  });
+}
 
     let prompt = "";
 
