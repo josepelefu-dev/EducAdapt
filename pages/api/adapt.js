@@ -2,18 +2,26 @@ export default async function handler(req, res) {
   try {
     const { text, type, mode, level, lang } = req.body;
 
+    // 🔒 VALIDACIÓN
     if (!text || text.trim() === "") {
       return res.status(400).json({
         result: "No has introducido texto"
       });
     }
 
-    // 🌍 IDIOMA
+    // 🌍 IDIOMA FORZADO
     let languageInstruction = "";
+
     if (lang === "ca") {
-      languageInstruction = "Respon en català.";
+      languageInstruction = `
+RESPONDE ÚNICAMENTE EN CATALÁN.
+NO uses castellano en ningún caso.
+`;
     } else {
-      languageInstruction = "Responde en castellano.";
+      languageInstruction = `
+RESPONDE ÚNICAMENTE EN CASTELLANO.
+NO uses catalán en ningún caso.
+`;
     }
 
     // 🎯 NIVEL
@@ -67,7 +75,6 @@ ${text}`;
     // 🧑‍🎓 MODO ALUMNO
     else {
 
-      // 🟢 RESUMEN
       if (type === "facil") {
         prompt = `${languageInstruction}
 
@@ -82,7 +89,6 @@ Texto:
 ${text}`;
       }
 
-      // 🟡 TDAH
       if (type === "tdah") {
         prompt = `${languageInstruction}
 
@@ -96,12 +102,12 @@ REGLAS:
 - Destaca palabras clave en MAYÚSCULAS
 
 Devuelve SOLO el resultado.
+SIN introducciones.
 
 Texto:
 ${text}`;
       }
 
-      // 🔵 DISLEXIA
       if (type === "dislexia") {
         prompt = `${languageInstruction}
 
@@ -114,12 +120,12 @@ REGLAS:
 - Muy fácil de leer
 
 Devuelve SOLO el texto.
+SIN introducciones.
 
 Texto:
 ${text}`;
       }
 
-      // 🌳 ESQUEMA
       if (type === "esquema") {
         prompt = `${languageInstruction}
 
@@ -133,6 +139,7 @@ TEMA
  │    ├── DETALLE
 
 Devuelve SOLO el esquema.
+SIN introducciones.
 
 Texto:
 ${text}`;
