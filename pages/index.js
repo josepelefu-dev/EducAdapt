@@ -9,7 +9,7 @@ export default function Home() {
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
-  // 🧠 CARGAR FUENTE DISLEXIA (SIN ROMPER NADA)
+  // 🧠 CARGAR FUENTE DISLEXIA
   useEffect(() => {
     const link = document.createElement("link");
     link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
@@ -68,9 +68,7 @@ export default function Home() {
     try {
       const res = await fetch("/api/adapt", {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json"
-        },
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, type, level, mode, lang })
       });
 
@@ -83,16 +81,42 @@ export default function Home() {
     setLoading(false);
   };
 
+  // 🔧 FORMATO ESQUEMA (FLECHAS)
   const formatResult = (text) => {
     if (!text) return "";
 
     return text
-      .replace(/^- (.*)$/gm, "🔹 $1")
-      .replace(/├──/g, "👉")
-      .replace(/│/g, "");
+      .replace(/^- (.*)$/gm, "• $1")
+      .replace(/├──/g, "↳")
+      .replace(/│/g, " ");
   };
 
-  // 🎨 SOLO AQUÍ APLICAMOS DISLEXIA
+  // 🎨 RESALTADO INTELIGENTE (TDAH / DISLEXIA)
+  const highlightKeywords = (text) => {
+    if (!text) return "";
+
+    return text.replace(/\b[A-ZÁÉÍÓÚÜÑ]{3,}\b/g, (word) => {
+      return `<span style="
+        color:#1d4ed8;
+        font-weight:600;
+        background:#e0f2fe;
+        padding:2px 6px;
+        border-radius:4px;
+      ">${word}</span>`;
+    });
+  };
+
+  const getFinalResult = () => {
+    const formatted = formatResult(result);
+
+    if (type === "tdah" || type === "dislexia") {
+      return highlightKeywords(formatted);
+    }
+
+    return formatted;
+  };
+
+  // 🎨 ESTILO RESULTADO
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
@@ -115,7 +139,6 @@ export default function Home() {
           <h2 style={{ margin: 0 }}>{t.title}</h2>
         </div>
 
-        {/* 🌍 IDIOMAS */}
         <div>
           <button onClick={() => setLang("es")} style={langBtn}>🇪🇸</button>
           <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
@@ -165,9 +188,10 @@ export default function Home() {
         <br /><br />
 
         {result && (
-          <div style={resultStyle}>
-            {formatResult(result)}
-          </div>
+          <div
+            style={resultStyle}
+            dangerouslySetInnerHTML={{ __html: getFinalResult() }}
+          />
         )}
 
       </div>
@@ -180,7 +204,7 @@ export default function Home() {
   );
 }
 
-/* 🎨 ESTILOS (SIN CAMBIOS) */
+/* 🎨 ESTILOS */
 
 const pageStyle = {
   minHeight: "100vh",
