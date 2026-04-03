@@ -91,20 +91,7 @@ export default function Home() {
       .replace(/│/g, " ");
   };
 
-  // 🎨 RESALTADO INTELIGENTE (TDAH / DISLEXIA)
-  const highlightKeywords = (text) => {
-  if (!text) return "";
-
-  return text.replace(/\b\w{6,}\b/g, (word) => {
-    return `<span style="
-      color:#1d4ed8;
-      font-weight:600;
-      background:#e0f2fe;
-      padding:2px 4px;
-      border-radius:4px;
-    ">${word}</span>`;
-  });
-};
+  
 
   const getFinalResult = () => {
     const formatted = formatResult(result);
@@ -187,12 +174,11 @@ export default function Home() {
 
         <br /><br />
 
-        {result && (
-          <div
-            style={resultStyle}
-            dangerouslySetInnerHTML={{ __html: getFinalResult() }}
-          />
-        )}
+{result && (
+  <div style={resultStyle}>
+    {formatResult(result)}
+  </div>
+)}
 
       </div>
 
