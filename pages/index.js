@@ -15,12 +15,19 @@ export default function Home() {
       return;
     }
 
+    // 🔒 límite tamaño archivo
+    if (file && file.size > 4000000) {
+      alert("Archivo demasiado grande (máx 4MB)");
+      return;
+    }
+
     setLoading(true);
 
     let fileData = null;
 
     if (file) {
       const base64 = await toBase64(file);
+
       fileData = {
         data: base64.split(",")[1],
         type: file.type
@@ -70,6 +77,7 @@ export default function Home() {
       {/* CARD */}
       <div style={cardStyle}>
 
+        {/* TEXTAREA */}
         <textarea
           rows="6"
           style={textareaStyle}
@@ -91,7 +99,13 @@ export default function Home() {
           onChange={(e) => setFile(e.target.files[0])}
         />
 
-        <br /><br />
+        <p style={{ fontSize: "12px", color: "#666" }}>
+          {lang === "es"
+            ? "Soporta PDF y TXT (máx 4MB)"
+            : "Suporta PDF i TXT (màx 4MB)"}
+        </p>
+
+        <br />
 
         {/* SELECTORES */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
@@ -132,11 +146,11 @@ export default function Home() {
 
       </div>
 
-      {/* AVISO */}
+      {/* AVISO LEGAL */}
       <p style={legalText}>
         {lang === "es"
-          ? "Esta herramienta no sustituye diagnóstico profesional."
-          : "Aquesta eina no substitueix diagnòstic professional."}
+          ? "Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional."
+          : "Aquesta eina és un suport educatiu basat en IA i no substitueix diagnòstic professional."}
       </p>
 
     </div>
