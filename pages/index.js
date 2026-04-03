@@ -5,7 +5,10 @@ export default function Home() {
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
   const [mode, setMode] = useState("alumno");
+
+  // 🌍 idioma persistente
   const [lang, setLang] = useState("es");
+
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
 
@@ -17,11 +20,21 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
+  // guardar idioma
+  useEffect(() => {
+    const savedLang = localStorage.getItem("lang");
+    if (savedLang) setLang(savedLang);
+  }, []);
+
+  useEffect(() => {
+    localStorage.setItem("lang", lang);
+  }, [lang]);
+
+  // fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
-      link.href =
-        "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
@@ -48,7 +61,8 @@ export default function Home() {
       auto: "Lectura automática",
       stop: "Detener",
       speak: "🔊 Escuchar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      download: "⬇️ Descargar resultado",
     },
     ca: {
       title: "EducAdapt",
@@ -70,7 +84,8 @@ export default function Home() {
       auto: "Lectura automàtica",
       stop: "Aturar",
       speak: "🔊 Escoltar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      download: "⬇️ Descarregar resultat",
     }
   };
 
@@ -149,12 +164,11 @@ export default function Home() {
   };
 
   const stopSpeech = () => {
-    if (typeof window === "undefined") return;
     window.speechSynthesis.cancel();
     setSpeaking(false);
   };
 
-  // 🔁 AUTO
+  // AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -250,7 +264,7 @@ export default function Home() {
           onClick={downloadResult}
           style={{ marginTop: "10px", background: "#0ea5e9", ...mainButton }}
         >
-          ⬇️ Descargar resultado
+          {t.download}
         </button>
 
         <button
@@ -335,7 +349,7 @@ export default function Home() {
   );
 }
 
-/* ESTILOS */
+/* ESTILOS (SIN CAMBIOS) */
 
 const pageStyle = {
   minHeight: "100vh",
