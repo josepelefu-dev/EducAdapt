@@ -9,21 +9,29 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
 
   const handleAdapt = async () => {
-    if (!text) {
+    if (!text.trim()) {
       alert(lang === "es" ? "Introduce texto" : "Introdueix text");
       return;
     }
 
     setLoading(true);
 
-    const res = await fetch("/api/adapt", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ text, type, level }),
-    });
+    try {
+      const res = await fetch("/api/adapt", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({ text, type, level })
+      });
 
-    const data = await res.json();
-    setResult(data.result);
+      const data = await res.json();
+
+      setResult(data.result);
+    } catch (error) {
+      setResult(lang === "es" ? "Error procesando texto" : "Error processant text");
+    }
+
     setLoading(false);
   };
 
@@ -43,13 +51,13 @@ export default function Home() {
         </div>
       </div>
 
-      {/* CARD */}
+      {/* CARD PRINCIPAL */}
       <div style={cardStyle}>
 
         <p style={{ textAlign: "center", color: "#555" }}>
           {lang === "es"
-            ? "Adapta tus apuntes a cualquier necesidad educativa"
-            : "Adapta els teus apunts a qualsevol necessitat educativa"}
+            ? "Adapta tus apuntes a diferentes necesidades educativas"
+            : "Adapta els teus apunts a diferents necessitats educatives"}
         </p>
 
         {/* TEXTAREA */}
@@ -114,11 +122,19 @@ export default function Home() {
         )}
 
       </div>
+
+      {/* AVISO LEGAL */}
+      <p style={legalText}>
+        {lang === "es"
+          ? "Esta herramienta es un apoyo educativo basado en IA y no sustituye diagnóstico profesional."
+          : "Aquesta eina és un suport educatiu basat en IA i no substitueix diagnòstic professional."}
+      </p>
+
     </div>
   );
 }
 
-/* 🎨 ESTILOS PRO */
+/* 🎨 ESTILOS */
 
 const pageStyle = {
   minHeight: "100vh",
@@ -194,4 +210,11 @@ const smallText = {
   color: "#888",
   textAlign: "center",
   marginTop: "10px"
+};
+
+const legalText = {
+  textAlign: "center",
+  fontSize: "12px",
+  marginTop: "20px",
+  opacity: 0.7
 };
