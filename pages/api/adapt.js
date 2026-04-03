@@ -9,50 +9,92 @@ export default async function handler(req, res) {
 
   let prompt = "";
 
+  // 🟢 FÁCIL
   if (type === "facil") {
     prompt = `Simplifica el siguiente texto para un niño de 10 años.
 
-Devuelve SOLO el texto adaptado.
-NO añadas introducciones, explicaciones ni comentarios.
-NO empieces con frases como "Claro" o "Aquí tienes".
-
-Texto:
-${text}`;
-  }
-
-  if (type === "tdah") {
-    prompt = `Reescribe este texto para alguien con TDAH.
-
+REGLAS:
 - Frases cortas
-- Usa listas
-- Destaca lo importante
+- Lenguaje muy sencillo
+- Explicación clara
 
-Devuelve SOLO el resultado final.
-NO añadas introducciones ni comentarios.
+Devuelve SOLO el texto final.
+SIN introducciones ni comentarios.
 
 Texto:
 ${text}`;
   }
 
+  // 🟡 TDAH (MEJORADO PRO)
+  if (type === "tdah") {
+    prompt = `Adapta este texto para una persona con TDAH.
+
+REGLAS OBLIGATORIAS:
+- Usa listas con guiones (-)
+- Máximo 1 idea por línea
+- Frases muy cortas (menos de 10 palabras)
+- Palabras clave en MAYÚSCULAS
+- Elimina lo irrelevante
+
+FORMATO EJEMPLO:
+- IDEA PRINCIPAL
+- detalle corto
+- otra IDEA CLAVE
+
+Devuelve SOLO el contenido final.
+SIN explicaciones ni introducciones.
+
+Texto:
+${text}`;
+  }
+
+  // 🔵 DISLEXIA (FORMATO ESPECIAL)
   if (type === "dislexia") {
     prompt = `Adapta este texto para dislexia.
 
-- Lenguaje simple
-- Frases cortas
-- Estructura clara
+REGLAS OBLIGATORIAS:
+- Frases muy cortas
+- Una idea por línea
+- Lenguaje muy simple
+- Evita palabras difíciles
+- Divide en bloques
 
-Devuelve SOLO el texto adaptado.
-NO añadas frases como "Aquí tienes" ni explicaciones.
+FORMATO:
+Cada frase en una línea nueva.
+
+Ejemplo:
+La célula es una unidad.
+Está en los seres vivos.
+Tiene funciones básicas.
+
+Devuelve SOLO el contenido.
+SIN introducciones.
 
 Texto:
 ${text}`;
   }
 
+  // 🌳 ESQUEMA (MUY VISUAL)
   if (type === "esquema") {
-    prompt = `Convierte este texto en un esquema tipo árbol.
+    prompt = `Convierte este texto en un esquema tipo árbol MUY claro.
+
+FORMATO OBLIGATORIO:
+
+TEMA PRINCIPAL
+ ├── IDEA 1
+ │    ├── detalle
+ │    ├── detalle
+ ├── IDEA 2
+ │    ├── detalle
+
+REGLAS:
+- Jerarquía clara
+- Palabras clave en MAYÚSCULAS
+- Muy organizado
+- Solo contenido importante
 
 Devuelve SOLO el esquema.
-NO añadas introducciones ni explicaciones.
+SIN explicaciones.
 
 Texto:
 ${text}`;
