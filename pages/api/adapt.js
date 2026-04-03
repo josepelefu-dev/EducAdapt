@@ -1,11 +1,34 @@
+import pdf from "pdf-parse";
+
 export default async function handler(req, res) {
   try {
-    const { text, type, level } = req.body;
+    let { text, type, level, file } = req.body;
+
+    // 📄 PROCESAR ARCHIVO SI EXISTE
+    if ((!text || text.trim() === "") && file) {
+      try {
+        const buffer = Buffer.from(file.data, "base64");
+
+        if (file.type === "application/pdf") {
+          const pdfData = await pdf(buffer);
+          text = pdfData.text;
+        }
+
+        if (file.type === "text/plain") {
+          text = buffer.toString("utf-8");
+        }
+
+      } catch (err) {
+        return res.status(500).json({
+          result: "Error leyendo el archivo"
+        });
+      }
+    }
 
     // 🔒 VALIDACIÓN
     if (!text || text.trim() === "") {
       return res.status(400).json({
-        result: "No has introducido texto"
+        result: "No has introducido texto ni archivo válido"
       });
     }
 
@@ -13,19 +36,11 @@ export default async function handler(req, res) {
 
     // 🟢 FÁCIL
     if (type === "facil") {
-      prompt = `Eres un experto en educación.
+      prompt = `Simplifica el siguiente texto para un estudiante de nivel ${level}.
 
-Adapta el siguiente texto para un estudiante de nivel ${level}.
-
-REGLAS:
 - Lenguaje sencillo
 - Frases cortas
 - Explicación clara
-- Mantener el significado original
-
-PROHIBIDO:
-- Añadir explicaciones externas
-- Comentarios innecesarios
 
 Devuelve SOLO el texto adaptado.
 
@@ -33,47 +48,28 @@ Texto:
 ${text}`;
     }
 
-    // 🟡 TDAH (MUY CONTROLADO)
+    // 🟡 TDAH
     if (type === "tdah") {
-      prompt = `Eres un experto en pedagogía especializado en TDAH.
+      prompt = `Adapta este texto para TDAH (nivel ${level}):
 
-Adapta el siguiente contenido para un estudiante con TDAH de nivel ${level}.
+- Frases muy cortas
+- Listas claras
+- Destaca lo importante en MAYÚSCULAS
+- Elimina lo secundario
 
-REGLAS OBLIGATORIAS:
-- Frases muy cortas (máx 12 palabras)
-- Usa listas con viñetas
-- Separa ideas claramente
-- Destaca conceptos clave en MAYÚSCULAS
-- Elimina información secundaria
-- Solo contenido esencial
-
-PROHIBIDO:
-- Explicaciones adicionales
-- Introducciones
-- Comentarios
-
-Devuelve SOLO el contenido final.
+Devuelve SOLO el resultado.
 
 Texto:
 ${text}`;
     }
 
-    // 🔵 DISLEXIA (OPTIMIZADO)
+    // 🔵 DISLEXIA
     if (type === "dislexia") {
-      prompt = `Eres un especialista en dislexia.
+      prompt = `Adapta este texto para dislexia (nivel ${level}):
 
-Adapta el siguiente texto para un estudiante con dislexia de nivel ${level}.
-
-REGLAS:
-- Frases muy cortas
-- Vocabulario sencillo
-- Evitar palabras complejas
+- Frases cortas
+- Lenguaje simple
 - Estructura clara
-- Dividir en bloques pequeños
-
-PROHIBIDO:
-- Añadir información nueva
-- Explicaciones externas
 
 Devuelve SOLO el texto adaptado.
 
@@ -81,21 +77,14 @@ Texto:
 ${text}`;
     }
 
-    // 🌳 ESQUEMA (NUEVO)
+    // 🌳 ESQUEMA
     if (type === "esquema") {
-      prompt = `Convierte el siguiente texto en un esquema tipo árbol para nivel ${level}.
+      prompt = `Convierte este texto en un esquema tipo árbol (nivel ${level}):
 
-FORMATO OBLIGATORIO:
-
-Tema principal
- ├── Idea clave
+Formato:
+Tema
+ ├── Idea
  │    ├── Detalle
- ├── Otra idea
-
-REGLAS:
-- Jerarquía clara
-- Muy organizado
-- Solo contenido esencial
 
 Devuelve SOLO el esquema.
 
@@ -103,7 +92,7 @@ Texto:
 ${text}`;
     }
 
-    // 🧠 PRIMER PROCESADO
+    // 🧠 LLAMADA A OPENAI
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
@@ -120,46 +109,14 @@ ${text}`;
 
     if (!response.ok) {
       return res.status(500).json({
-        result: "Error en IA (verifica API key o saldo)"
+        result: "Error en IA"
       });
     }
 
-    const firstResult = data.choices?.[0]?.message?.content;
-
-    // 🔍 VALIDACIÓN EXTRA
-    if (!firstResult) {
-      return res.status(500).json({
-        result: "Error generando contenido"
-      });
-    }
-
-    // 🧠 SEGUNDO PROCESADO (MEJORA CALIDAD)
-    const secondResponse = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4.1-mini",
-        messages: [{
-          role: "user",
-          content: `Mejora este contenido para que sea más claro, estructurado y pedagógicamente correcto.
-
-NO añadas explicaciones.
-
-Contenido:
-${firstResult}`
-        }]
-      })
-    });
-
-    const secondData = await secondResponse.json();
-
-    const finalResult = secondData.choices?.[0]?.message?.content || firstResult;
+    const result = data.choices?.[0]?.message?.content;
 
     return res.status(200).json({
-      result: finalResult
+      result: result || "Sin resultado"
     });
 
   } catch (error) {
