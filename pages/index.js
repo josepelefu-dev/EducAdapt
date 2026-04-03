@@ -1,5 +1,4 @@
 import { useState, useEffect } from "react";
-import jsPDF from "jspdf";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -20,7 +19,7 @@ export default function Home() {
 
   const [speaking, setSpeaking] = useState(false);
 
-  // idioma persistente
+  // 🌍 idioma persistente
   useEffect(() => {
     const savedLang = localStorage.getItem("lang");
     if (savedLang) setLang(savedLang);
@@ -30,7 +29,7 @@ export default function Home() {
     localStorage.setItem("lang", lang);
   }, [lang]);
 
-  // fuente dislexia
+  // 🧠 fuente dislexia
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
@@ -132,7 +131,7 @@ export default function Home() {
       .filter((l) => l.trim() !== "");
   };
 
-  // VOZ
+  // 🔊 VOZ
   const speakText = () => {
     if (!result || typeof window === "undefined") return;
 
@@ -168,7 +167,7 @@ export default function Home() {
     setSpeaking(false);
   };
 
-  // AUTO
+  // 🔁 AUTO
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -182,7 +181,7 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // TXT
+  // ⬇️ TXT
   const downloadResult = () => {
     if (!result) return;
 
@@ -198,9 +197,11 @@ export default function Home() {
     link.click();
   };
 
-  // PDF PRO
-  const downloadPDF = () => {
+  // 📄 PDF (SIN ERROR)
+  const downloadPDF = async () => {
     if (!result) return;
+
+    const { jsPDF } = await import("jspdf");
 
     const doc = new jsPDF();
 
@@ -214,7 +215,6 @@ export default function Home() {
     doc.text("EducAdapt", margin, 20);
 
     doc.setFontSize(10);
-    doc.setFont("helvetica", "normal");
     doc.text(`Tipo: ${type} | Nivel: ${level}`, margin, 28);
 
     doc.line(margin, 32, 200 - margin, 32);
