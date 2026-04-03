@@ -8,24 +8,17 @@ export default function Home() {
 
   const handleAdapt = async () => {
     setLoading(true);
-
-    try {
-      const res = await fetch("/api/adapt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, type }),
-      });
-
-      const data = await res.json();
-      setResult(data.result);
-    } catch (error) {
-      setResult("Error procesando");
-    }
-
+    const res = await fetch("/api/adapt", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ text, type }),
+    });
+    const data = await res.json();
+    setResult(data.result);
     setLoading(false);
   };
 
-  // 🔧 FORMATO ESQUEMA (SIN 👉)
+  // 🔧 FORMATO ESQUEMA (CAMBIO 1)
   const formatResult = (text) => {
     if (!text) return "";
 
@@ -35,7 +28,7 @@ export default function Home() {
       .replace(/│/g, " ");
   };
 
-  // 🎨 COLORES PARA PALABRAS CLAVE
+  // 🎨 COLORES PALABRAS CLAVE (CAMBIO 2)
   const highlightKeywords = (text) => {
     if (!text) return "";
 
@@ -44,7 +37,7 @@ export default function Home() {
     });
   };
 
-  // 🎯 RESULTADO FINAL SEGÚN TIPO
+  // 🎯 RESULTADO FINAL (CAMBIO 3)
   const getFinalResult = () => {
     const formatted = formatResult(result);
 
@@ -56,13 +49,12 @@ export default function Home() {
   };
 
   return (
-    <div style={{ padding: 40, fontFamily: "Arial", background: "#0f172a", color: "white", minHeight: "100vh" }}>
-
-      <h1>EducAdapt 🧠</h1>
+    <div style={{ padding: 40, fontFamily: "Arial" }}>
+      <h1>Adaptador de Apuntes 🧠</h1>
 
       <textarea
         rows="10"
-        style={{ width: "100%", padding: "15px", borderRadius: "10px" }}
+        cols="60"
         placeholder="Pega aquí tus apuntes..."
         value={text}
         onChange={(e) => setText(e.target.value)}
@@ -70,8 +62,8 @@ export default function Home() {
 
       <br /><br />
 
-      <select value={type} onChange={(e) => setType(e.target.value)} style={{ padding: "10px", borderRadius: "8px" }}>
-        <option value="facil">Resumen</option>
+      <select value={type} onChange={(e) => setType(e.target.value)}>
+        <option value="facil">Fácil</option>
         <option value="tdah">TDAH</option>
         <option value="dislexia">Dislexia</option>
         <option value="esquema">Esquema</option>
@@ -79,35 +71,17 @@ export default function Home() {
 
       <br /><br />
 
-      <button
-        onClick={handleAdapt}
-        style={{
-          padding: "12px 20px",
-          borderRadius: "10px",
-          border: "none",
-          background: "#6366f1",
-          color: "white",
-          cursor: "pointer"
-        }}
-      >
-        {loading ? "Procesando..." : "Adaptar"}
+      <button onClick={handleAdapt}>
+        {loading ? "Adaptando..." : "Adaptar"}
       </button>
 
-      <h2 style={{ marginTop: 30 }}>Resultado:</h2>
+      <h2>Resultado:</h2>
 
+      {/* 🔥 SOLO CAMBIO AQUÍ */}
       <div
-        style={{
-          whiteSpace: "pre-wrap",
-          marginTop: 20,
-          padding: "20px",
-          borderRadius: "10px",
-          background: "#f8fafc",
-          color: "black",
-          lineHeight: "1.8"
-        }}
+        style={{ whiteSpace: "pre-wrap", marginTop: 20 }}
         dangerouslySetInnerHTML={{ __html: getFinalResult() }}
       />
-
     </div>
   );
 }
