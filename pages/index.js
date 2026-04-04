@@ -18,6 +18,11 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
+  // 🧠 QUIZ STATES (NUEVO)
+  const [quiz, setQuiz] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [answers, setAnswers] = useState({});
+
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -29,13 +34,13 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ IMPORTAR SOLO TXT (ESTABLE)
+  // 📂 SOLO TXT (estable)
   const handleFileUpload = (file) => {
     if (!file) return;
 
-    const extension = file.name.split(".").pop().toLowerCase();
+    const ext = file.name.split(".").pop().toLowerCase();
 
-    if (extension !== "txt") {
+    if (ext !== "txt") {
       alert("Solo se permite .txt por ahora");
       return;
     }
@@ -45,37 +50,43 @@ export default function Home() {
     reader.readAsText(file);
   };
 
-  // 🧠 ESQUEMA INTELIGENTE
-  const generateSmartSchema = (text) => {
-    const lines = text.split("\n").filter(l => l.trim() !== "");
+  // 🧠 GENERAR QUIZ (NUEVO)
+  const generateQuiz = () => {
+    if (!result) return;
 
-    let result = "";
-    let currentTitle = "";
+    const lines = result.split("\n").filter(l => l.length > 20);
 
-    lines.forEach(line => {
-      const t = line.trim();
+    const questions = lines.slice(0, 5).map((line) => {
+      let correct = line.slice(0, 80);
 
-      // Título (mayúsculas o corto)
-      if (
-        t.length < 60 &&
-        (t === t.toUpperCase() || t.endsWith(":"))
-      ) {
-        currentTitle = t.replace(":", "");
-        result += `\n📌 ${currentTitle}\n`;
-      }
+      // adaptar según tipo
+      if (type === "dislexia") correct = correct.slice(0, 50);
+      if (type === "tdah") correct = correct.slice(0, 60);
 
-      // Subidea
-      else if (t.length < 120) {
-        result += `  ↳ ${t}\n`;
-      }
+      const options = [
+        correct,
+        "No es correcto",
+        "Opción incorrecta",
+        "Respuesta errónea"
+      ].sort(() => Math.random() - 0.5);
 
-      // Detalle
-      else {
-        result += `    • ${t}\n`;
-      }
+      return {
+        question: "¿Qué afirma este texto?",
+        options,
+        correct
+      };
     });
 
-    return result;
+    setQuiz(questions);
+    setShowQuiz(true);
+    setAnswers({});
+  };
+
+  const handleAnswer = (qIndex, option) => {
+    setAnswers(prev => ({
+      ...prev,
+      [qIndex]: option
+    }));
   };
 
   const translations = {
@@ -102,7 +113,8 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      quiz: "🧠 Generar preguntas"
     },
     ca: {
       title: "EducAdapt",
@@ -127,12 +139,14 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      quiz: "🧠 Generar preguntes"
     }
   };
 
   const t = translations[lang];
 
+  // ⚠️ NO TOCAR
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
@@ -149,17 +163,8 @@ export default function Home() {
       });
 
       const data = await res.json();
-
-      let finalResult = data.result || "";
-
-      // 🧠 aplicar esquema inteligente
-      if (type === "esquema") {
-        finalResult = generateSmartSchema(finalResult);
-      }
-
-      setResult(finalResult);
+      setResult(data.result || "");
       setCurrentLine(0);
-
     } catch {
       setResult("Error procesando");
     }
@@ -331,6 +336,13 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
+        {/* 🧠 BOTÓN QUIZ */}
+        {result && (
+          <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
+            {t.quiz}
+          </button>
+        )}
+
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
         </button>
@@ -339,41 +351,45 @@ export default function Home() {
           {guidedMode ? t.normal : t.guided}
         </button>
 
-        {guidedMode && (
-          <div>
-            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
-              {autoPlay ? t.stop : t.auto}
-            </button>
-
-            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
-              {t.speak}
-            </button>
-
-            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              ⏸ Pausa
-            </button>
-
-            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              {t.resume}
-            </button>
-
-            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              {t.stopSpeak}
-            </button>
-
-            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
-          </div>
-        )}
-
         <br /><br />
 
         {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
 
-        {guidedMode && result && (
-          <div style={resultStyle}>
-            {getLines().map((line, i) => (
-              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
-                {line}
+        {/* 🧠 QUIZ UI */}
+        {showQuiz && (
+          <div style={{ marginTop: "30px" }}>
+            {quiz.map((q, i) => (
+              <div key={i} style={{
+                background: "white",
+                padding: "20px",
+                borderRadius: "12px",
+                marginBottom: "15px"
+              }}>
+                <p><strong>{q.question}</strong></p>
+
+                {q.options.map((opt, j) => {
+                  const isSelected = answers[i] === opt;
+                  const isCorrect = opt === q.correct;
+
+                  return (
+                    <div
+                      key={j}
+                      onClick={() => handleAnswer(i, opt)}
+                      style={{
+                        padding: "10px",
+                        marginTop: "5px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        background:
+                          isSelected
+                            ? isCorrect ? "#bbf7d0" : "#fecaca"
+                            : "#f1f5f9"
+                      }}
+                    >
+                      {opt}
+                    </div>
+                  );
+                })}
               </div>
             ))}
           </div>
