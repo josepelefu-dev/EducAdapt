@@ -29,38 +29,20 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ IMPORTAR ARCHIVOS
-  const handleFileUpload = async (file) => {
+  // ✅ IMPORTAR TXT (ESTABLE)
+  const handleFileUpload = (file) => {
     if (!file) return;
 
     const extension = file.name.split(".").pop().toLowerCase();
 
-    // TXT
-    if (extension === "txt") {
-      const reader = new FileReader();
-      reader.onload = (e) => setText(e.target.result);
-      reader.readAsText(file);
+    if (extension !== "txt") {
+      alert("Solo se permiten archivos .txt por ahora");
+      return;
     }
 
-    // DOCX (simple)
-    else if (extension === "docx") {
-      const arrayBuffer = await file.arrayBuffer();
-      const mammoth = await import("mammoth");
-      const result = await mammoth.extractRawText({ arrayBuffer });
-      setText(result.value);
-    }
-
-    // DOC (muy limitado)
-    else if (extension === "doc") {
-      alert("Los archivos .doc pueden no funcionar correctamente. Usa .docx mejor.");
-      const reader = new FileReader();
-      reader.onload = (e) => setText(e.target.result);
-      reader.readAsText(file);
-    }
-
-    else {
-      alert("Formato no soportado");
-    }
+    const reader = new FileReader();
+    reader.onload = (e) => setText(e.target.result);
+    reader.readAsText(file);
   };
 
   const translations = {
@@ -87,8 +69,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF",
-      import: "📂 Importar archivo"
+      pdf: "📄 Exportar PDF"
     },
     ca: {
       title: "EducAdapt",
@@ -113,8 +94,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF",
-      import: "📂 Importar fitxer"
+      pdf: "📄 Exportar PDF"
     }
   };
 
@@ -279,10 +259,9 @@ export default function Home() {
 
         <br /><br />
 
-        {/* IMPORTAR */}
         <input
           type="file"
-          accept=".txt,.doc,.docx"
+          accept=".txt"
           onChange={(e) => handleFileUpload(e.target.files[0])}
         />
 
