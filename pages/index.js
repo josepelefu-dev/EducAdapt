@@ -193,7 +193,21 @@ export default function Home() {
       setCurrentLine(index);
 
       const utterance = new SpeechSynthesisUtterance(lines[index]);
-      utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
+
+const voices = window.speechSynthesis.getVoices();
+
+// buscar voz catalana o española
+const voice = voices.find(v =>
+  lang === "ca"
+    ? v.lang.toLowerCase().includes("ca")
+    : v.lang.toLowerCase().includes("es")
+);
+
+if (voice) {
+  utterance.voice = voice;
+} else {
+  utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
+}
 
       utterance.onend = () => {
         if (!paused) {
