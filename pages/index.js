@@ -14,7 +14,9 @@ export default function Home() {
 
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
+
   const [speaking, setSpeaking] = useState(false);
+  const [paused, setPaused] = useState(false);
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -114,11 +116,12 @@ export default function Home() {
       .filter(l => l.trim() !== "");
   };
 
-  const speakText = () => {
+  // 🔊 START DESDE DONDE QUIERAS
+  const speakText = (startIndex = currentLine) => {
     if (!result || typeof window === "undefined") return;
 
     const lines = getLines();
-    let index = 0;
+    let index = startIndex;
 
     const speakLine = () => {
       if (index >= lines.length) {
@@ -132,16 +135,31 @@ export default function Home() {
       utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
 
       utterance.onend = () => {
-        index++;
-        speakLine();
+        if (!paused) {
+          index++;
+          speakLine();
+        }
       };
 
       window.speechSynthesis.speak(utterance);
     };
 
     window.speechSynthesis.cancel();
+    setPaused(false);
     setSpeaking(true);
     speakLine();
+  };
+
+  const pauseSpeech = () => {
+    if (typeof window === "undefined") return;
+    window.speechSynthesis.pause();
+    setPaused(true);
+  };
+
+  const resumeSpeech = () => {
+    if (typeof window === "undefined") return;
+    window.speechSynthesis.resume();
+    setPaused(false);
   };
 
   const stopSpeech = () => {
@@ -149,6 +167,7 @@ export default function Home() {
       window.speechSynthesis.cancel();
     }
     setSpeaking(false);
+    setPaused(false);
   };
 
   useEffect(() => {
@@ -193,7 +212,6 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
-
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
@@ -259,8 +277,16 @@ export default function Home() {
               {autoPlay ? t.stop : t.auto}
             </button>
 
-            <button onClick={speakText} style={{ marginTop: "10px", ...mainButton }}>
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
               {t.speak}
+            </button>
+
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
+
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ▶ Reanudar
             </button>
 
             <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
@@ -290,13 +316,12 @@ export default function Home() {
             {getLines().map((line, i) => (
               <div
                 key={i}
+                onClick={() => speakText(i)}
                 style={{
                   padding: "8px",
                   margin: "4px 0",
                   borderRadius: "6px",
-                  transition: "all 0.3s ease",
-
-                  // 🔥 EFECTO FOCO
+                  cursor: "pointer",
                   opacity: i === currentLine ? 1 : 0.4,
                   background: i === currentLine ? "#dbeafe" : "transparent",
                   fontWeight: i === currentLine ? "600" : "400"
