@@ -18,7 +18,7 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // 🧠 QUIZ
+  // 🧠 QUIZ (NUEVO)
   const [quiz, setQuiz] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -34,7 +34,7 @@ export default function Home() {
     }
   }, []);
 
-  // 🧠 QUIZ INTELIGENTE (SIN IA)
+  // 🧠 QUIZ INTELIGENTE (MEJORADO)
   const generateQuiz = () => {
     if (!result) return;
 
@@ -47,7 +47,7 @@ export default function Home() {
       );
 
     if (lines.length < 2) {
-      alert("No hay suficientes definiciones claras para generar preguntas");
+      alert("No hay suficiente contenido claro para generar preguntas");
       return;
     }
 
@@ -121,7 +121,6 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF",
       quiz: "🧠 Generar preguntas"
     },
     ca: {
@@ -147,13 +146,13 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF",
       quiz: "🧠 Generar preguntes"
     }
   };
 
   const t = translations[lang];
 
+  // ⚠️ NO TOCAR
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
@@ -256,26 +255,42 @@ export default function Home() {
     link.click();
   };
 
-  const exportPDF = () => {
-    const win = window.open("", "_blank");
-    win.document.write(`<pre>${formatResult(result)}</pre>`);
-    win.document.close();
-    win.print();
-  };
+  useEffect(() => {
+    if (!autoPlay || !guidedMode) return;
+
+    const interval = setInterval(() => {
+      setCurrentLine(prev => {
+        const lines = getLines();
+        return prev < lines.length - 1 ? prev + 1 : prev;
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [autoPlay, speed, guidedMode, result]);
 
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: "1.6",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
+    letterSpacing: type === "dislexia" ? "1px" : "normal",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     color: "#111827"
   };
 
   return (
     <div style={pageStyle}>
       <div style={headerStyle}>
-        <h2>{t.title}</h2>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <img src="/logo.jpg" style={{ width: "50px" }} />
+          <h2>{t.title}</h2>
+        </div>
+
+        <div>
+          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
+          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+        </div>
       </div>
 
       <div style={cardStyle}>
@@ -283,20 +298,58 @@ export default function Home() {
 
         <br /><br />
 
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
 
+        {/* QUIZ */}
         {result && (
           <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
             {t.quiz}
           </button>
         )}
 
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
         <br /><br />
 
-        {result && <div style={resultStyle}>{formatResult(result)}</div>}
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
 
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* QUIZ UI */}
         {showQuiz && (
           <div style={{ marginTop: "30px" }}>
             {quiz.map((q, i) => (
@@ -338,12 +391,22 @@ export default function Home() {
         )}
 
       </div>
+
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
+            {t.download}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
-const pageStyle = { padding: "20px" };
-const headerStyle = { marginBottom: "20px" };
-const cardStyle = { background: "white", padding: "30px", borderRadius: "20px" };
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
 const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
 const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
