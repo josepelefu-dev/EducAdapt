@@ -50,7 +50,9 @@ export default function Home() {
       auto: "Lectura automática",
       stop: "Detener",
       speak: "🔊 Escuchar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      resume: "▶ Reanudar",
+      download: "⬇️ Descargar resultado"
     },
     ca: {
       title: "EducAdapt",
@@ -72,7 +74,9 @@ export default function Home() {
       auto: "Lectura automàtica",
       stop: "Aturar",
       speak: "🔊 Escoltar",
-      stopSpeak: "⏹ Parar"
+      stopSpeak: "⏹ Parar",
+      resume: "▶ Reprendre",
+      download: "⬇️ Descarregar resultat"
     }
   };
 
@@ -174,6 +178,20 @@ export default function Home() {
     setPaused(false);
   };
 
+  // 🆕 DESCARGA (solo añadido)
+  const downloadResult = () => {
+    if (!result) return;
+
+    const blob = new Blob([formatResult(result)], {
+      type: "text/plain;charset=utf-8;"
+    });
+
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "educadapt.txt";
+    link.click();
+  };
+
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -213,37 +231,9 @@ export default function Home() {
       </div>
 
       <div style={cardStyle}>
-        <textarea
-          rows="8"
-          style={textareaStyle}
-          placeholder={t.placeholder}
-          value={text}
-          onChange={(e) => setText(e.target.value)}
-        />
+        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
 
         <br /><br />
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
-            <option value="facil">{t.resumen}</option>
-            <option value="tdah">{t.tdah}</option>
-            <option value="dislexia">{t.dislexia}</option>
-            <option value="esquema">{t.esquema}</option>
-          </select>
-
-          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
-            <option value="basico">{t.basico}</option>
-            <option value="intermedio">{t.intermedio}</option>
-            <option value="avanzado">{t.avanzado}</option>
-          </select>
-
-          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
-            <option value="alumno">{t.alumno}</option>
-            <option value="profesor">{t.profesor}</option>
-          </select>
-        </div>
-
-        <br />
 
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
@@ -274,7 +264,7 @@ export default function Home() {
             </button>
 
             <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              ▶ Reanudar
+              {t.resume}
             </button>
 
             <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
@@ -322,6 +312,25 @@ export default function Home() {
           </div>
         )}
       </div>
+
+      {/* 🆕 BOTÓN FUERA (no interfiere) */}
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button
+            onClick={downloadResult}
+            style={{
+              padding: "15px",
+              background: "#0ea5e9",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer"
+            }}
+          >
+            {t.download}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
