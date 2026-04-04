@@ -49,20 +49,16 @@ export default function Home() {
   const generateSmartSchema = (text) => {
     const lines = text.split("\n").filter(l => l.trim() !== "");
     let result = "";
-    let currentTitle = "";
-
     lines.forEach(line => {
       const t = line.trim();
       if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
-        currentTitle = t.replace(":", "");
-        result += `\n📌 ${currentTitle}\n`;
+        result += `\n📌 ${t.replace(":", "")}\n`;
       } else if (t.length < 120) {
         result += `  ↳ ${t}\n`;
       } else {
         result += `    • ${t}\n`;
       }
     });
-
     return result;
   };
 
@@ -171,6 +167,7 @@ export default function Home() {
 
     const speakLine = () => {
       if (index >= lines.length) return;
+
       setCurrentLine(index);
 
       const utterance = new SpeechSynthesisUtterance(lines[index]);
@@ -222,7 +219,7 @@ export default function Home() {
     win.print();
   };
 
-  // 🧠 QUIZ BUENO
+  // 🧠 QUIZ (estable)
   const generateQuiz = () => {
     if (!result) return;
 
@@ -248,31 +245,69 @@ export default function Home() {
     setAnswers(prev => ({ ...prev, [qIndex]: option }));
   };
 
+  useEffect(() => {
+    if (!autoPlay || !guidedMode) return;
+
+    const interval = setInterval(() => {
+      setCurrentLine(prev => {
+        const lines = getLines();
+        return prev < lines.length - 1 ? prev + 1 : prev;
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [autoPlay, speed, guidedMode, result]);
+
+  const resultStyle = {
+    background: "#f8fafc",
+    padding: "20px",
+    borderRadius: "12px",
+    whiteSpace: "pre-wrap",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
+    letterSpacing: type === "dislexia" ? "1px" : "normal",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
+    color: "#111827"
+  };
+
   return (
     <div style={pageStyle}>
-      {/* TODO TU JSX ORIGINAL intacto */}
-      {/* SOLO añade este botón */}
-      {result && (
-        <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
-          {t.quiz}
-        </button>
-      )}
+      <div style={headerStyle}>
+        <h2>{t.title}</h2>
+      </div>
 
-      {/* QUIZ AL FINAL */}
-      {showQuiz && (
-        <div style={{ marginTop: "30px" }}>
-          {quiz.map((q, i) => (
-            <div key={i} style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "15px" }}>
-              <p><strong>{q.question}</strong></p>
-              {q.options.map((opt, j) => (
-                <div key={j} onClick={() => handleAnswer(i, opt)} style={{ padding: "10px", marginTop: "5px", cursor: "pointer", background: "#f1f5f9" }}>
-                  {opt}
-                </div>
-              ))}
-            </div>
-          ))}
-        </div>
-      )}
+      <div style={cardStyle}>
+        <textarea rows="8" style={textareaStyle} value={text} onChange={(e) => setText(e.target.value)} />
+
+        <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
+
+        <button onClick={handleAdapt}>{t.adapt}</button>
+
+        {result && (
+          <button onClick={generateQuiz}>{t.quiz}</button>
+        )}
+
+        {result && <div style={resultStyle}>{formatResult(result)}</div>}
+
+        {showQuiz && (
+          <div>
+            {quiz.map((q, i) => (
+              <div key={i}>
+                <p>{q.question}</p>
+                {q.options.map((opt, j) => (
+                  <div key={j} onClick={() => handleAnswer(i, opt)}>
+                    {opt}
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px" };
