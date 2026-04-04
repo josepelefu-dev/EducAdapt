@@ -18,7 +18,7 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // QUIZ
+  // 🧠 QUIZ (NUEVO)
   const [quiz, setQuiz] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -118,6 +118,8 @@ export default function Home() {
     if (!text) return "";
     return text
       .replace(/^- (.*)$/gm, "• $1")
+      .replace(/├──/g, "↳")
+      .replace(/│/g, " ")
       .replace(/\. /g, ".\n\n");
   };
 
@@ -134,7 +136,10 @@ export default function Home() {
     let index = startIndex;
 
     const speakLine = () => {
-      if (index >= lines.length) return;
+      if (index >= lines.length) {
+        setSpeaking(false);
+        return;
+      }
 
       setCurrentLine(index);
 
@@ -149,6 +154,13 @@ export default function Home() {
       };
 
       window.speechSynthesis.speak(utterance);
+
+      setTimeout(() => {
+        lineRefs.current[index]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 200);
     };
 
     window.speechSynthesis.cancel();
@@ -186,42 +198,24 @@ export default function Home() {
     link.click();
   };
 
-  // 🧠 QUIZ PRO SIN IA
+  // 🧠 QUIZ (mejor posible sin IA)
   const generateQuiz = () => {
     if (!result) return;
 
-    const lines = result
-      .split("\n")
-      .map(l => l.trim())
-      .filter(l =>
-        l.length > 30 &&
-        (l.includes(" es ") || l.includes(" fue ") || l.includes(" son "))
-      );
-
-    if (lines.length < 2) {
-      alert("No hay suficientes definiciones claras");
-      return;
-    }
+    const lines = result.split("\n").filter(l => l.length > 30);
 
     const questions = lines.slice(0, 5).map((line, i) => {
-      const [concept, ...rest] = line.split(" es ");
-      const definition = rest.join(" es ");
+      const correct = line;
 
-      const conceptClean = concept.replace(/[•\-]/g, "").trim();
+      const others = lines.filter((_, idx) => idx !== i);
 
-      const otherDefs = lines
-        .filter((_, idx) => idx !== i)
-        .map(l => l.split(" es ")[1])
-        .filter(Boolean);
-
-      const fakeOptions = otherDefs
-        .sort(() => Math.random() - 0.5)
-        .slice(0, 3);
+      const options = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)]
+        .sort(() => Math.random() - 0.5);
 
       return {
-        question: `¿Qué es ${conceptClean}?`,
-        options: [definition, ...fakeOptions].sort(() => Math.random() - 0.5),
-        correct: definition
+        question: "Selecciona la afirmación correcta:",
+        options,
+        correct
       };
     });
 
@@ -237,66 +231,148 @@ export default function Home() {
     }));
   };
 
+  useEffect(() => {
+    if (!autoPlay || !guidedMode) return;
+
+    const interval = setInterval(() => {
+      setCurrentLine(prev => {
+        const lines = getLines();
+        return prev < lines.length - 1 ? prev + 1 : prev;
+      });
+    }, speed);
+
+    return () => clearInterval(interval);
+  }, [autoPlay, speed, guidedMode, result]);
+
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
+    letterSpacing: type === "dislexia" ? "1px" : "normal",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     color: "#111827"
   };
 
   return (
-    <div style={{ padding: "20px" }}>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} />
+    <div style={pageStyle}>
+      <div style={headerStyle}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <img src="/logo.jpg" style={{ width: "50px" }} />
+          <h2>{t.title}</h2>
+        </div>
 
-      <br /><br />
+        <div>
+          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
+          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+        </div>
+      </div>
 
-      <button onClick={handleAdapt}>
-        {loading ? "Procesando..." : "Adaptar"}
-      </button>
+      <div style={cardStyle}>
+        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
 
-      {result && (
-        <button onClick={generateQuiz}>
-          🧠 Generar preguntas
+        <br /><br />
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
+        <button onClick={handleAdapt} style={mainButton}>
+          {loading ? t.loading : t.adapt}
         </button>
-      )}
 
-      <br /><br />
+        {/* QUIZ */}
+        {result && (
+          <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
+            {t.quiz}
+          </button>
+        )}
 
-      {result && <div style={resultStyle}>{formatResult(result)}</div>}
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
 
-      {showQuiz && (
-        <div style={{ marginTop: "30px" }}>
-          {quiz.map((q, i) => (
-            <div key={i} style={{ marginBottom: "15px", color: "#111" }}>
-              <p><strong>{q.question}</strong></p>
+        <br /><br />
 
-              {q.options.map((opt, j) => {
-                const isSelected = answers[i] === opt;
-                const isCorrect = opt === q.correct;
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
 
-                return (
-                  <div
-                    key={j}
-                    onClick={() => handleAnswer(i, opt)}
-                    style={{
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+
+        {/* QUIZ UI */}
+        {showQuiz && (
+          <div style={{ marginTop: "30px" }}>
+            {quiz.map((q, i) => (
+              <div key={i} style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "15px", color: "#111827" }}>
+                <p><strong>{q.question}</strong></p>
+
+                {q.options.map((opt, j) => {
+                  const isSelected = answers[i] === opt;
+                  const isCorrect = opt === q.correct;
+
+                  return (
+                    <div key={j} onClick={() => handleAnswer(i, opt)} style={{
                       padding: "10px",
                       marginTop: "5px",
+                      borderRadius: "8px",
                       cursor: "pointer",
                       background:
                         isSelected
                           ? isCorrect ? "#bbf7d0" : "#fecaca"
-                          : "#eee"
-                    }}
-                  >
-                    {opt}
-                  </div>
-                );
-              })}
-            </div>
-          ))}
+                          : "#f1f5f9"
+                    }}>
+                      {opt}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+
+      </div>
+
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
+            {t.download}
+          </button>
         </div>
       )}
     </div>
   );
 }
+
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
