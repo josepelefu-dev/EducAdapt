@@ -178,7 +178,6 @@ export default function Home() {
     setPaused(false);
   };
 
-  // 🆕 DESCARGA (solo añadido)
   const downloadResult = () => {
     if (!result) return;
 
@@ -235,17 +234,34 @@ export default function Home() {
 
         <br /><br />
 
+        {/* ✅ RESTAURADO */}
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
 
-        <button
-          onClick={() => {
-            setGuidedMode(!guidedMode);
-            setCurrentLine(0);
-          }}
-          style={{ marginTop: "10px", ...mainButton }}
-        >
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
           {guidedMode ? t.normal : t.guided}
         </button>
 
@@ -271,41 +287,18 @@ export default function Home() {
               {t.stopSpeak}
             </button>
 
-            <input
-              type="range"
-              min="1000"
-              max="5000"
-              step="500"
-              value={speed}
-              onChange={(e) => setSpeed(Number(e.target.value))}
-              style={{ width: "100%", marginTop: "10px" }}
-            />
+            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
           </div>
         )}
 
         <br /><br />
 
-        {!guidedMode && result && (
-          <div style={resultStyle}>{formatResult(result)}</div>
-        )}
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
 
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
-              <div
-                key={i}
-                ref={el => lineRefs.current[i] = el}
-                onClick={() => speakText(i)}
-                style={{
-                  padding: "8px",
-                  margin: "4px 0",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  opacity: i === currentLine ? 1 : 0.4,
-                  background: i === currentLine ? "#dbeafe" : "transparent",
-                  fontWeight: i === currentLine ? "600" : "400"
-                }}
-              >
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
                 {line}
               </div>
             ))}
@@ -313,20 +306,10 @@ export default function Home() {
         )}
       </div>
 
-      {/* 🆕 BOTÓN FUERA (no interfiere) */}
+      {/* ✅ BOTÓN FUERA */}
       {result && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <button
-            onClick={downloadResult}
-            style={{
-              padding: "15px",
-              background: "#0ea5e9",
-              color: "white",
-              border: "none",
-              borderRadius: "12px",
-              cursor: "pointer"
-            }}
-          >
+          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
             {t.download}
           </button>
         </div>
