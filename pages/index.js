@@ -20,8 +20,23 @@ export default function Home() {
 
   const lineRefs = useRef([]);
 
+  // ✅ CARGAR DATOS DESDE URL
   useEffect(() => {
     if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+
+      const urlText = params.get("text");
+      const urlType = params.get("type");
+      const urlLevel = params.get("level");
+      const urlMode = params.get("mode");
+      const urlLang = params.get("lang");
+
+      if (urlText) setText(decodeURIComponent(urlText));
+      if (urlType) setType(urlType);
+      if (urlLevel) setLevel(urlLevel);
+      if (urlMode) setMode(urlMode);
+      if (urlLang) setLang(urlLang);
+
       const link = document.createElement("link");
       link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
@@ -53,7 +68,9 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      share: "🔗 Compartir enlace",
+      copied: "Enlace copiado!"
     },
     ca: {
       title: "EducAdapt",
@@ -78,7 +95,9 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      share: "🔗 Compartir enllaç",
+      copied: "Enllaç copiat!"
     }
   };
 
@@ -193,6 +212,16 @@ export default function Home() {
     link.click();
   };
 
+  // ✅ COMPARTIR ENLACE
+  const shareLink = () => {
+    const base = window.location.origin;
+
+    const url = `${base}?text=${encodeURIComponent(text)}&type=${type}&level=${level}&mode=${mode}&lang=${lang}`;
+
+    navigator.clipboard.writeText(url);
+    alert(t.copied);
+  };
+
   const exportPDF = () => {
     const win = window.open("", "_blank");
     win.document.write(`<pre>${formatResult(result)}</pre>`);
@@ -271,6 +300,10 @@ export default function Home() {
 
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
+        </button>
+
+        <button onClick={shareLink} style={{ marginTop: "10px", ...mainButton }}>
+          {t.share}
         </button>
 
         <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
