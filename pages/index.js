@@ -18,6 +18,9 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
+  // 🆕 HISTORIAL
+  const [history, setHistory] = useState([]);
+
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -26,6 +29,10 @@ export default function Home() {
       link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
+
+      // cargar historial
+      const saved = localStorage.getItem("educadapt_history");
+      if (saved) setHistory(JSON.parse(saved));
     }
   }, []);
 
@@ -52,7 +59,10 @@ export default function Home() {
       speak: "🔊 Escuchar",
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
-      download: "⬇️ Descargar resultado"
+      download: "⬇️ Descargar resultado",
+      history: "📚 Historial",
+      save: "💾 Guardar en historial",
+      pdf: "📄 Exportar PDF"
     },
     ca: {
       title: "EducAdapt",
@@ -76,7 +86,10 @@ export default function Home() {
       speak: "🔊 Escoltar",
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
-      download: "⬇️ Descarregar resultat"
+      download: "⬇️ Descarregar resultat",
+      history: "📚 Historial",
+      save: "💾 Guardar al historial",
+      pdf: "📄 Exportar PDF"
     }
   };
 
@@ -191,6 +204,29 @@ export default function Home() {
     link.click();
   };
 
+  // 🆕 GUARDAR EN HISTORIAL
+  const saveToHistory = () => {
+    if (!result) return;
+
+    const newEntry = {
+      text,
+      result,
+      date: new Date().toISOString()
+    };
+
+    const updated = [newEntry, ...history];
+    setHistory(updated);
+    localStorage.setItem("educadapt_history", JSON.stringify(updated));
+  };
+
+  // 🆕 EXPORTAR PDF
+  const exportPDF = () => {
+    const win = window.open("", "_blank");
+    win.document.write(`<pre>${formatResult(result)}</pre>`);
+    win.document.close();
+    win.print();
+  };
+
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -217,6 +253,19 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
+
+      {/* HISTORIAL */}
+      {history.length > 0 && (
+        <div style={{ maxWidth: "900px", margin: "auto", marginBottom: "20px", background: "white", padding: "15px", borderRadius: "12px" }}>
+          <h3>{t.history}</h3>
+          {history.slice(0, 5).map((item, i) => (
+            <div key={i} onClick={() => { setText(item.text); setResult(item.result); }} style={{ cursor: "pointer", padding: "8px", borderBottom: "1px solid #ddd" }}>
+              {item.text.slice(0, 60)}...
+            </div>
+          ))}
+        </div>
+      )}
+
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
@@ -234,7 +283,6 @@ export default function Home() {
 
         <br /><br />
 
-        {/* ✅ RESTAURADO */}
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">{t.resumen}</option>
@@ -259,6 +307,15 @@ export default function Home() {
 
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
+        </button>
+
+        {/* BOTONES NUEVOS */}
+        <button onClick={saveToHistory} style={{ marginTop: "10px", ...mainButton }}>
+          {t.save}
+        </button>
+
+        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
+          {t.pdf}
         </button>
 
         <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
@@ -306,7 +363,6 @@ export default function Home() {
         )}
       </div>
 
-      {/* ✅ BOTÓN FUERA */}
       {result && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
           <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
@@ -318,7 +374,6 @@ export default function Home() {
   );
 }
 
-/* estilos */
 const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
 const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
 const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
