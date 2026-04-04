@@ -18,7 +18,7 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // 🧠 QUIZ
+  // QUIZ
   const [quiz, setQuiz] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -118,8 +118,6 @@ export default function Home() {
     if (!text) return "";
     return text
       .replace(/^- (.*)$/gm, "• $1")
-      .replace(/├──/g, "↳")
-      .replace(/│/g, " ")
       .replace(/\. /g, ".\n\n");
   };
 
@@ -136,10 +134,7 @@ export default function Home() {
     let index = startIndex;
 
     const speakLine = () => {
-      if (index >= lines.length) {
-        setSpeaking(false);
-        return;
-      }
+      if (index >= lines.length) return;
 
       setCurrentLine(index);
 
@@ -191,25 +186,42 @@ export default function Home() {
     link.click();
   };
 
-  // 🧠 QUIZ BUENO (SIN IA)
+  // 🧠 QUIZ PRO SIN IA
   const generateQuiz = () => {
     if (!result) return;
 
-    const lines = result.split("\n").filter(l => l.length > 30);
+    const lines = result
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l =>
+        l.length > 30 &&
+        (l.includes(" es ") || l.includes(" fue ") || l.includes(" son "))
+      );
+
+    if (lines.length < 2) {
+      alert("No hay suficientes definiciones claras");
+      return;
+    }
 
     const questions = lines.slice(0, 5).map((line, i) => {
-      const correct = line;
+      const [concept, ...rest] = line.split(" es ");
+      const definition = rest.join(" es ");
 
-      const others = lines.filter((_, idx) => idx !== i);
+      const conceptClean = concept.replace(/[•\-]/g, "").trim();
 
-      const fakeOptions = others
-        .sort(() => 0.5 - Math.random())
+      const otherDefs = lines
+        .filter((_, idx) => idx !== i)
+        .map(l => l.split(" es ")[1])
+        .filter(Boolean);
+
+      const fakeOptions = otherDefs
+        .sort(() => Math.random() - 0.5)
         .slice(0, 3);
 
       return {
-        question: "Selecciona la afirmación correcta:",
-        options: [correct, ...fakeOptions].sort(() => Math.random() - 0.5),
-        correct
+        question: `¿Qué es ${conceptClean}?`,
+        options: [definition, ...fakeOptions].sort(() => Math.random() - 0.5),
+        correct: definition
       };
     });
 
@@ -224,19 +236,6 @@ export default function Home() {
       [qIndex]: option
     }));
   };
-
-  useEffect(() => {
-    if (!autoPlay || !guidedMode) return;
-
-    const interval = setInterval(() => {
-      setCurrentLine(prev => {
-        const lines = getLines();
-        return prev < lines.length - 1 ? prev + 1 : prev;
-      });
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [autoPlay, speed, guidedMode, result]);
 
   const resultStyle = {
     background: "#f8fafc",
@@ -272,20 +271,28 @@ export default function Home() {
             <div key={i} style={{ marginBottom: "15px", color: "#111" }}>
               <p><strong>{q.question}</strong></p>
 
-              {q.options.map((opt, j) => (
-                <div
-                  key={j}
-                  onClick={() => handleAnswer(i, opt)}
-                  style={{
-                    padding: "10px",
-                    marginTop: "5px",
-                    cursor: "pointer",
-                    background: "#eee"
-                  }}
-                >
-                  {opt}
-                </div>
-              ))}
+              {q.options.map((opt, j) => {
+                const isSelected = answers[i] === opt;
+                const isCorrect = opt === q.correct;
+
+                return (
+                  <div
+                    key={j}
+                    onClick={() => handleAnswer(i, opt)}
+                    style={{
+                      padding: "10px",
+                      marginTop: "5px",
+                      cursor: "pointer",
+                      background:
+                        isSelected
+                          ? isCorrect ? "#bbf7d0" : "#fecaca"
+                          : "#eee"
+                    }}
+                  >
+                    {opt}
+                  </div>
+                );
+              })}
             </div>
           ))}
         </div>
