@@ -164,16 +164,16 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
-  // 🔥 MEJORA DE LECTURA AQUÍ
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
 
+    // 🔥 AJUSTE FINO
     lineHeight:
-      type === "dislexia" ? "1.2" :
-      type === "tdah" ? "1.5" :
+      type === "dislexia" ? "1.3" : // 👉 puedes probar 1.25 o 1.35
+      type === "tdah" ? "1.65" :
       "1.6",
 
     letterSpacing:
