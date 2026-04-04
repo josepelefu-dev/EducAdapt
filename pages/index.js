@@ -170,9 +170,8 @@ export default function Home() {
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
 
-    // 🔥 AJUSTE FINO
     lineHeight:
-      type === "dislexia" ? "1.3" : // 👉 puedes probar 1.25 o 1.35
+      type === "dislexia" ? "1.3" :
       type === "tdah" ? "1.65" :
       "1.6",
 
@@ -289,7 +288,20 @@ export default function Home() {
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
-              <div key={i} style={{ background: i === currentLine ? "#dbeafe" : "transparent" }}>
+              <div
+                key={i}
+                style={{
+                  padding: "8px",
+                  margin: "4px 0",
+                  borderRadius: "6px",
+                  transition: "all 0.3s ease",
+
+                  // 🔥 EFECTO FOCO
+                  opacity: i === currentLine ? 1 : 0.4,
+                  background: i === currentLine ? "#dbeafe" : "transparent",
+                  fontWeight: i === currentLine ? "600" : "400"
+                }}
+              >
                 {line}
               </div>
             ))}
