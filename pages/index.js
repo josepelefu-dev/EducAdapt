@@ -29,13 +29,13 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ IMPORTAR ARCHIVOS (VERSIÓN SEGURA)
-  const handleFileUpload = async (file) => {
+  // ✅ IMPORTAR ARCHIVOS (VERSIÓN FINAL FUNCIONAL)
+  const handleFileUpload = (file) => {
     if (!file) return;
 
     const extension = file.name.split(".").pop().toLowerCase();
 
-    // TXT (igual que antes)
+    // TXT
     if (extension === "txt") {
       const reader = new FileReader();
       reader.onload = (e) => setText(e.target.result);
@@ -43,29 +43,31 @@ export default function Home() {
       return;
     }
 
-    // DOCX (SIN ROMPER BUILD)
+    // DOCX (VERSIÓN QUE FUNCIONA)
     if (extension === "docx") {
-      try {
-        const arrayBuffer = await file.arrayBuffer();
+      const reader = new FileReader();
 
-        // 👇 IMPORT DINÁMICO SOLO EN CLIENTE
-        const mammoth = (await import("mammoth")).default;
+      reader.onload = async (e) => {
+        try {
+          const arrayBuffer = e.target.result;
 
-        const result = await mammoth.extractRawText({ arrayBuffer });
-        setText(result.value);
-      } catch (err) {
-        console.error(err);
-        alert("Error leyendo el archivo .docx");
-      }
+          const mammoth = (await import("mammoth")).default;
+
+          const result = await mammoth.extractRawText({ arrayBuffer });
+          setText(result.value || "No se pudo leer el contenido");
+        } catch (err) {
+          console.error(err);
+          alert("Error leyendo el archivo DOCX");
+        }
+      };
+
+      reader.readAsArrayBuffer(file);
       return;
     }
 
-    // DOC (limitado)
+    // DOC (no fiable)
     if (extension === "doc") {
-      alert("Los archivos .doc pueden no funcionar correctamente. Usa .docx mejor.");
-      const reader = new FileReader();
-      reader.onload = (e) => setText(e.target.result);
-      reader.readAsText(file);
+      alert("Los archivos .doc no son compatibles. Usa .docx o .txt.");
       return;
     }
 
