@@ -18,6 +18,11 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
+  // 🧠 QUIZ (NUEVO)
+  const [quiz, setQuiz] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [answers, setAnswers] = useState({});
+
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -55,7 +60,6 @@ export default function Home() {
     lines.forEach(line => {
       const t = line.trim();
 
-      // Título (mayúsculas o corto)
       if (
         t.length < 60 &&
         (t === t.toUpperCase() || t.endsWith(":"))
@@ -63,13 +67,9 @@ export default function Home() {
         currentTitle = t.replace(":", "");
         result += `\n📌 ${currentTitle}\n`;
       }
-
-      // Subidea
       else if (t.length < 120) {
         result += `  ↳ ${t}\n`;
       }
-
-      // Detalle
       else {
         result += `    • ${t}\n`;
       }
@@ -102,7 +102,8 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      quiz: "🧠 Generar quiz"
     },
     ca: {
       title: "EducAdapt",
@@ -127,7 +128,8 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      quiz: "🧠 Generar quiz"
     }
   };
 
@@ -152,7 +154,6 @@ export default function Home() {
 
       let finalResult = data.result || "";
 
-      // 🧠 aplicar esquema inteligente
       if (type === "esquema") {
         finalResult = generateSmartSchema(finalResult);
       }
@@ -258,6 +259,39 @@ export default function Home() {
     win.print();
   };
 
+  // 🧠 QUIZ PRO
+  const generateQuiz = () => {
+    if (!result) return;
+
+    const lines = result
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l => l.length > 40 && !l.startsWith("📌"));
+
+    const questions = lines.slice(0, 5).map((line, i) => {
+      const correct = line;
+
+      const distractors = lines
+        .filter((_, idx) => idx !== i)
+        .sort(() => Math.random() - 0.5)
+        .slice(0, 3);
+
+      return {
+        question: "Selecciona la opción correcta:",
+        options: [correct, ...distractors].sort(() => Math.random() - 0.5),
+        correct
+      };
+    });
+
+    setQuiz(questions);
+    setShowQuiz(true);
+    setAnswers({});
+  };
+
+  const handleAnswer = (qIndex, option) => {
+    setAnswers(prev => ({ ...prev, [qIndex]: option }));
+  };
+
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -331,6 +365,13 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
+        {/* QUIZ BUTTON */}
+        {result && (
+          <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
+            {t.quiz}
+          </button>
+        )}
+
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
         </button>
@@ -378,6 +419,42 @@ export default function Home() {
             ))}
           </div>
         )}
+
+        {/* QUIZ UI */}
+        {showQuiz && (
+          <div style={{ marginTop: "30px" }}>
+            {quiz.map((q, i) => (
+              <div key={i} style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "15px" }}>
+                <p><strong>{q.question}</strong></p>
+
+                {q.options.map((opt, j) => {
+                  const isSelected = answers[i] === opt;
+                  const isCorrect = opt === q.correct;
+
+                  return (
+                    <div
+                      key={j}
+                      onClick={() => handleAnswer(i, opt)}
+                      style={{
+                        padding: "10px",
+                        marginTop: "5px",
+                        borderRadius: "8px",
+                        cursor: "pointer",
+                        background:
+                          isSelected
+                            ? isCorrect ? "#bbf7d0" : "#fecaca"
+                            : "#f1f5f9"
+                      }}
+                    >
+                      {opt}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+        )}
+
       </div>
 
       {result && (
