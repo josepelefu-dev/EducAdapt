@@ -97,7 +97,8 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      file: "Seleccionar archivo .txt"
     },
     ca: {
       title: "EducAdapt",
@@ -122,7 +123,8 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF"
+      pdf: "📄 Exportar PDF",
+      file: "Seleccionar fitxer .txt"
     }
   };
 
@@ -295,7 +297,18 @@ export default function Home() {
 
         <br /><br />
 
-        <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
+        {/* NUEVO LABEL */}
+        <div>
+          <label style={{ color: "#111827", fontWeight: "600" }}>
+            {t.file}
+          </label>
+          <input 
+            type="file" 
+            accept=".txt" 
+            onChange={(e) => handleFileUpload(e.target.files[0])} 
+            style={{ marginTop: "5px" }}
+          />
+        </div>
 
         <br /><br />
 
