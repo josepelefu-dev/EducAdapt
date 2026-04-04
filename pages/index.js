@@ -18,11 +18,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // 🧠 QUIZ (NUEVO)
-  const [quiz, setQuiz] = useState([]);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [answers, setAnswers] = useState({});
-
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -33,6 +28,55 @@ export default function Home() {
       document.head.appendChild(link);
     }
   }, []);
+
+  // ✅ IMPORTAR SOLO TXT (ESTABLE)
+  const handleFileUpload = (file) => {
+    if (!file) return;
+
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    if (extension !== "txt") {
+      alert("Solo se permite .txt por ahora");
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = (e) => setText(e.target.result);
+    reader.readAsText(file);
+  };
+
+  // 🧠 ESQUEMA INTELIGENTE
+  const generateSmartSchema = (text) => {
+    const lines = text.split("\n").filter(l => l.trim() !== "");
+
+    let result = "";
+    let currentTitle = "";
+
+    lines.forEach(line => {
+      const t = line.trim();
+
+      // Título (mayúsculas o corto)
+      if (
+        t.length < 60 &&
+        (t === t.toUpperCase() || t.endsWith(":"))
+      ) {
+        currentTitle = t.replace(":", "");
+        result += `\n📌 ${currentTitle}\n`;
+      }
+
+      // Subidea
+      else if (t.length < 120) {
+        result += `  ↳ ${t}\n`;
+      }
+
+      // Detalle
+      else {
+        result += `    • ${t}\n`;
+      }
+    });
+
+    return result;
+  };
 
   const translations = {
     es: {
@@ -58,7 +102,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      quiz: "🧠 Generar preguntas"
+      pdf: "📄 Exportar PDF"
     },
     ca: {
       title: "EducAdapt",
@@ -83,7 +127,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      quiz: "🧠 Generar preguntes"
+      pdf: "📄 Exportar PDF"
     }
   };
 
@@ -105,8 +149,17 @@ export default function Home() {
       });
 
       const data = await res.json();
-      setResult(data.result || "");
+
+      let finalResult = data.result || "";
+
+      // 🧠 aplicar esquema inteligente
+      if (type === "esquema") {
+        finalResult = generateSmartSchema(finalResult);
+      }
+
+      setResult(finalResult);
       setCurrentLine(0);
+
     } catch {
       setResult("Error procesando");
     }
@@ -198,37 +251,11 @@ export default function Home() {
     link.click();
   };
 
-  // 🧠 QUIZ (mejor posible sin IA)
-  const generateQuiz = () => {
-    if (!result) return;
-
-    const lines = result.split("\n").filter(l => l.length > 30);
-
-    const questions = lines.slice(0, 5).map((line, i) => {
-      const correct = line;
-
-      const others = lines.filter((_, idx) => idx !== i);
-
-      const options = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)]
-        .sort(() => Math.random() - 0.5);
-
-      return {
-        question: "Selecciona la afirmación correcta:",
-        options,
-        correct
-      };
-    });
-
-    setQuiz(questions);
-    setShowQuiz(true);
-    setAnswers({});
-  };
-
-  const handleAnswer = (qIndex, option) => {
-    setAnswers(prev => ({
-      ...prev,
-      [qIndex]: option
-    }));
+  const exportPDF = () => {
+    const win = window.open("", "_blank");
+    win.document.write(`<pre>${formatResult(result)}</pre>`);
+    win.document.close();
+    win.print();
   };
 
   useEffect(() => {
@@ -274,6 +301,10 @@ export default function Home() {
 
         <br /><br />
 
+        <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
+
+        <br /><br />
+
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">{t.resumen}</option>
@@ -300,79 +331,31 @@ export default function Home() {
           {loading ? t.loading : t.adapt}
         </button>
 
-        {/* QUIZ */}
-        {result && (
-          <button onClick={generateQuiz} style={{ marginTop: "10px", ...mainButton }}>
-            {t.quiz}
-          </button>
-        )}
+        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
+          {t.pdf}
+        </button>
 
         <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
           {guidedMode ? t.normal : t.guided}
         </button>
 
-        <br /><br />
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
 
-        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
 
-        {guidedMode && result && (
-          <div style={resultStyle}>
-            {getLines().map((line, i) => (
-              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
-                {line}
-              </div>
-            ))}
-          </div>
-        )}
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
 
-        {/* QUIZ UI */}
-        {showQuiz && (
-          <div style={{ marginTop: "30px" }}>
-            {quiz.map((q, i) => (
-              <div key={i} style={{ background: "white", padding: "20px", borderRadius: "12px", marginBottom: "15px", color: "#111827" }}>
-                <p><strong>{q.question}</strong></p>
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.resume}
+            </button>
 
-                {q.options.map((opt, j) => {
-                  const isSelected = answers[i] === opt;
-                  const isCorrect = opt === q.correct;
-
-                  return (
-                    <div key={j} onClick={() => handleAnswer(i, opt)} style={{
-                      padding: "10px",
-                      marginTop: "5px",
-                      borderRadius: "8px",
-                      cursor: "pointer",
-                      background:
-                        isSelected
-                          ? isCorrect ? "#bbf7d0" : "#fecaca"
-                          : "#f1f5f9"
-                    }}>
-                      {opt}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </div>
-        )}
-
-      </div>
-
-      {result && (
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
-            {t.download}
-          </button>
-        </div>
-      )}
-    </div>
-  );
-}
-
-const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
-const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
-const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
-const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
-const selectStyle = { padding: "10px", borderRadius: "8px" };
-const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
-const langBtn = { margin: "5px" };
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+       
