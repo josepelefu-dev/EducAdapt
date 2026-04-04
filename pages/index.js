@@ -18,7 +18,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // 🧠 NUEVO QUIZ (aislado)
   const [quiz, setQuiz] = useState([]);
   const [showQuiz, setShowQuiz] = useState(false);
   const [answers, setAnswers] = useState({});
@@ -34,24 +33,36 @@ export default function Home() {
     }
   }, []);
 
-  // 🧠 GENERAR QUIZ (NO TOCA NADA EXISTENTE)
   const generateQuiz = () => {
     if (!result) return;
 
-    const lines = result.split("\n").filter(l => l.length > 20);
+    const lines = result
+      .split("\n")
+      .map(l => l.trim())
+      .filter(l => l.length > 20);
 
-    const questions = lines.slice(0, 5).map((line) => {
-      let correct = line.slice(0, 80);
+    if (lines.length < 4) {
+      alert("Texto demasiado corto para generar preguntas");
+      return;
+    }
 
-      if (type === "dislexia") correct = correct.slice(0, 50);
-      if (type === "tdah") correct = correct.slice(0, 60);
+    const questions = lines.slice(0, 5).map((line, index) => {
+      let correct = line;
 
-      const options = [
-        correct,
-        "No es correcto",
-        "Opción incorrecta",
-        "Respuesta errónea"
-      ].sort(() => Math.random() - 0.5);
+      if (type === "dislexia") correct = correct.slice(0, 60);
+      if (type === "tdah") correct = correct.slice(0, 80);
+
+      const otherLines = lines.filter((_, i) => i !== index);
+      const shuffled = otherLines.sort(() => 0.5 - Math.random());
+
+      const fakeOptions = shuffled.slice(0, 3).map(l => {
+        if (type === "dislexia") return l.slice(0, 60);
+        if (type === "tdah") return l.slice(0, 80);
+        return l.slice(0, 100);
+      });
+
+      const options = [correct, ...fakeOptions]
+        .sort(() => Math.random() - 0.5);
 
       return {
         question: "¿Qué afirma este texto?",
@@ -129,7 +140,6 @@ export default function Home() {
 
   const t = translations[lang];
 
-  // ⚠️ NO TOCAR
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
@@ -347,7 +357,6 @@ export default function Home() {
           </div>
         )}
 
-        {/* 🧠 QUIZ */}
         {showQuiz && (
           <div style={{ marginTop: "30px" }}>
             {quiz.map((q, i) => (
