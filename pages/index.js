@@ -29,6 +29,7 @@ export default function Home() {
     }
   }, []);
 
+  // ✅ IMPORTAR SOLO TXT (ESTABLE)
   const handleFileUpload = (file) => {
     if (!file) return;
 
@@ -44,19 +45,32 @@ export default function Home() {
     reader.readAsText(file);
   };
 
+  // 🧠 ESQUEMA INTELIGENTE
   const generateSmartSchema = (text) => {
     const lines = text.split("\n").filter(l => l.trim() !== "");
 
     let result = "";
+    let currentTitle = "";
 
     lines.forEach(line => {
       const t = line.trim();
 
-      if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
-        result += `\n📌 ${t.replace(":", "")}\n`;
-      } else if (t.length < 120) {
+      // Título (mayúsculas o corto)
+      if (
+        t.length < 60 &&
+        (t === t.toUpperCase() || t.endsWith(":"))
+      ) {
+        currentTitle = t.replace(":", "");
+        result += `\n📌 ${currentTitle}\n`;
+      }
+
+      // Subidea
+      else if (t.length < 120) {
         result += `  ↳ ${t}\n`;
-      } else {
+      }
+
+      // Detalle
+      else {
         result += `    • ${t}\n`;
       }
     });
@@ -138,6 +152,7 @@ export default function Home() {
 
       let finalResult = data.result || "";
 
+      // 🧠 aplicar esquema inteligente
       if (type === "esquema") {
         finalResult = generateSmartSchema(finalResult);
       }
@@ -156,6 +171,8 @@ export default function Home() {
     if (!text) return "";
     return text
       .replace(/^- (.*)$/gm, "• $1")
+      .replace(/├──/g, "↳")
+      .replace(/│/g, " ")
       .replace(/\. /g, ".\n\n");
   };
 
@@ -172,7 +189,10 @@ export default function Home() {
     let index = startIndex;
 
     const speakLine = () => {
-      if (index >= lines.length) return;
+      if (index >= lines.length) {
+        setSpeaking(false);
+        return;
+      }
 
       setCurrentLine(index);
 
@@ -187,6 +207,13 @@ export default function Home() {
       };
 
       window.speechSynthesis.speak(utterance);
+
+      setTimeout(() => {
+        lineRefs.current[index]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 200);
     };
 
     window.speechSynthesis.cancel();
@@ -212,7 +239,12 @@ export default function Home() {
   };
 
   const downloadResult = () => {
-    const blob = new Blob([formatResult(result)], { type: "text/plain" });
+    if (!result) return;
+
+    const blob = new Blob([formatResult(result)], {
+      type: "text/plain;charset=utf-8;"
+    });
+
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
     link.download = "educadapt.txt";
@@ -222,6 +254,7 @@ export default function Home() {
   const exportPDF = () => {
     const win = window.open("", "_blank");
     win.document.write(`<pre>${formatResult(result)}</pre>`);
+    win.document.close();
     win.print();
   };
 
@@ -252,29 +285,116 @@ export default function Home() {
   return (
     <div style={pageStyle}>
       <div style={headerStyle}>
-        <h2>{t.title}</h2>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <img src="/logo.jpg" style={{ width: "50px" }} />
+          <h2>{t.title}</h2>
+        </div>
+
+        <div>
+          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
+          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+        </div>
       </div>
 
       <div style={cardStyle}>
-        <textarea rows="8" style={textareaStyle} value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+
+        <br /><br />
 
         <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
 
-        <button onClick={handleAdapt}>{t.adapt}</button>
+        <br /><br />
 
-        <button onClick={exportPDF}>{t.pdf}</button>
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
 
-        <button onClick={() => setGuidedMode(!guidedMode)}>
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
+        <button onClick={handleAdapt} style={mainButton}>
+          {loading ? t.loading : t.adapt}
+        </button>
+
+        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
+          {t.pdf}
+        </button>
+
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
           {guidedMode ? t.normal : t.guided}
         </button>
 
-        {result && <div style={resultStyle}>{formatResult(result)}</div>}
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
+
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
+
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.resume}
+            </button>
+
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.stopSpeak}
+            </button>
+
+            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
+          </div>
+        )}
+
+        <br /><br />
+
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
+
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
+
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
+            {t.download}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
 
 const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
-const headerStyle = { maxWidth: "900px", margin: "auto" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
 const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
-const textareaStyle = { width: "100%", padding: "15px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
