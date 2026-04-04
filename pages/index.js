@@ -172,9 +172,9 @@ export default function Home() {
     whiteSpace: "pre-wrap",
 
     lineHeight:
-      type === "dislexia" ? "1.35" :
+      type === "dislexia" ? "1.2" :
       type === "tdah" ? "1.5" :
-      "1.5",
+      "1.6",
 
     letterSpacing:
       type === "dislexia" ? "0.8px" :
