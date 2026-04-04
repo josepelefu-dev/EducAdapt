@@ -18,11 +18,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // 🧠 QUIZ
-  const [quiz, setQuiz] = useState([]);
-  const [showQuiz, setShowQuiz] = useState(false);
-  const [answers, setAnswers] = useState({});
-
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -36,11 +31,14 @@ export default function Home() {
 
   const handleFileUpload = (file) => {
     if (!file) return;
+
     const extension = file.name.split(".").pop().toLowerCase();
+
     if (extension !== "txt") {
       alert("Solo se permite .txt por ahora");
       return;
     }
+
     const reader = new FileReader();
     reader.onload = (e) => setText(e.target.result);
     reader.readAsText(file);
@@ -48,9 +46,12 @@ export default function Home() {
 
   const generateSmartSchema = (text) => {
     const lines = text.split("\n").filter(l => l.trim() !== "");
+
     let result = "";
+
     lines.forEach(line => {
       const t = line.trim();
+
       if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
         result += `\n📌 ${t.replace(":", "")}\n`;
       } else if (t.length < 120) {
@@ -59,6 +60,7 @@ export default function Home() {
         result += `    • ${t}\n`;
       }
     });
+
     return result;
   };
 
@@ -86,8 +88,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF",
-      quiz: "🧠 Generar preguntas"
+      pdf: "📄 Exportar PDF"
     },
     ca: {
       title: "EducAdapt",
@@ -112,8 +113,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF",
-      quiz: "🧠 Generar preguntes"
+      pdf: "📄 Exportar PDF"
     }
   };
 
@@ -135,6 +135,7 @@ export default function Home() {
       });
 
       const data = await res.json();
+
       let finalResult = data.result || "";
 
       if (type === "esquema") {
@@ -143,6 +144,7 @@ export default function Home() {
 
       setResult(finalResult);
       setCurrentLine(0);
+
     } catch {
       setResult("Error procesando");
     }
@@ -152,11 +154,15 @@ export default function Home() {
 
   const formatResult = (text) => {
     if (!text) return "";
-    return text.replace(/^- (.*)$/gm, "• $1").replace(/\. /g, ".\n\n");
+    return text
+      .replace(/^- (.*)$/gm, "• $1")
+      .replace(/\. /g, ".\n\n");
   };
 
   const getLines = () => {
-    return formatResult(result).split("\n").filter(l => l.trim() !== "");
+    return formatResult(result)
+      .split("\n")
+      .filter(l => l.trim() !== "");
   };
 
   const speakText = (startIndex = currentLine) => {
@@ -219,32 +225,6 @@ export default function Home() {
     win.print();
   };
 
-  // 🧠 QUIZ (estable)
-  const generateQuiz = () => {
-    if (!result) return;
-
-    const lines = result.split("\n").filter(l => l.length > 30);
-
-    const questions = lines.slice(0, 5).map((line, i) => {
-      const correct = line;
-      const others = lines.filter((_, idx) => idx !== i);
-
-      return {
-        question: "Selecciona la afirmación correcta:",
-        options: [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)],
-        correct
-      };
-    });
-
-    setQuiz(questions);
-    setShowQuiz(true);
-    setAnswers({});
-  };
-
-  const handleAnswer = (qIndex, option) => {
-    setAnswers(prev => ({ ...prev, [qIndex]: option }));
-  };
-
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -282,26 +262,13 @@ export default function Home() {
 
         <button onClick={handleAdapt}>{t.adapt}</button>
 
-        {result && (
-          <button onClick={generateQuiz}>{t.quiz}</button>
-        )}
+        <button onClick={exportPDF}>{t.pdf}</button>
+
+        <button onClick={() => setGuidedMode(!guidedMode)}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
 
         {result && <div style={resultStyle}>{formatResult(result)}</div>}
-
-        {showQuiz && (
-          <div>
-            {quiz.map((q, i) => (
-              <div key={i}>
-                <p>{q.question}</p>
-                {q.options.map((opt, j) => (
-                  <div key={j} onClick={() => handleAnswer(i, opt)}>
-                    {opt}
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
       </div>
     </div>
   );
