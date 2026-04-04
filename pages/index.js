@@ -29,20 +29,47 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ IMPORTAR TXT (ESTABLE)
-  const handleFileUpload = (file) => {
+  // ✅ IMPORTAR ARCHIVOS (VERSIÓN SEGURA)
+  const handleFileUpload = async (file) => {
     if (!file) return;
 
     const extension = file.name.split(".").pop().toLowerCase();
 
-    if (extension !== "txt") {
-      alert("Solo se permiten archivos .txt por ahora");
+    // TXT (igual que antes)
+    if (extension === "txt") {
+      const reader = new FileReader();
+      reader.onload = (e) => setText(e.target.result);
+      reader.readAsText(file);
       return;
     }
 
-    const reader = new FileReader();
-    reader.onload = (e) => setText(e.target.result);
-    reader.readAsText(file);
+    // DOCX (SIN ROMPER BUILD)
+    if (extension === "docx") {
+      try {
+        const arrayBuffer = await file.arrayBuffer();
+
+        // 👇 IMPORT DINÁMICO SOLO EN CLIENTE
+        const mammoth = (await import("mammoth")).default;
+
+        const result = await mammoth.extractRawText({ arrayBuffer });
+        setText(result.value);
+      } catch (err) {
+        console.error(err);
+        alert("Error leyendo el archivo .docx");
+      }
+      return;
+    }
+
+    // DOC (limitado)
+    if (extension === "doc") {
+      alert("Los archivos .doc pueden no funcionar correctamente. Usa .docx mejor.");
+      const reader = new FileReader();
+      reader.onload = (e) => setText(e.target.result);
+      reader.readAsText(file);
+      return;
+    }
+
+    alert("Formato no soportado");
   };
 
   const translations = {
@@ -261,7 +288,7 @@ export default function Home() {
 
         <input
           type="file"
-          accept=".txt"
+          accept=".txt,.doc,.docx"
           onChange={(e) => handleFileUpload(e.target.files[0])}
         />
 
