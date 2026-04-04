@@ -181,6 +181,16 @@ export default function Home() {
   const speakText = (startIndex = currentLine) => {
     if (!result || typeof window === "undefined") return;
 
+    const voices = window.speechSynthesis.getVoices();
+
+    const hasCatalan = voices.some(v =>
+      v.lang.toLowerCase().includes("ca")
+    );
+
+    if (lang === "ca" && !hasCatalan) {
+      alert("⚠️ Tu dispositivo no tiene voz catalana. Prueba con Edge o Safari.");
+    }
+
     const lines = getLines();
     let index = startIndex;
 
@@ -193,21 +203,7 @@ export default function Home() {
       setCurrentLine(index);
 
       const utterance = new SpeechSynthesisUtterance(lines[index]);
-
-const voices = window.speechSynthesis.getVoices();
-
-// buscar voz catalana o española
-const voice = voices.find(v =>
-  lang === "ca"
-    ? v.lang.toLowerCase().includes("ca")
-    : v.lang.toLowerCase().includes("es")
-);
-
-if (voice) {
-  utterance.voice = voice;
-} else {
-  utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
-}
+      utterance.lang = lang === "ca" ? "ca-ES" : "es-ES";
 
       utterance.onend = () => {
         if (!paused) {
@@ -311,7 +307,6 @@ if (voice) {
 
         <br /><br />
 
-        {/* NUEVO LABEL */}
         <div>
           <label style={{ color: "#111827", fontWeight: "600" }}>
             {t.file}
