@@ -29,45 +29,64 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ IMPORTAR ARCHIVOS (VERSIÓN FINAL FUNCIONAL)
-  const handleFileUpload = (file) => {
+  // ✅ DETECTAR TÍTULOS
+  const detectTitles = (text) => {
+    return text
+      .split("\n")
+      .map(line => {
+        const t = line.trim();
+        if (t.length > 5 && t.length < 60 && t === t.toUpperCase()) {
+          return `\n📌 ${t}\n`;
+        }
+        return line;
+      })
+      .join("\n");
+  };
+
+  // ✅ IMPORTAR ARCHIVOS (TXT + DOCX BACKEND)
+  const handleFileUpload = async (file) => {
     if (!file) return;
 
-    const extension = file.name.split(".").pop().toLowerCase();
+    const ext = file.name.split(".").pop().toLowerCase();
 
     // TXT
-    if (extension === "txt") {
+    if (ext === "txt") {
       const reader = new FileReader();
-      reader.onload = (e) => setText(e.target.result);
+      reader.onload = (e) => {
+        setText(detectTitles(e.target.result));
+      };
       reader.readAsText(file);
       return;
     }
 
-    // DOCX (VERSIÓN QUE FUNCIONA)
-    if (extension === "docx") {
-      const reader = new FileReader();
+    // DOCX → BACKEND
+    if (ext === "docx") {
+      try {
+        const formData = new FormData();
+        formData.append("file", file);
 
-      reader.onload = async (e) => {
-        try {
-          const arrayBuffer = e.target.result;
+        const res = await fetch("/api/parse-doc", {
+          method: "POST",
+          body: formData
+        });
 
-          const mammoth = (await import("mammoth")).default;
+        const data = await res.json();
 
-          const result = await mammoth.extractRawText({ arrayBuffer });
-          setText(result.value || "No se pudo leer el contenido");
-        } catch (err) {
-          console.error(err);
-          alert("Error leyendo el archivo DOCX");
-        }
-      };
+        if (!data.text) throw new Error();
 
-      reader.readAsArrayBuffer(file);
+        setText(detectTitles(data.text));
+
+      } catch (err) {
+        console.error(err);
+        alert("Error leyendo el archivo DOCX");
+      }
+
       return;
     }
 
-    // DOC (no fiable)
-    if (extension === "doc") {
-      alert("Los archivos .doc no son compatibles. Usa .docx o .txt.");
+    // DOC
+    if (ext === "doc") {
+      alert("Formato .doc no soportado. Usa .docx");
       return;
     }
 
@@ -129,6 +148,7 @@ export default function Home() {
 
   const t = translations[lang];
 
+  // ⚠️ NO TOCAR
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
@@ -288,11 +308,7 @@ export default function Home() {
 
         <br /><br />
 
-        <input
-          type="file"
-          accept=".txt,.doc,.docx"
-          onChange={(e) => handleFileUpload(e.target.files[0])}
-        />
+        <input type="file" accept=".txt,.doc,.docx" onChange={(e) => handleFileUpload(e.target.files[0])} />
 
         <br /><br />
 
