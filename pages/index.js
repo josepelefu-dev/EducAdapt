@@ -164,12 +164,28 @@ export default function Home() {
     return () => clearInterval(interval);
   }, [autoPlay, speed, guidedMode, result]);
 
+  // 🔥 MEJORA DE LECTURA AQUÍ
   const resultStyle = {
     background: "#f8fafc",
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" ? "1.4" : type === "tdah" ? "1.45" : "1.6",
+
+    lineHeight:
+      type === "dislexia" ? "1.6" :
+      type === "tdah" ? "1.65" :
+      "1.6",
+
+    letterSpacing:
+      type === "dislexia" ? "0.8px" :
+      type === "tdah" ? "0.5px" :
+      "normal",
+
+    wordSpacing:
+      type === "dislexia" ? "3px" :
+      type === "tdah" ? "2px" :
+      "normal",
+
     border: "1px solid #e2e8f0",
     fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     fontSize: "17px",
@@ -178,9 +194,6 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
-
-      {/* TEST */}
-      <h1 style={{ color: "red" }}>TEST NUEVO</h1>
 
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
