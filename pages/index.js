@@ -29,68 +29,53 @@ export default function Home() {
     }
   }, []);
 
-  // ✅ DETECTAR TÍTULOS
-  const detectTitles = (text) => {
-    return text
-      .split("\n")
-      .map(line => {
-        const t = line.trim();
-        if (t.length > 5 && t.length < 60 && t === t.toUpperCase()) {
-          return `\n📌 ${t}\n`;
-        }
-        return line;
-      })
-      .join("\n");
-  };
-
-  // ✅ IMPORTAR ARCHIVOS (TXT + DOCX BACKEND)
-  const handleFileUpload = async (file) => {
+  // ✅ IMPORTAR SOLO TXT (ESTABLE)
+  const handleFileUpload = (file) => {
     if (!file) return;
 
-    const ext = file.name.split(".").pop().toLowerCase();
+    const extension = file.name.split(".").pop().toLowerCase();
 
-    // TXT
-    if (ext === "txt") {
-      const reader = new FileReader();
-      reader.onload = (e) => {
-        setText(detectTitles(e.target.result));
-      };
-      reader.readAsText(file);
+    if (extension !== "txt") {
+      alert("Solo se permite .txt por ahora");
       return;
     }
 
-    // DOCX → BACKEND
-    if (ext === "docx") {
-      try {
-        const formData = new FormData();
-        formData.append("file", file);
+    const reader = new FileReader();
+    reader.onload = (e) => setText(e.target.result);
+    reader.readAsText(file);
+  };
 
-        const res = await fetch("/api/parse-doc", {
-          method: "POST",
-          body: formData
-        });
+  // 🧠 ESQUEMA INTELIGENTE
+  const generateSmartSchema = (text) => {
+    const lines = text.split("\n").filter(l => l.trim() !== "");
 
-        const data = await res.json();
+    let result = "";
+    let currentTitle = "";
 
-        if (!data.text) throw new Error();
+    lines.forEach(line => {
+      const t = line.trim();
 
-        setText(detectTitles(data.text));
-
-      } catch (err) {
-        console.error(err);
-        alert("Error leyendo el archivo DOCX");
+      // Título (mayúsculas o corto)
+      if (
+        t.length < 60 &&
+        (t === t.toUpperCase() || t.endsWith(":"))
+      ) {
+        currentTitle = t.replace(":", "");
+        result += `\n📌 ${currentTitle}\n`;
       }
 
-      return;
-    }
+      // Subidea
+      else if (t.length < 120) {
+        result += `  ↳ ${t}\n`;
+      }
 
-    // DOC
-    if (ext === "doc") {
-      alert("Formato .doc no soportado. Usa .docx");
-      return;
-    }
+      // Detalle
+      else {
+        result += `    • ${t}\n`;
+      }
+    });
 
-    alert("Formato no soportado");
+    return result;
   };
 
   const translations = {
@@ -148,7 +133,6 @@ export default function Home() {
 
   const t = translations[lang];
 
-  // ⚠️ NO TOCAR
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
@@ -165,8 +149,17 @@ export default function Home() {
       });
 
       const data = await res.json();
-      setResult(data.result || "");
+
+      let finalResult = data.result || "";
+
+      // 🧠 aplicar esquema inteligente
+      if (type === "esquema") {
+        finalResult = generateSmartSchema(finalResult);
+      }
+
+      setResult(finalResult);
       setCurrentLine(0);
+
     } catch {
       setResult("Error procesando");
     }
@@ -308,7 +301,7 @@ export default function Home() {
 
         <br /><br />
 
-        <input type="file" accept=".txt,.doc,.docx" onChange={(e) => handleFileUpload(e.target.files[0])} />
+        <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
 
         <br /><br />
 
