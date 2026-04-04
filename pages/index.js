@@ -18,9 +18,6 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
-  // ✅ HISTORIAL
-  const [history, setHistory] = useState([]);
-
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -29,15 +26,6 @@ export default function Home() {
       link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
-
-      const saved = localStorage.getItem("educadapt_history");
-      if (saved) {
-        try {
-          setHistory(JSON.parse(saved));
-        } catch {
-          setHistory([]);
-        }
-      }
     }
   }, []);
 
@@ -65,8 +53,6 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      history: "📚 Historial",
-      save: "💾 Guardar en historial",
       pdf: "📄 Exportar PDF"
     },
     ca: {
@@ -92,8 +78,6 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      history: "📚 Historial",
-      save: "💾 Guardar al historial",
       pdf: "📄 Exportar PDF"
     }
   };
@@ -209,31 +193,6 @@ export default function Home() {
     link.click();
   };
 
-  // ✅ FIX HISTORIAL
-  const saveToHistory = () => {
-    if (!result) {
-      alert("Primero genera un resultado");
-      return;
-    }
-
-    const newEntry = {
-      text,
-      result,
-      date: Date.now()
-    };
-
-    const updated = [newEntry, ...history].slice(0, 10);
-
-    setHistory(updated);
-    localStorage.setItem("educadapt_history", JSON.stringify(updated));
-  };
-
-  const loadFromHistory = (item) => {
-    setText(item.text);
-    setResult(item.result);
-    setCurrentLine(0);
-  };
-
   const exportPDF = () => {
     const win = window.open("", "_blank");
     win.document.write(`<pre>${formatResult(result)}</pre>`);
@@ -267,35 +226,6 @@ export default function Home() {
 
   return (
     <div style={pageStyle}>
-
-      {/* HISTORIAL */}
-      {history.length > 0 && (
-        <div style={{
-          maxWidth: "900px",
-          margin: "auto",
-          marginBottom: "20px",
-          background: "white",
-          padding: "15px",
-          borderRadius: "12px",
-          color: "#111"
-        }}>
-          <h3>{t.history}</h3>
-          {history.map((item, i) => (
-            <div
-              key={i}
-              onClick={() => loadFromHistory(item)}
-              style={{
-                cursor: "pointer",
-                padding: "8px",
-                borderBottom: "1px solid #ddd"
-              }}
-            >
-              {item.text.slice(0, 80)}...
-            </div>
-          ))}
-        </div>
-      )}
-
       <div style={headerStyle}>
         <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
           <img src="/logo.jpg" style={{ width: "50px" }} />
@@ -337,11 +267,6 @@ export default function Home() {
 
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
-        </button>
-
-        {/* NUEVOS */}
-        <button onClick={saveToHistory} style={{ marginTop: "10px", ...mainButton }}>
-          {t.save}
         </button>
 
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
