@@ -30,7 +30,6 @@ export default function Home() {
       link.rel = "stylesheet";
       document.head.appendChild(link);
 
-      // cargar historial
       const saved = localStorage.getItem("educadapt_history");
       if (saved) {
         try {
@@ -269,7 +268,7 @@ export default function Home() {
   return (
     <div style={pageStyle}>
 
-      {/* ✅ HISTORIAL VISIBLE */}
+      {/* HISTORIAL */}
       {history.length > 0 && (
         <div style={{
           maxWidth: "900px",
@@ -281,7 +280,6 @@ export default function Home() {
           color: "#111"
         }}>
           <h3>{t.history}</h3>
-
           {history.map((item, i) => (
             <div
               key={i}
@@ -311,3 +309,105 @@ export default function Home() {
       </div>
 
       <div style={cardStyle}>
+        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+
+        <br /><br />
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
+        <button onClick={handleAdapt} style={mainButton}>
+          {loading ? t.loading : t.adapt}
+        </button>
+
+        {/* NUEVOS */}
+        <button onClick={saveToHistory} style={{ marginTop: "10px", ...mainButton }}>
+          {t.save}
+        </button>
+
+        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
+          {t.pdf}
+        </button>
+
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
+
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
+
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.resume}
+            </button>
+
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.stopSpeak}
+            </button>
+
+            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
+          </div>
+        )}
+
+        <br /><br />
+
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
+
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
+            {t.download}
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
