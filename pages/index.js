@@ -20,29 +20,48 @@ export default function Home() {
 
   const lineRefs = useRef([]);
 
-  // ✅ CARGAR DATOS DESDE URL
   useEffect(() => {
     if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-
-      const urlText = params.get("text");
-      const urlType = params.get("type");
-      const urlLevel = params.get("level");
-      const urlMode = params.get("mode");
-      const urlLang = params.get("lang");
-
-      if (urlText) setText(decodeURIComponent(urlText));
-      if (urlType) setType(urlType);
-      if (urlLevel) setLevel(urlLevel);
-      if (urlMode) setMode(urlMode);
-      if (urlLang) setLang(urlLang);
-
       const link = document.createElement("link");
       link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
   }, []);
+
+  // ✅ IMPORTAR ARCHIVOS
+  const handleFileUpload = async (file) => {
+    if (!file) return;
+
+    const extension = file.name.split(".").pop().toLowerCase();
+
+    // TXT
+    if (extension === "txt") {
+      const reader = new FileReader();
+      reader.onload = (e) => setText(e.target.result);
+      reader.readAsText(file);
+    }
+
+    // DOCX (simple)
+    else if (extension === "docx") {
+      const arrayBuffer = await file.arrayBuffer();
+      const mammoth = await import("mammoth");
+      const result = await mammoth.extractRawText({ arrayBuffer });
+      setText(result.value);
+    }
+
+    // DOC (muy limitado)
+    else if (extension === "doc") {
+      alert("Los archivos .doc pueden no funcionar correctamente. Usa .docx mejor.");
+      const reader = new FileReader();
+      reader.onload = (e) => setText(e.target.result);
+      reader.readAsText(file);
+    }
+
+    else {
+      alert("Formato no soportado");
+    }
+  };
 
   const translations = {
     es: {
@@ -69,8 +88,7 @@ export default function Home() {
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
       pdf: "📄 Exportar PDF",
-      share: "🔗 Compartir enlace",
-      copied: "Enlace copiado!"
+      import: "📂 Importar archivo"
     },
     ca: {
       title: "EducAdapt",
@@ -96,8 +114,7 @@ export default function Home() {
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
       pdf: "📄 Exportar PDF",
-      share: "🔗 Compartir enllaç",
-      copied: "Enllaç copiat!"
+      import: "📂 Importar fitxer"
     }
   };
 
@@ -212,16 +229,6 @@ export default function Home() {
     link.click();
   };
 
-  // ✅ COMPARTIR ENLACE
-  const shareLink = () => {
-    const base = window.location.origin;
-
-    const url = `${base}?text=${encodeURIComponent(text)}&type=${type}&level=${level}&mode=${mode}&lang=${lang}`;
-
-    navigator.clipboard.writeText(url);
-    alert(t.copied);
-  };
-
   const exportPDF = () => {
     const win = window.open("", "_blank");
     win.document.write(`<pre>${formatResult(result)}</pre>`);
@@ -272,6 +279,15 @@ export default function Home() {
 
         <br /><br />
 
+        {/* IMPORTAR */}
+        <input
+          type="file"
+          accept=".txt,.doc,.docx"
+          onChange={(e) => handleFileUpload(e.target.files[0])}
+        />
+
+        <br /><br />
+
         <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
           <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
             <option value="facil">{t.resumen}</option>
@@ -300,10 +316,6 @@ export default function Home() {
 
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
-        </button>
-
-        <button onClick={shareLink} style={{ marginTop: "10px", ...mainButton }}>
-          {t.share}
         </button>
 
         <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
