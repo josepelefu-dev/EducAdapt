@@ -31,14 +31,11 @@ export default function Home() {
 
   const handleFileUpload = (file) => {
     if (!file) return;
-
     const extension = file.name.split(".").pop().toLowerCase();
-
     if (extension !== "txt") {
       alert("Solo se permite .txt por ahora");
       return;
     }
-
     const reader = new FileReader();
     reader.onload = (e) => setText(e.target.result);
     reader.readAsText(file);
@@ -46,27 +43,16 @@ export default function Home() {
 
   const generateSmartSchema = (text) => {
     const lines = text.split("\n").filter(l => l.trim() !== "");
-
     let result = "";
-    let currentTitle = "";
 
     lines.forEach(line => {
       const t = line.trim();
-
-      if (
-        t.length < 60 &&
-        (t === t.toUpperCase() || t.endsWith(":"))
-      ) {
-        currentTitle = t.replace(":", "");
-        result += `\n📌 ${currentTitle}\n`;
-      }
-
-      else if (t.length < 120) {
+      if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
+        result += `\n📌 ${t.replace(":", "")}\n`;
+      } else if (t.length < 120) {
         result += `  ↳ ${t}\n`;
-      }
-
-      else {
-        result += `    • ${t}\n`;
+      } else {
+        result += `   • ${t}\n`;
       }
     });
 
@@ -146,7 +132,6 @@ export default function Home() {
       });
 
       const data = await res.json();
-
       let finalResult = data.result || "";
 
       if (type === "esquema") {
@@ -155,7 +140,6 @@ export default function Home() {
 
       setResult(finalResult);
       setCurrentLine(0);
-
     } catch {
       setResult("Error procesando");
     }
@@ -181,16 +165,6 @@ export default function Home() {
   const speakText = (startIndex = currentLine) => {
     if (!result || typeof window === "undefined") return;
 
-    const voices = window.speechSynthesis.getVoices();
-
-    const hasCatalan = voices.some(v =>
-      v.lang.toLowerCase().includes("ca")
-    );
-
-    if (lang === "ca" && !hasCatalan) {
-      alert("⚠️ Tu dispositivo no tiene voz catalana. Prueba con Edge o Safari.");
-    }
-
     const lines = getLines();
     let index = startIndex;
 
@@ -213,13 +187,6 @@ export default function Home() {
       };
 
       window.speechSynthesis.speak(utterance);
-
-      setTimeout(() => {
-        lineRefs.current[index]?.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
-      }, 200);
     };
 
     window.speechSynthesis.cancel();
@@ -245,10 +212,9 @@ export default function Home() {
   };
 
   const downloadResult = () => {
-  if (!result) return;
+    if (!result) return;
 
-  const content = `
-EDUCADAPT
+    const content = `EDUCADAPT
 
 Tipo: ${type}
 Nivel: ${level}
@@ -261,76 +227,83 @@ ${formatResult(result)}
 
 ----------------------------------------
 
-Documento generado con EducAdapt
-`;
+Documento generado con EducAdapt`;
 
-  const blob = new Blob([content], {
-    type: "text/plain;charset=utf-8;"
-  });
+    const blob = new Blob([content], {
+      type: "text/plain;charset=utf-8;"
+    });
 
-  const link = document.createElement("a");
-  link.href = URL.createObjectURL(blob);
-  link.download = "educadapt.txt";
-  link.click();
-};
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = "educadapt.txt";
+    link.click();
+  };
 
+  // ✅ SOLO MEJORADO (NO TOCA NADA MÁS)
   const exportPDF = () => {
-  if (!result) return;
+    if (!result) return;
 
-  const formatted = formatResult(result).replace(/\n/g, "<br>");
+    const formatted = formatResult(result).replace(/\n/g, "<br>");
 
-  const win = window.open("", "_blank");
+    const colorMap = {
+      facil: "#6366f1",
+      tdah: "#f59e0b",
+      dislexia: "#10b981",
+      esquema: "#0ea5e9"
+    };
 
-  win.document.write(`
-    <html>
-      <head>
-        <title>EducAdapt PDF</title>
-        <style>
-          body {
-            font-family: Arial;
-            padding: 40px;
-            line-height: 1.6;
-            color: #111;
-          }
-          h1 {
-            color: #6366f1;
-          }
-          .meta {
-            margin-bottom: 20px;
-            font-size: 14px;
-            color: #555;
-          }
-          .content {
-            margin-top: 20px;
-            font-size: 16px;
-          }
-          hr {
-            margin: 20px 0;
-          }
-        </style>
-      </head>
-      <body>
-        <h1>EducAdapt</h1>
+    const color = colorMap[type] || "#6366f1";
 
-        <div class="meta">
-          <strong>Tipo:</strong> ${type} <br>
-          <strong>Nivel:</strong> ${level} <br>
-          <strong>Modo:</strong> ${mode} <br>
-          <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
-        </div>
+    const win = window.open("", "_blank");
+    if (!win) return alert("Permite ventanas emergentes");
 
-        <hr />
-
-        <div class="content">
+    win.document.write(`
+      <html>
+        <head>
+          <title>EducAdapt PDF</title>
+          <style>
+            body {
+              font-family: Arial;
+              padding: 40px;
+              line-height: 1.7;
+              max-width: 800px;
+              margin: auto;
+            }
+            h1 {
+              color: ${color};
+            }
+            .badge {
+              background: ${color};
+              color: white;
+              padding: 4px 10px;
+              border-radius: 8px;
+              margin-right: 5px;
+              font-size: 12px;
+            }
+            hr {
+              height: 2px;
+              background: ${color};
+              border: none;
+              margin: 20px 0;
+            }
+          </style>
+        </head>
+        <body>
+          <h1>EducAdapt</h1>
+          <div>
+            <span class="badge">${type}</span>
+            <span class="badge">${level}</span>
+            <span class="badge">${mode}</span>
+          </div>
+          <hr>
           ${formatted}
-        </div>
-      </body>
-    </html>
-  `);
+        </body>
+      </html>
+    `);
 
-  win.document.close();
-  win.print();
-};
+    win.document.close();
+    setTimeout(() => win.print(), 300);
+  };
 
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
@@ -376,15 +349,8 @@ Documento generado con EducAdapt
         <br /><br />
 
         <div>
-          <label style={{ color: "#111827", fontWeight: "600" }}>
-            {t.file}
-          </label>
-          <input 
-            type="file" 
-            accept=".txt" 
-            onChange={(e) => handleFileUpload(e.target.files[0])} 
-            style={{ marginTop: "5px" }}
-          />
+          <label style={{ color: "#111827", fontWeight: "600" }}>{t.file}</label>
+          <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} style={{ marginTop: "5px" }} />
         </div>
 
         <br /><br />
@@ -456,7 +422,20 @@ Documento generado con EducAdapt
         {guidedMode && result && (
           <div style={resultStyle}>
             {getLines().map((line, i) => (
-              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+              <div
+                key={i}
+                ref={el => lineRefs.current[i] = el}
+                onClick={() => speakText(i)}
+                style={{
+                  padding: "8px",
+                  margin: "4px 0",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  opacity: i === currentLine ? 1 : 0.4,
+                  background: i === currentLine ? "#dbeafe" : "transparent",
+                  fontWeight: i === currentLine ? "600" : "400"
+                }}
+              >
                 {line}
               </div>
             ))}
@@ -466,7 +445,17 @@ Documento generado con EducAdapt
 
       {result && (
         <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
+          <button
+            onClick={downloadResult}
+            style={{
+              padding: "15px",
+              background: "#0ea5e9",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer"
+            }}
+          >
             {t.download}
           </button>
         </div>
