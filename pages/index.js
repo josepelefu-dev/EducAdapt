@@ -258,11 +258,62 @@ export default function Home() {
   };
 
   const exportPDF = () => {
-    const win = window.open("", "_blank");
-    win.document.write(`<pre>${formatResult(result)}</pre>`);
-    win.document.close();
-    win.print();
-  };
+  if (!result) return;
+
+  const formatted = formatResult(result).replace(/\n/g, "<br>");
+
+  const win = window.open("", "_blank");
+
+  win.document.write(`
+    <html>
+      <head>
+        <title>EducAdapt PDF</title>
+        <style>
+          body {
+            font-family: Arial;
+            padding: 40px;
+            line-height: 1.6;
+            color: #111;
+          }
+          h1 {
+            color: #6366f1;
+          }
+          .meta {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+          }
+          .content {
+            margin-top: 20px;
+            font-size: 16px;
+          }
+          hr {
+            margin: 20px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>EducAdapt</h1>
+
+        <div class="meta">
+          <strong>Tipo:</strong> ${type} <br>
+          <strong>Nivel:</strong> ${level} <br>
+          <strong>Modo:</strong> ${mode} <br>
+          <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
+        </div>
+
+        <hr />
+
+        <div class="content">
+          ${formatted}
+        </div>
+      </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.print();
+};
 
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
