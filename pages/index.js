@@ -42,22 +42,33 @@ export default function Home() {
   };
 
   const generateSmartSchema = (text) => {
-    const lines = text.split("\n").filter(l => l.trim() !== "");
-    let result = "";
+  if (!text) return "";
 
-    lines.forEach(line => {
-      const t = line.trim();
-      if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
-        result += `\n📌 ${t.replace(":", "")}\n`;
-      } else if (t.length < 120) {
-        result += `  ↳ ${t}\n`;
-      } else {
-        result += `   • ${t}\n`;
-      }
-    });
+  const lines = text
+    .split("\n")
+    .map(l => l.trim())
+    .filter(l => l.length > 20);
 
-    return result;
-  };
+  let schema = "";
+
+  // título principal
+  if (lines[0]) {
+    schema += `📌 ${lines[0].toUpperCase()}\n`;
+  }
+
+  // estructura tipo árbol REAL
+  lines.slice(1, 6).forEach((line, i) => {
+    const short = line.split(" ").slice(0, 3).join(" ");
+
+    if (i % 2 === 0) {
+      schema += `↳ ${short}\n`;
+    } else {
+      schema += `   ↳ ${short}\n`;
+    }
+  });
+
+  return schema;
+};
 
   const translations = {
     es: {
