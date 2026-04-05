@@ -262,6 +262,16 @@ export default function Home() {
 
   const formatted = formatResult(result).replace(/\n/g, "<br>");
 
+  // 🎨 color según tipo
+  const colorMap = {
+    facil: "#6366f1",
+    tdah: "#f59e0b",
+    dislexia: "#10b981",
+    esquema: "#0ea5e9"
+  };
+
+  const color = colorMap[type] || "#6366f1";
+
   const win = window.open("", "_blank");
 
   win.document.write(`
@@ -271,45 +281,119 @@ export default function Home() {
         <style>
           body {
             font-family: Arial;
-            padding: 40px;
-            line-height: 1.6;
+            margin: 0;
             color: #111;
           }
-          h1 {
-            color: #6366f1;
+
+          .page {
+            padding: 40px;
+            page-break-after: always;
           }
-          .meta {
+
+          /* PORTADA */
+          .cover {
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background: ${color};
+            color: white;
+            text-align: center;
+          }
+
+          .cover img {
+            width: 100px;
             margin-bottom: 20px;
+          }
+
+          .cover h1 {
+            font-size: 40px;
+            margin-bottom: 10px;
+          }
+
+          .cover p {
+            font-size: 18px;
+          }
+
+          /* CONTENIDO */
+          .header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+          }
+
+          .header img {
+            width: 40px;
+          }
+
+          .title {
+            color: ${color};
+          }
+
+          .meta {
+            margin-top: 10px;
             font-size: 14px;
             color: #555;
           }
+
           .content {
             margin-top: 20px;
+            line-height: 1.6;
             font-size: 16px;
           }
-          hr {
-            margin: 20px 0;
+
+          .footer {
+            position: fixed;
+            bottom: 10px;
+            right: 20px;
+            font-size: 12px;
+            color: #999;
           }
         </style>
       </head>
+
       <body>
-        <h1>EducAdapt</h1>
 
-        <div class="meta">
-          <strong>Tipo:</strong> ${type} <br>
-          <strong>Nivel:</strong> ${level} <br>
-          <strong>Modo:</strong> ${mode} <br>
-          <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
+        <!-- PORTADA -->
+        <div class="cover page">
+          <img src="/logo.jpg" />
+          <h1>EducAdapt</h1>
+          <p>${type.toUpperCase()} - ${level.toUpperCase()}</p>
+          <p>${new Date().toLocaleDateString()}</p>
         </div>
 
-        <hr />
+        <!-- CONTENIDO -->
+        <div class="page">
 
-        <div class="content">
-          ${formatted}
+          <div class="header">
+            <img src="/logo.jpg" />
+            <h2 class="title">EducAdapt</h2>
+          </div>
+
+          <div class="meta">
+            <strong>Tipo:</strong> ${type} <br>
+            <strong>Nivel:</strong> ${level} <br>
+            <strong>Modo:</strong> ${mode}
+          </div>
+
+          <div class="content">
+            ${formatted}
+          </div>
+
+          <div class="footer">
+            Página 1
+          </div>
+
         </div>
+
       </body>
     </html>
   `);
+
+  win.document.close();
+  win.print();
+};
 
   win.document.close();
   win.print();
