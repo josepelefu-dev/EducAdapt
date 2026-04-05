@@ -5,19 +5,19 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVELES (ESTABLES)
+    // 🧠 NIVELES
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
 
 REGLAS:
-- Elimina la mayor parte de detalles.
+- Elimina la mayoría de detalles.
 - Quédate solo con ideas esenciales.
-- Lenguaje claro y fácil.
+- Lenguaje claro.
 - Frases cortas.
 
 IMPORTANTE:
-- Debe ser claramente más corto que el original.
+- Debe ser claramente más corto.
 - NO añadas títulos.
 `;
     }
@@ -33,7 +33,6 @@ REGLAS:
 
 IMPORTANTE:
 - Más completo que básico.
-- Más corto que avanzado.
 - NO añadas títulos.
 `;
     }
@@ -43,8 +42,8 @@ IMPORTANTE:
 Adapta el contenido para un estudiante de 15-16 años.
 
 REGLAS:
-- Mantén la mayor parte del contenido.
-- Explica de forma clara.
+- Mantén la mayoría del contenido.
+- Explicación clara.
 
 IMPORTANTE:
 - Debe ser el más completo.
@@ -58,9 +57,8 @@ IMPORTANTE:
 Haz un resumen adaptado al nivel.
 
 REGLAS:
-- Respeta la diferencia entre niveles.
-- No hagas todos los resúmenes iguales.
-- Mantén coherencia.
+- Respeta diferencias entre niveles.
+- No hacer todos iguales.
 `;
     }
 
@@ -71,7 +69,6 @@ Adapta para TDAH.
 REGLAS:
 - Una idea por línea.
 - Frases cortas.
-- Espaciado claro.
 `;
     }
 
@@ -82,41 +79,42 @@ Adapta para dislexia.
 REGLAS:
 - Frases cortas.
 - Palabras simples.
-- Estructura clara.
 `;
     }
 
-    // 🌳 ESQUEMA (ESTILO QUE QUIERES)
+    // 🌳 ESQUEMA FORZADO (ESTE ES EL CAMBIO REAL)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema visual tipo árbol EXACTAMENTE con este formato:
+Convierte el contenido en un esquema EXACTAMENTE con esta estructura.
+
+DEBES COPIAR ESTE FORMATO:
 
 📌 TEMA PRINCIPAL
-↳ Idea principal
+↳ Idea principal 1
+   ↳ Subidea 1
+   ↳ Subidea 2
+↳ Idea principal 2
    ↳ Subidea
-   ↳ Subidea
-↳ Otra idea principal
 
-REGLAS OBLIGATORIAS:
-- Usa SIEMPRE "↳"
-- Usa espacios para subniveles (como en el ejemplo)
-- Máximo 2 niveles de profundidad
-- Máximo 6-8 líneas en total
+REGLAS OBLIGATORIAS (NO ROMPER):
+- Usa SIEMPRE "📌" para el título
+- Usa SIEMPRE "↳" para cada nivel
+- Usa EXACTAMENTE 3 espacios antes de subideas
+- Máximo 2 niveles (no más)
+- Máximo 6 líneas en total
 
 CONTENIDO:
-- Reduce MUCHO la información
-- Quédate solo con conceptos clave
-- NO incluyas todo el contenido
+- SOLO palabras clave o frases muy cortas
+- Elimina toda explicación
+- Reduce muchísimo la información
 
 PROHIBIDO:
-- Frases largas
 - Párrafos
+- Texto largo
+- Listas normales (- o *)
 - Explicaciones
-- Repeticiones
 
-OBJETIVO:
-- Debe parecer un mapa mental
-- Debe ser visual y claro
+SI NO SIGUES ESTE FORMATO, LA RESPUESTA ES INCORRECTA.
 `;
     }
 
