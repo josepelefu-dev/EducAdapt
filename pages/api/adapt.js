@@ -5,83 +5,99 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVEL (POR EDAD + PROFUNDIDAD)
-
+    // 🧠 NIVEL (REALISTA POR EDAD)
     if (level === "basico") {
       levelPrompt = `
-Adapta el contenido para un estudiante de 11 años.
+Adapta el contenido para un estudiante de 11-12 años.
 
-- Lenguaje claro pero no infantil.
-- Explicación sencilla.
-- Reduce bastante el contenido.
-- Quédate solo con lo esencial.
+IMPORTANTE:
+- Lenguaje claro pero NO infantil.
+- Explica los conceptos de forma sencilla.
+- Usa frases cortas y comprensibles.
+- Mantén las ideas importantes.
+- Reduce ligeramente el contenido, pero sin eliminar información clave.
 `;
     }
 
     if (level === "intermedio") {
       levelPrompt = `
-Adapta el contenido para un estudiante de 13 años.
+Adapta el contenido para un estudiante de 13-14 años.
 
+IMPORTANTE:
 - Lenguaje claro y educativo.
-- Incluye ideas principales.
-- Mantén información relevante.
+- Mantén conceptos importantes.
+- Explicación estructurada.
+- No simplifiques en exceso.
+- Mantén buena parte del contenido original.
 `;
     }
 
     if (level === "avanzado") {
       levelPrompt = `
-Adapta el contenido para un estudiante de 15 años.
+Adapta el contenido para un estudiante de 15-16 años.
 
-- Lenguaje preciso pero comprensible.
-- Incluye conceptos importantes.
-- Mantén bastante contenido del original.
+IMPORTANTE:
+- Lenguaje académico pero comprensible.
+- Mantén precisión en los conceptos.
+- No simplifiques en exceso.
+- Conserva la mayor parte del contenido.
+- Prioriza claridad y estructura.
 `;
     }
 
-    // 🎯 TIPO (RESUMEN INTELIGENTE)
-
+    // 🎯 TIPO (MEJORADO)
     if (type === "facil") {
       typePrompt = `
-Haz un resumen del texto adaptado al nivel indicado.
+Haz un resumen adaptado al nivel indicado.
 
-IMPORTANTE:
+REGLAS IMPORTANTES:
 - Mantén las ideas principales.
-- Reduce el contenido de forma proporcional al tamaño del texto.
-- No lo reduzcas a un número fijo de frases.
-- Si el texto es largo, el resumen debe tener varios párrafos.
-- No añadas información nueva.
+- Ajusta la longitud según el texto original:
+  - Texto corto → resumen corto
+  - Texto largo → varios párrafos
+- NO reduzcas todo a pocas líneas.
+- NO añadas información nueva.
+- Mantén coherencia y claridad.
 `;
     }
 
     if (type === "tdah") {
       typePrompt = `
-Adapta el texto para TDAH:
+Adapta el texto para TDAH.
 
+REGLAS:
 - Frases cortas.
 - Una idea por línea.
-- Formato claro y separado.
-- Evita bloques largos.
+- Espaciado visual claro.
+- Usa listas si es posible.
+- Evita bloques largos de texto.
+- Mantén el contenido importante.
 `;
     }
 
     if (type === "dislexia") {
       typePrompt = `
-Adapta el texto para dislexia:
+Adapta el texto para dislexia.
 
-- Lenguaje simple.
+REGLAS:
+- Lenguaje simple y claro.
 - Frases cortas.
-- Estructura clara.
+- Estructura limpia.
 - Evita palabras complejas innecesarias.
+- Mantén las ideas clave.
 `;
     }
 
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema estructurado:
+Convierte el contenido en un esquema estructurado.
 
-- Formato jerárquico.
+REGLAS:
+- Organización jerárquica.
 - Ideas claras.
-- Visual y ordenado.
+- Usa viñetas o niveles.
+- Mantén la información importante.
+- No reduzcas en exceso.
 `;
     }
 
@@ -104,9 +120,9 @@ Convierte el contenido en un esquema estructurado:
             content: `
 ${languageInstruction}
 
-${typePrompt}
-
 ${levelPrompt}
+
+${typePrompt}
 
 Texto:
 ${text}
