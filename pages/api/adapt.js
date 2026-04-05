@@ -5,27 +5,76 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🟢 NIVEL
+    // 🧠 NIVEL (ADAPTADO POR EDAD REAL)
+
     if (level === "basico") {
-      levelPrompt = "Explica como para un niño de 10 años. Usa frases muy simples.";
+      levelPrompt = `
+Explica el contenido para un estudiante de 11 años.
+
+- Usa lenguaje claro pero NO infantil.
+- No uses metáforas tipo "truco mágico".
+- Explica conceptos de forma sencilla pero correcta.
+- Frases cortas pero naturales.
+- Mantén rigor educativo sin simplificar en exceso.
+`;
     }
 
     if (level === "intermedio") {
-      levelPrompt = "Explica de forma clara con ideas principales.";
+      levelPrompt = `
+Explica el contenido para un estudiante de 13 años.
+
+- Lenguaje claro y educativo.
+- Introduce conceptos importantes.
+- Mantén equilibrio entre claridad y contenido.
+- Evita lenguaje infantil.
+`;
     }
 
     if (level === "avanzado") {
-      levelPrompt = "Explica con detalle y términos más avanzados.";
+      levelPrompt = `
+Explica el contenido para un estudiante de 15 años.
+
+- Lenguaje preciso pero comprensible.
+- Incluye términos clave sin exceso académico.
+- Explicación completa pero clara.
+- Evita tecnicismos innecesarios.
+`;
     }
 
     // 🎯 TIPO
-    if (type === "facil") typePrompt = "Haz un resumen claro.";
-    if (type === "tdah") typePrompt = "Texto corto, claro y separado.";
-    if (type === "dislexia") typePrompt = "Frases simples y fáciles de leer.";
-    if (type === "esquema") typePrompt = "Haz un esquema estructurado.";
+
+    if (type === "facil") {
+      typePrompt = "Haz un resumen claro del texto.";
+    }
+
+    if (type === "tdah") {
+      typePrompt = `
+Adapta el texto para TDAH:
+- frases cortas
+- ideas separadas
+- estructura clara
+`;
+    }
+
+    if (type === "dislexia") {
+      typePrompt = `
+Adapta el texto para dislexia:
+- lenguaje simple
+- frases cortas
+- estructura clara
+`;
+    }
+
+    if (type === "esquema") {
+      typePrompt = `
+Convierte el contenido en un esquema estructurado.
+`;
+    }
 
     const languageInstruction =
-      lang === "ca" ? "Respon en català." : "Responde en español.";
+      lang === "ca"
+        ? "Respon en català."
+        : "Responde en español.";
 
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
@@ -40,7 +89,9 @@ export default async function handler(req, res) {
             role: "user",
             content: `
 ${languageInstruction}
+
 ${typePrompt}
+
 ${levelPrompt}
 
 Texto:
