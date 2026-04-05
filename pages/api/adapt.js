@@ -5,21 +5,20 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVELES (YA FUNCIONAN BIEN)
+    // 🧠 NIVELES (SIN PORCENTAJES, MÁS FIABLE)
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
 
 REGLAS:
-- Reduce el contenido al 30%.
-- Quédate SOLO con lo esencial.
-- Elimina evolución detallada y listas largas.
-- Usa frases claras y cortas.
+- Elimina la mayor parte de detalles.
+- Quédate solo con ideas imprescindibles.
+- Lenguaje claro y fácil.
+- Frases cortas.
 
 IMPORTANTE:
-- Debe ser corto.
+- Debe ser claramente más corto que el texto original.
 - NO añadas títulos.
-- Empieza directamente.
 `;
     }
 
@@ -28,12 +27,13 @@ IMPORTANTE:
 Adapta el contenido para un estudiante de 13-14 años.
 
 REGLAS:
-- Reduce el contenido al 60%.
 - Mantén ideas importantes.
-- Explica sin exceso.
+- Elimina detalles secundarios.
+- Explicación clara.
 
 IMPORTANTE:
-- Más largo que básico.
+- Más completo que básico.
+- Más corto que avanzado.
 - NO añadas títulos.
 `;
     }
@@ -43,8 +43,9 @@ IMPORTANTE:
 Adapta el contenido para un estudiante de 15-16 años.
 
 REGLAS:
-- Mantén casi todo el contenido.
-- Explicación completa pero clara.
+- Mantén la mayoría del contenido.
+- Explica de forma clara.
+- Conserva información relevante.
 
 IMPORTANTE:
 - Debe ser el más completo.
@@ -58,12 +59,9 @@ IMPORTANTE:
 Haz un resumen adaptado al nivel.
 
 REGLAS:
-- Respeta la longitud según nivel.
-- No hagas todos los niveles iguales.
+- Respeta la diferencia entre niveles.
+- No hagas resúmenes similares.
 - Mantén coherencia.
-
-IMPORTANTE:
-- Empieza directamente.
 `;
     }
 
@@ -89,45 +87,35 @@ REGLAS:
 `;
     }
 
-    // 🌳 ESQUEMA V4 (FINAL BUENO)
+    // 🌳 ESQUEMA V5 (VUELTA AL BUENO + MEJORADO)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un ESQUEMA DE ESTUDIO MUY SIMPLIFICADO.
+Convierte el contenido en un esquema visual tipo árbol.
 
-REGLAS OBLIGATORIAS:
-- Reduce el contenido al 20-30%.
-- Quédate SOLO con conceptos clave.
-- Elimina explicaciones y detalles.
+REGLAS:
+- Reduce el contenido (muy importante).
+- Quédate solo con conceptos clave.
+- NO incluyas todo el contenido.
 
 FORMATO:
 
 📌 TEMA
-- Idea principal
-  - Subidea
-  - Subidea
-- Otra idea
-  - Subidea
+↳ Idea principal
+  ↳ Subidea
+  ↳ Subidea
+↳ Otra idea
+  ↳ Subidea
 
 REGLAS CLAVE:
-- SOLO palabras clave (máx 3-4 palabras)
-- NO frases largas
-- NO párrafos
-- Máximo 2-3 niveles
-- Agrupar bien
+- Frases muy cortas o palabras clave
+- Máximo 2 niveles de profundidad
+- No repetir información
+- No redactar texto largo
 
-MUY IMPORTANTE:
-- Debe ser corto
-- Debe poder estudiarse rápido
-- Debe parecer un esquema real, no un texto
-
-PROHIBIDO:
-- Explicar
-- Redactar
-- Repetir contenido
-
-OBJETIVO:
-- Memorizar rápido
-- Ver estructura clara
+IMPORTANTE:
+- Debe verse como un esquema visual
+- Debe ser fácil de estudiar
+- No debe parecer un resumen
 `;
     }
 
