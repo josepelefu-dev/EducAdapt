@@ -18,6 +18,11 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
+  // 🧠 QUIZ
+  const [quiz, setQuiz] = useState([]);
+  const [showQuiz, setShowQuiz] = useState(false);
+  const [answers, setAnswers] = useState({});
+
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -28,50 +33,6 @@ export default function Home() {
       document.head.appendChild(link);
     }
   }, []);
-
-  const handleFileUpload = (file) => {
-    if (!file) return;
-
-    const extension = file.name.split(".").pop().toLowerCase();
-
-    if (extension !== "txt") {
-      alert("Solo se permite .txt por ahora");
-      return;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => setText(e.target.result);
-    reader.readAsText(file);
-  };
-
-  const generateSmartSchema = (text) => {
-    const lines = text.split("\n").filter(l => l.trim() !== "");
-
-    let result = "";
-    let currentTitle = "";
-
-    lines.forEach(line => {
-      const t = line.trim();
-
-      if (
-        t.length < 60 &&
-        (t === t.toUpperCase() || t.endsWith(":"))
-      ) {
-        currentTitle = t.replace(":", "");
-        result += `\n📌 ${currentTitle}\n`;
-      }
-
-      else if (t.length < 120) {
-        result += `  ↳ ${t}\n`;
-      }
-
-      else {
-        result += `    • ${t}\n`;
-      }
-    });
-
-    return result;
-  };
 
   const translations = {
     es: {
@@ -97,8 +58,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reanudar",
       download: "⬇️ Descargar resultado",
-      pdf: "📄 Exportar PDF",
-      file: "Seleccionar archivo .txt"
+      quiz: "🧠 Generar quiz"
     },
     ca: {
       title: "EducAdapt",
@@ -123,8 +83,7 @@ export default function Home() {
       stopSpeak: "⏹ Parar",
       resume: "▶ Reprendre",
       download: "⬇️ Descarregar resultat",
-      pdf: "📄 Exportar PDF",
-      file: "Seleccionar fitxer .txt"
+      quiz: "🧠 Generar qüestionari"
     }
   };
 
@@ -146,16 +105,9 @@ export default function Home() {
       });
 
       const data = await res.json();
-
-      let finalResult = data.result || "";
-
-      if (type === "esquema") {
-        finalResult = generateSmartSchema(finalResult);
-      }
-
-      setResult(finalResult);
+      setResult(data.result || "");
       setCurrentLine(0);
-
+      setShowQuiz(false); // reset quiz
     } catch {
       setResult("Error procesando");
     }
@@ -163,13 +115,41 @@ export default function Home() {
     setLoading(false);
   };
 
+  // 🧠 QUIZ
+  const generateQuiz = () => {
+    if (!result) return;
+
+    const sentences = result
+      .replace(/\n/g, " ")
+      .split(".")
+      .map(s => s.trim())
+      .filter(s => s.length > 40);
+
+    if (sentences.length < 4) {
+      alert("Texto insuficiente");
+      return;
+    }
+
+    const questions = sentences.slice(0, 5).map((correct, i) => {
+      const others = sentences.filter((_, idx) => idx !== i);
+      const options = [correct, ...others.sort(() => Math.random() - 0.5).slice(0, 3)]
+        .sort(() => Math.random() - 0.5);
+
+      return { question: "¿Cuál es correcta?", options, correct };
+    });
+
+    setQuiz(questions);
+    setShowQuiz(true);
+    setAnswers({});
+  };
+
+  const handleAnswer = (qIndex, option) => {
+    setAnswers(prev => ({ ...prev, [qIndex]: option }));
+  };
+
   const formatResult = (text) => {
     if (!text) return "";
-    return text
-      .replace(/^- (.*)$/gm, "• $1")
-      .replace(/├──/g, "↳")
-      .replace(/│/g, " ")
-      .replace(/\. /g, ".\n\n");
+    return text.replace(/\. /g, ".\n\n");
   };
 
   const getLines = () => {
@@ -181,24 +161,11 @@ export default function Home() {
   const speakText = (startIndex = currentLine) => {
     if (!result || typeof window === "undefined") return;
 
-    const voices = window.speechSynthesis.getVoices();
-
-    const hasCatalan = voices.some(v =>
-      v.lang.toLowerCase().includes("ca")
-    );
-
-    if (lang === "ca" && !hasCatalan) {
-      alert("⚠️ Tu dispositivo no tiene voz catalana. Prueba con Edge o Safari.");
-    }
-
     const lines = getLines();
     let index = startIndex;
 
     const speakLine = () => {
-      if (index >= lines.length) {
-        setSpeaking(false);
-        return;
-      }
+      if (index >= lines.length) return;
 
       setCurrentLine(index);
 
@@ -213,204 +180,75 @@ export default function Home() {
       };
 
       window.speechSynthesis.speak(utterance);
-
-      setTimeout(() => {
-        lineRefs.current[index]?.scrollIntoView({
-          behavior: "smooth",
-          block: "center"
-        });
-      }, 200);
     };
 
     window.speechSynthesis.cancel();
     setPaused(false);
-    setSpeaking(true);
     speakLine();
   };
 
-  const pauseSpeech = () => {
-    window.speechSynthesis.pause();
-    setPaused(true);
-  };
-
-  const resumeSpeech = () => {
-    window.speechSynthesis.resume();
-    setPaused(false);
-  };
-
-  const stopSpeech = () => {
-    window.speechSynthesis.cancel();
-    setSpeaking(false);
-    setPaused(false);
-  };
-
-  const downloadResult = () => {
-    if (!result) return;
-
-    const blob = new Blob([formatResult(result)], {
-      type: "text/plain;charset=utf-8;"
-    });
-
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "educadapt.txt";
-    link.click();
-  };
-
-  const exportPDF = () => {
-    const win = window.open("", "_blank");
-    win.document.write(`<pre>${formatResult(result)}</pre>`);
-    win.document.close();
-    win.print();
-  };
-
-  useEffect(() => {
-    if (!autoPlay || !guidedMode) return;
-
-    const interval = setInterval(() => {
-      setCurrentLine(prev => {
-        const lines = getLines();
-        return prev < lines.length - 1 ? prev + 1 : prev;
-      });
-    }, speed);
-
-    return () => clearInterval(interval);
-  }, [autoPlay, speed, guidedMode, result]);
-
-  const resultStyle = {
-    background: "#f8fafc",
-    padding: "20px",
-    borderRadius: "12px",
-    whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
-    letterSpacing: type === "dislexia" ? "1px" : "normal",
-    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
-    color: "#111827"
-  };
-
   return (
-    <div style={pageStyle}>
-      <div style={headerStyle}>
-        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
-          <img src="/logo.jpg" style={{ width: "50px" }} />
-          <h2>{t.title}</h2>
-        </div>
+    <div style={{ padding: "20px" }}>
+      <h2>{t.title}</h2>
 
-        <div>
-          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
-          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
-        </div>
-      </div>
+      <textarea
+        rows="6"
+        style={{ width: "100%" }}
+        placeholder={t.placeholder}
+        value={text}
+        onChange={(e) => setText(e.target.value)}
+      />
 
-      <div style={cardStyle}>
-        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+      <br /><br />
 
-        <br /><br />
-
-        <div>
-          <label style={{ color: "#111827", fontWeight: "600" }}>
-            {t.file}
-          </label>
-          <input 
-            type="file" 
-            accept=".txt" 
-            onChange={(e) => handleFileUpload(e.target.files[0])} 
-            style={{ marginTop: "5px" }}
-          />
-        </div>
-
-        <br /><br />
-
-        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
-          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
-            <option value="facil">{t.resumen}</option>
-            <option value="tdah">{t.tdah}</option>
-            <option value="dislexia">{t.dislexia}</option>
-            <option value="esquema">{t.esquema}</option>
-          </select>
-
-          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
-            <option value="basico">{t.basico}</option>
-            <option value="intermedio">{t.intermedio}</option>
-            <option value="avanzado">{t.avanzado}</option>
-          </select>
-
-          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
-            <option value="alumno">{t.alumno}</option>
-            <option value="profesor">{t.profesor}</option>
-          </select>
-        </div>
-
-        <br />
-
-        <button onClick={handleAdapt} style={mainButton}>
-          {loading ? t.loading : t.adapt}
-        </button>
-
-        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
-          {t.pdf}
-        </button>
-
-        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
-          {guidedMode ? t.normal : t.guided}
-        </button>
-
-        {guidedMode && (
-          <div>
-            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
-              {autoPlay ? t.stop : t.auto}
-            </button>
-
-            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
-              {t.speak}
-            </button>
-
-            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              ⏸ Pausa
-            </button>
-
-            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              {t.resume}
-            </button>
-
-            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
-              {t.stopSpeak}
-            </button>
-
-            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
-          </div>
-        )}
-
-        <br /><br />
-
-        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
-
-        {guidedMode && result && (
-          <div style={resultStyle}>
-            {getLines().map((line, i) => (
-              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
-                {line}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+      <button onClick={handleAdapt}>
+        {loading ? t.loading : t.adapt}
+      </button>
 
       {result && (
-        <div style={{ textAlign: "center", marginTop: "20px" }}>
-          <button onClick={downloadResult} style={{ padding: "15px", background: "#0ea5e9", color: "white", border: "none", borderRadius: "12px", cursor: "pointer" }}>
-            {t.download}
+        <>
+          <button onClick={generateQuiz} style={{ marginLeft: "10px" }}>
+            {t.quiz}
           </button>
+
+          <div style={{ marginTop: "20px", whiteSpace: "pre-wrap" }}>
+            {formatResult(result)}
+          </div>
+        </>
+      )}
+
+      {showQuiz && (
+        <div style={{ marginTop: "30px" }}>
+          {quiz.map((q, i) => (
+            <div key={i} style={{ marginBottom: "15px" }}>
+              <p><strong>{q.question}</strong></p>
+
+              {q.options.map((opt, j) => {
+                const isSelected = answers[i] === opt;
+                const isCorrect = opt === q.correct;
+
+                return (
+                  <div
+                    key={j}
+                    onClick={() => handleAnswer(i, opt)}
+                    style={{
+                      padding: "8px",
+                      marginTop: "5px",
+                      cursor: "pointer",
+                      background:
+                        isSelected
+                          ? isCorrect ? "#bbf7d0" : "#fecaca"
+                          : "#eee"
+                    }}
+                  >
+                    {opt}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
         </div>
       )}
     </div>
   );
 }
-
-const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
-const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
-const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
-const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
-const selectStyle = { padding: "10px", borderRadius: "8px" };
-const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
-const langBtn = { margin: "5px" };
