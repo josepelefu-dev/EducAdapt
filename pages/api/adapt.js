@@ -89,29 +89,34 @@ REGLAS:
     // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
     if (type === "esquema") {
   typePrompt = `
-Convierte el contenido en un esquema visual tipo árbol EXACTO.
+Convierte el contenido en un esquema tipo árbol MUY VISUAL.
 
 FORMATO OBLIGATORIO:
-📌 TÍTULO
-↳ Concepto
+📌 TEMA PRINCIPAL
+↳ Idea principal
    ↳ Palabra clave
+↳ Otra idea
    ↳ Palabra clave
 
-REGLAS MUY IMPORTANTES:
-- Máximo 1 a 3 palabras por línea
+REGLAS CLAVE:
+- SOLO 3-4 ideas principales (no más)
+- Cada idea: máximo 1 subnivel
+- Máximo total: 8 líneas
+- Máximo 3 palabras por línea
+- SOLO palabras clave
 - NO frases
 - NO explicaciones
-- SOLO palabras clave
-- Máximo 6-8 líneas en total
-- Estructura clara tipo árbol
-- Usa SOLO: 📌 y ↳
+
+MUY IMPORTANTE:
+- ELIMINA información secundaria
+- QUÉDATE solo con lo MÁS IMPORTANTE del texto
 
 PROHIBIDO:
-- Frases largas
-- Explicar
-- Redactar como resumen
+- Listar todo
+- Hacer resumen
+- Escribir frases
 
-Debe parecer un esquema de libro, no un texto.
+Debe parecer un esquema de estudio rápido.
 `;
 }
 
