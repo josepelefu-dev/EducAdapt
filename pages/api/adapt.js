@@ -5,19 +5,16 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVEL (POR EDAD REAL)
+    // 🧠 NIVEL (POR EDAD + PROFUNDIDAD)
 
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11 años.
 
-- Lenguaje claro pero NO infantil.
-- Frases sencillas y naturales.
-- Explicación comprensible sin perder rigor.
-- No uses metáforas tipo "truco mágico".
-- Sé directo.
-
-Respeta siempre que es un resumen: sé breve y directo.
+- Lenguaje claro pero no infantil.
+- Explicación sencilla.
+- Reduce bastante el contenido.
+- Quédate solo con lo esencial.
 `;
     }
 
@@ -27,9 +24,7 @@ Adapta el contenido para un estudiante de 13 años.
 
 - Lenguaje claro y educativo.
 - Incluye ideas principales.
-- Mantén equilibrio entre claridad y contenido.
-
-Respeta siempre que es un resumen: sé breve y directo.
+- Mantén información relevante.
 `;
     }
 
@@ -38,24 +33,23 @@ Respeta siempre que es un resumen: sé breve y directo.
 Adapta el contenido para un estudiante de 15 años.
 
 - Lenguaje preciso pero comprensible.
-- Incluye términos importantes sin exceso académico.
-- Explicación completa pero clara.
-
-Respeta siempre que es un resumen: sé breve y directo.
+- Incluye conceptos importantes.
+- Mantén bastante contenido del original.
 `;
     }
 
-    // 🎯 TIPO (CONTROLA EL RESULTADO)
+    // 🎯 TIPO (RESUMEN INTELIGENTE)
 
     if (type === "facil") {
       typePrompt = `
-Haz un resumen del texto.
+Haz un resumen del texto adaptado al nivel indicado.
 
 IMPORTANTE:
-- Máximo 3 frases.
-- Solo ideas principales.
+- Mantén las ideas principales.
+- Reduce el contenido de forma proporcional al tamaño del texto.
+- No lo reduzcas a un número fijo de frases.
+- Si el texto es largo, el resumen debe tener varios párrafos.
 - No añadas información nueva.
-- No expliques en detalle.
 `;
     }
 
@@ -63,9 +57,9 @@ IMPORTANTE:
       typePrompt = `
 Adapta el texto para TDAH:
 
-- Frases muy cortas.
+- Frases cortas.
 - Una idea por línea.
-- Usa saltos de línea.
+- Formato claro y separado.
 - Evita bloques largos.
 `;
     }
@@ -83,11 +77,11 @@ Adapta el texto para dislexia:
 
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema estructurado.
+Convierte el contenido en un esquema estructurado:
 
-- Usa formato claro.
-- Ideas jerárquicas.
-- Muy visual.
+- Formato jerárquico.
+- Ideas claras.
+- Visual y ordenado.
 `;
     }
 
