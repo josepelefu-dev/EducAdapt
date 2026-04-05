@@ -277,84 +277,56 @@ Documento generado con EducAdapt
   const exportPDF = () => {
   if (!result) return;
 
-  const content = formatResult(result).replace(/\n/g, "<br>");
-
-  const colorMap = {
-    facil: "#6366f1",
-    tdah: "#f59e0b",
-    dislexia: "#10b981",
-    esquema: "#0ea5e9"
-  };
-
-  const color = colorMap[type] || "#6366f1";
+  const formatted = formatResult(result).replace(/\n/g, "<br>");
 
   const win = window.open("", "_blank");
 
-  if (!win) {
-    alert("Permite ventanas emergentes");
-    return;
-  }
-
-  win.document.open();
   win.document.write(`
     <html>
       <head>
-        <title>EducAdapt</title>
+        <title>EducAdapt PDF</title>
         <style>
           body {
-            font-family: Arial, sans-serif;
+            font-family: Arial;
             padding: 40px;
             line-height: 1.6;
             color: #111;
           }
-
           h1 {
-            color: ${color};
-            margin-bottom: 10px;
+            color: #6366f1;
           }
-
           .meta {
+            margin-bottom: 20px;
             font-size: 14px;
             color: #555;
-            margin-bottom: 20px;
           }
-
           .content {
+            margin-top: 20px;
             font-size: 16px;
           }
-
           hr {
             margin: 20px 0;
           }
         </style>
       </head>
       <body>
-
         <h1>EducAdapt</h1>
 
         <div class="meta">
-          <strong>Tipo:</strong> ${type}<br>
-          <strong>Nivel:</strong> ${level}<br>
-          <strong>Modo:</strong> ${mode}<br>
+          <strong>Tipo:</strong> ${type} <br>
+          <strong>Nivel:</strong> ${level} <br>
+          <strong>Modo:</strong> ${mode} <br>
           <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
         </div>
 
-        <hr>
+        <hr />
 
         <div class="content">
-          ${content}
+          ${formatted}
         </div>
-
       </body>
     </html>
   `);
-
-  win.document.close();
-
-  setTimeout(() => {
-    win.print();
-  }, 300);
-};
 
   win.document.close();
   win.print();
