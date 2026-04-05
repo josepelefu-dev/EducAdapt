@@ -245,17 +245,34 @@ export default function Home() {
   };
 
   const downloadResult = () => {
-    if (!result) return;
+  if (!result) return;
 
-    const blob = new Blob([formatResult(result)], {
-      type: "text/plain;charset=utf-8;"
-    });
+  const content = `
+EDUCADAPT
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "educadapt.txt";
-    link.click();
-  };
+Tipo: ${type}
+Nivel: ${level}
+Modo: ${mode}
+Fecha: ${new Date().toLocaleDateString()}
+
+----------------------------------------
+
+${formatResult(result)}
+
+----------------------------------------
+
+Documento generado con EducAdapt
+`;
+
+  const blob = new Blob([content], {
+    type: "text/plain;charset=utf-8;"
+  });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "educadapt.txt";
+  link.click();
+};
 
   const exportPDF = () => {
   if (!result) return;
