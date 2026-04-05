@@ -5,69 +5,89 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVEL (ADAPTADO POR EDAD REAL)
+    // 🧠 NIVEL (POR EDAD REAL)
 
     if (level === "basico") {
       levelPrompt = `
-Explica el contenido para un estudiante de 11 años.
+Adapta el contenido para un estudiante de 11 años.
 
-- Usa lenguaje claro pero NO infantil.
+- Lenguaje claro pero NO infantil.
+- Frases sencillas y naturales.
+- Explicación comprensible sin perder rigor.
 - No uses metáforas tipo "truco mágico".
-- Explica conceptos de forma sencilla pero correcta.
-- Frases cortas pero naturales.
-- Mantén rigor educativo sin simplificar en exceso.
+- Sé directo.
+
+Respeta siempre que es un resumen: sé breve y directo.
 `;
     }
 
     if (level === "intermedio") {
       levelPrompt = `
-Explica el contenido para un estudiante de 13 años.
+Adapta el contenido para un estudiante de 13 años.
 
 - Lenguaje claro y educativo.
-- Introduce conceptos importantes.
+- Incluye ideas principales.
 - Mantén equilibrio entre claridad y contenido.
-- Evita lenguaje infantil.
+
+Respeta siempre que es un resumen: sé breve y directo.
 `;
     }
 
     if (level === "avanzado") {
       levelPrompt = `
-Explica el contenido para un estudiante de 15 años.
+Adapta el contenido para un estudiante de 15 años.
 
 - Lenguaje preciso pero comprensible.
-- Incluye términos clave sin exceso académico.
+- Incluye términos importantes sin exceso académico.
 - Explicación completa pero clara.
-- Evita tecnicismos innecesarios.
+
+Respeta siempre que es un resumen: sé breve y directo.
 `;
     }
 
-    // 🎯 TIPO
+    // 🎯 TIPO (CONTROLA EL RESULTADO)
 
     if (type === "facil") {
-      typePrompt = "Haz un resumen claro del texto.";
+      typePrompt = `
+Haz un resumen del texto.
+
+IMPORTANTE:
+- Máximo 3 frases.
+- Solo ideas principales.
+- No añadas información nueva.
+- No expliques en detalle.
+`;
     }
 
     if (type === "tdah") {
       typePrompt = `
 Adapta el texto para TDAH:
-- frases cortas
-- ideas separadas
-- estructura clara
+
+- Frases muy cortas.
+- Una idea por línea.
+- Usa saltos de línea.
+- Evita bloques largos.
 `;
     }
 
     if (type === "dislexia") {
       typePrompt = `
 Adapta el texto para dislexia:
-- lenguaje simple
-- frases cortas
-- estructura clara
+
+- Lenguaje simple.
+- Frases cortas.
+- Estructura clara.
+- Evita palabras complejas innecesarias.
 `;
     }
 
     if (type === "esquema") {
       typePrompt = `
 Convierte el contenido en un esquema estructurado.
+
+- Usa formato claro.
+- Ideas jerárquicas.
+- Muy visual.
 `;
     }
 
