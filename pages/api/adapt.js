@@ -1,9 +1,3 @@
-import OpenAI from "openai";
-
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
-
 export default async function handler(req, res) {
   try {
     const { text, type, level, mode, lang } = req.body;
@@ -33,25 +27,34 @@ export default async function handler(req, res) {
     const languageInstruction =
       lang === "ca" ? "Respon en català." : "Responde en español.";
 
-    const response = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        {
-          role: "user",
-          content: `
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: `
 ${languageInstruction}
 ${typePrompt}
 ${levelPrompt}
 
 Texto:
 ${text}
-`,
-        },
-      ],
+`
+          }
+        ]
+      })
     });
 
+    const data = await response.json();
+
     res.status(200).json({
-      result: response.choices[0].message.content,
+      result: data.choices?.[0]?.message?.content || "Error generando respuesta"
     });
 
   } catch (error) {
