@@ -1,174 +1,103 @@
+import OpenAI from "openai";
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY,
+});
+
 export default async function handler(req, res) {
   try {
-    const { text, type, mode, level, lang } = req.body;
+    const { text, type, level, mode, lang } = req.body;
 
-    // 🔒 VALIDACIÓN
-    if (!text || text.trim() === "") {
-      return res.status(400).json({
-        result: "No has introducido texto"
-      });
-    }
+    let levelPrompt = "";
+    let typePrompt = "";
 
-    // 🌍 IDIOMA FORZADO
-    let languageInstruction = "";
-
-    if (lang === "ca") {
-      languageInstruction = `
-RESPONDE ÚNICAMENTE EN CATALÁN.
-NO uses castellano en ningún caso.
-`;
-    } else {
-      languageInstruction = `
-RESPONDE ÚNICAMENTE EN CASTELLANO.
-NO uses catalán en ningún caso.
-`;
-    }
-
-    // 🎯 NIVEL
-    let levelInstruction = "";
-
+    // 🎯 NIVEL (CLAVE)
     if (level === "basico") {
-      levelInstruction = `
-- Lenguaje muy sencillo
-- Frases muy cortas
-- Evitar palabras difíciles
+      levelPrompt = `
+Explica el contenido como si fuera para un niño de 10 años.
+Usa frases muy cortas, vocabulario simple y evita tecnicismos.
+Reduce el contenido a lo esencial.
 `;
     }
 
     if (level === "intermedio") {
-      levelInstruction = `
-- Lenguaje claro
-- Explicación estructurada
+      levelPrompt = `
+Explica el contenido de forma clara y estructurada.
+Incluye las ideas principales sin simplificar en exceso.
+Lenguaje accesible pero preciso.
 `;
     }
 
     if (level === "avanzado") {
-      levelInstruction = `
-- Mantener términos técnicos
-- Explicación más completa
+      levelPrompt = `
+Explica el contenido con detalle y precisión académica.
+Incluye conceptos importantes, relaciones y terminología relevante.
+No simplifiques demasiado.
 `;
     }
 
-    let prompt = "";
-
-    // 👨‍🏫 MODO PROFESOR
-    if (mode === "profesor") {
-      prompt = `${languageInstruction}
-
-Adapta este contenido para uso docente.
-
-REGLAS:
-- Explicación clara
-- Estructura didáctica
-- Bien organizado
-
-NIVEL:
-${levelInstruction}
-
-Devuelve SOLO el contenido.
-SIN introducciones.
-
-Texto:
-${text}`;
+    // 🎯 TIPO
+    if (type === "facil") {
+      typePrompt = "Haz un resumen claro del texto.";
     }
 
-    // 🧑‍🎓 MODO ALUMNO
-    else {
-
-      if (type === "facil") {
-        prompt = `${languageInstruction}
-
-Simplifica el siguiente texto.
-
-${levelInstruction}
-
-Devuelve SOLO el texto.
-SIN introducciones ni comentarios.
-
-Texto:
-${text}`;
-      }
-
-      if (type === "tdah") {
-        prompt = `${languageInstruction}
-
-Adapta este texto para TDAH.
-
-${levelInstruction}
-
-REGLAS:
-- Usa listas
-- Una idea por línea
-- Destaca palabras clave en MAYÚSCULAS
-
-Devuelve SOLO el resultado.
-SIN introducciones.
-
-Texto:
-${text}`;
-      }
-
-      if (type === "dislexia") {
-        prompt = `${languageInstruction}
-
-Adapta este texto para dislexia.
-
-${levelInstruction}
-
-REGLAS:
-- Una frase por línea
-- Muy fácil de leer
-
-Devuelve SOLO el texto.
-SIN introducciones.
-
-Texto:
-${text}`;
-      }
-
-      if (type === "esquema") {
-        prompt = `${languageInstruction}
-
-Convierte este texto en un esquema tipo árbol.
-
-${levelInstruction}
-
-FORMATO:
-TEMA
- ├── IDEA
- │    ├── DETALLE
-
-Devuelve SOLO el esquema.
-SIN introducciones.
-
-Texto:
-${text}`;
-      }
+    if (type === "tdah") {
+      typePrompt = `
+Adapta el texto para TDAH:
+- frases cortas
+- ideas separadas
+- formato claro
+`;
     }
 
-    // 🤖 LLAMADA IA
-    const response = await fetch("https://api.openai.com/v1/chat/completions", {
-      method: "POST",
-      headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        model: "gpt-4o-mini",
-        messages: [{ role: "user", content: prompt }]
-      })
+    if (type === "dislexia") {
+      typePrompt = `
+Adapta el texto para dislexia:
+- lenguaje simple
+- frases cortas
+- estructura clara
+`;
+    }
+
+    if (type === "esquema") {
+      typePrompt = `
+Convierte el contenido en esquema estructurado.
+`;
+    }
+
+    const languageInstruction =
+      lang === "ca"
+        ? "Respon en català."
+        : "Responde en español.";
+
+    const completion = await openai.chat.completions.create({
+      model: "gpt-4o-mini",
+      messages: [
+        {
+          role: "system",
+          content: "Eres un experto en educación y adaptación de contenido.",
+        },
+        {
+          role: "user",
+          content: `
+${languageInstruction}
+
+${typePrompt}
+
+${levelPrompt}
+
+Texto:
+${text}
+`,
+        },
+      ],
     });
 
-    const data = await response.json();
-
-    return res.status(200).json({
-      result: data.choices?.[0]?.message?.content || "Sin resultado"
+    res.status(200).json({
+      result: completion.choices[0].message.content,
     });
 
   } catch (error) {
-    console.error(error);
-    return res.status(500).json({
-      result: "Error interno del servidor"
-    });
+    res.status(500).json({ error: "Error procesando" });
   }
 }
