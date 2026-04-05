@@ -5,19 +5,19 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVELES (SIN PORCENTAJES, MÁS FIABLE)
+    // 🧠 NIVELES (ESTABLES)
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
 
 REGLAS:
 - Elimina la mayor parte de detalles.
-- Quédate solo con ideas imprescindibles.
+- Quédate solo con ideas esenciales.
 - Lenguaje claro y fácil.
 - Frases cortas.
 
 IMPORTANTE:
-- Debe ser claramente más corto que el texto original.
+- Debe ser claramente más corto que el original.
 - NO añadas títulos.
 `;
     }
@@ -43,9 +43,8 @@ IMPORTANTE:
 Adapta el contenido para un estudiante de 15-16 años.
 
 REGLAS:
-- Mantén la mayoría del contenido.
+- Mantén la mayor parte del contenido.
 - Explica de forma clara.
-- Conserva información relevante.
 
 IMPORTANTE:
 - Debe ser el más completo.
@@ -60,7 +59,7 @@ Haz un resumen adaptado al nivel.
 
 REGLAS:
 - Respeta la diferencia entre niveles.
-- No hagas resúmenes similares.
+- No hagas todos los resúmenes iguales.
 - Mantén coherencia.
 `;
     }
@@ -87,35 +86,37 @@ REGLAS:
 `;
     }
 
-    // 🌳 ESQUEMA V5 (VUELTA AL BUENO + MEJORADO)
+    // 🌳 ESQUEMA (ESTILO QUE QUIERES)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema visual tipo árbol.
+Convierte el contenido en un esquema visual tipo árbol EXACTAMENTE con este formato:
 
-REGLAS:
-- Reduce el contenido (muy importante).
-- Quédate solo con conceptos clave.
-- NO incluyas todo el contenido.
-
-FORMATO:
-
-📌 TEMA
+📌 TEMA PRINCIPAL
 ↳ Idea principal
-  ↳ Subidea
-  ↳ Subidea
-↳ Otra idea
-  ↳ Subidea
+   ↳ Subidea
+   ↳ Subidea
+↳ Otra idea principal
 
-REGLAS CLAVE:
-- Frases muy cortas o palabras clave
+REGLAS OBLIGATORIAS:
+- Usa SIEMPRE "↳"
+- Usa espacios para subniveles (como en el ejemplo)
 - Máximo 2 niveles de profundidad
-- No repetir información
-- No redactar texto largo
+- Máximo 6-8 líneas en total
 
-IMPORTANTE:
-- Debe verse como un esquema visual
-- Debe ser fácil de estudiar
-- No debe parecer un resumen
+CONTENIDO:
+- Reduce MUCHO la información
+- Quédate solo con conceptos clave
+- NO incluyas todo el contenido
+
+PROHIBIDO:
+- Frases largas
+- Párrafos
+- Explicaciones
+- Repeticiones
+
+OBJETIVO:
+- Debe parecer un mapa mental
+- Debe ser visual y claro
 `;
     }
 
