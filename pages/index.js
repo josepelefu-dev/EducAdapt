@@ -41,7 +41,7 @@ export default function Home() {
     reader.readAsText(file);
   };
 
-  // 🔥 NUEVO ESQUEMA REAL (NO DEPENDE DE IA)
+  // 🔥 SOLO ESTA FUNCIÓN CAMBIADA (ESQUEMA REAL)
   const generateSmartSchema = (text) => {
     if (!text) return "";
 
@@ -50,19 +50,19 @@ export default function Home() {
       .map(l => l.trim())
       .filter(l => l.length > 20);
 
-    let result = "📌 TEMA\n";
+    let schema = "📌 TEMA\n";
 
-    lines.slice(0, 8).forEach((line, i) => {
-      const short = line.split(" ").slice(0, 5).join(" ");
+    lines.slice(0, 6).forEach((line, i) => {
+      const short = line.split(" ").slice(0, 4).join(" ");
 
-      if (i === 0) {
-        result += `↳ ${short}\n`;
+      if (i % 2 === 0) {
+        schema += `↳ ${short}\n`;
       } else {
-        result += `   ↳ ${short}\n`;
+        schema += `   ↳ ${short}\n`;
       }
     });
 
-    return result;
+    return schema;
   };
 
   const translations = {
@@ -140,7 +140,6 @@ export default function Home() {
       const data = await res.json();
       let finalResult = data.result || "";
 
-      // 🔥 SOLO CAMBIO AQUÍ
       if (type === "esquema") {
         finalResult = generateSmartSchema(finalResult);
       }
@@ -240,6 +239,28 @@ ${formatResult(result)}
     link.click();
   };
 
+  const exportPDF = () => {
+    if (!result) return;
+
+    const formatted = formatResult(result).replace(/\n/g, "<br>");
+    const win = window.open("", "_blank");
+
+    win.document.write(`
+      <html>
+        <head>
+          <title>EducAdapt PDF</title>
+        </head>
+        <body>
+          <h1>EducAdapt</h1>
+          ${formatted}
+        </body>
+      </html>
+    `);
+
+    win.document.close();
+    win.print();
+  };
+
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
 
@@ -265,7 +286,6 @@ ${formatResult(result)}
     <div style={{ padding: 20 }}>
       <textarea value={text} onChange={(e) => setText(e.target.value)} />
       <button onClick={handleAdapt}>{t.adapt}</button>
-
       {result && <div style={resultStyle}>{result}</div>}
     </div>
   );
