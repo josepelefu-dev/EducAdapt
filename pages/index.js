@@ -41,28 +41,22 @@ export default function Home() {
     reader.readAsText(file);
   };
 
-  // 🔥 SOLO ESTA FUNCIÓN CAMBIADA (ESQUEMA REAL)
   const generateSmartSchema = (text) => {
-    if (!text) return "";
+    const lines = text.split("\n").filter(l => l.trim() !== "");
+    let result = "";
 
-    const lines = text
-      .split("\n")
-      .map(l => l.trim())
-      .filter(l => l.length > 20);
-
-    let schema = "📌 TEMA\n";
-
-    lines.slice(0, 6).forEach((line, i) => {
-      const short = line.split(" ").slice(0, 4).join(" ");
-
-      if (i % 2 === 0) {
-        schema += `↳ ${short}\n`;
+    lines.forEach(line => {
+      const t = line.trim();
+      if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
+        result += `\n📌 ${t.replace(":", "")}\n`;
+      } else if (t.length < 120) {
+        result += `  ↳ ${t}\n`;
       } else {
-        schema += `   ↳ ${short}\n`;
+        result += `   • ${t}\n`;
       }
     });
 
-    return schema;
+    return result;
   };
 
   const translations = {
@@ -221,13 +215,19 @@ export default function Home() {
     if (!result) return;
 
     const content = `EDUCADAPT
+
 Tipo: ${type}
 Nivel: ${level}
 Modo: ${mode}
 Fecha: ${new Date().toLocaleDateString()}
+
 ----------------------------------------
+
 ${formatResult(result)}
-----------------------------------------`;
+
+----------------------------------------
+
+Documento generado con EducAdapt`;
 
     const blob = new Blob([content], {
       type: "text/plain;charset=utf-8;"
@@ -239,26 +239,70 @@ ${formatResult(result)}
     link.click();
   };
 
+  // ✅ SOLO MEJORADO (NO TOCA NADA MÁS)
   const exportPDF = () => {
     if (!result) return;
 
     const formatted = formatResult(result).replace(/\n/g, "<br>");
+
+    const colorMap = {
+      facil: "#6366f1",
+      tdah: "#f59e0b",
+      dislexia: "#10b981",
+      esquema: "#0ea5e9"
+    };
+
+    const color = colorMap[type] || "#6366f1";
+
     const win = window.open("", "_blank");
+    if (!win) return alert("Permite ventanas emergentes");
 
     win.document.write(`
       <html>
         <head>
           <title>EducAdapt PDF</title>
+          <style>
+            body {
+              font-family: Arial;
+              padding: 40px;
+              line-height: 1.7;
+              max-width: 800px;
+              margin: auto;
+            }
+            h1 {
+              color: ${color};
+            }
+            .badge {
+              background: ${color};
+              color: white;
+              padding: 4px 10px;
+              border-radius: 8px;
+              margin-right: 5px;
+              font-size: 12px;
+            }
+            hr {
+              height: 2px;
+              background: ${color};
+              border: none;
+              margin: 20px 0;
+            }
+          </style>
         </head>
         <body>
           <h1>EducAdapt</h1>
+          <div>
+            <span class="badge">${type}</span>
+            <span class="badge">${level}</span>
+            <span class="badge">${mode}</span>
+          </div>
+          <hr>
           ${formatted}
         </body>
       </html>
     `);
 
     win.document.close();
-    win.print();
+    setTimeout(() => win.print(), 300);
   };
 
   useEffect(() => {
@@ -279,14 +323,151 @@ ${formatResult(result)}
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
+    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
+    letterSpacing: type === "dislexia" ? "1px" : "normal",
+    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     color: "#111827"
   };
 
   return (
-    <div style={{ padding: 20 }}>
-      <textarea value={text} onChange={(e) => setText(e.target.value)} />
-      <button onClick={handleAdapt}>{t.adapt}</button>
-      {result && <div style={resultStyle}>{result}</div>}
+    <div style={pageStyle}>
+      <div style={headerStyle}>
+        <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+          <img src="/logo.jpg" style={{ width: "50px" }} />
+          <h2>{t.title}</h2>
+        </div>
+
+        <div>
+          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
+          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+        </div>
+      </div>
+
+      <div style={cardStyle}>
+        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+
+        <br /><br />
+
+        <div>
+          <label style={{ color: "#111827", fontWeight: "600" }}>{t.file}</label>
+          <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} style={{ marginTop: "5px" }} />
+        </div>
+
+        <br /><br />
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
+
+        <button onClick={handleAdapt} style={mainButton}>
+          {loading ? t.loading : t.adapt}
+        </button>
+
+        <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
+          {t.pdf}
+        </button>
+
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
+
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
+
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.resume}
+            </button>
+
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.stopSpeak}
+            </button>
+
+            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
+          </div>
+        )}
+
+        <br /><br />
+
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
+
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div
+                key={i}
+                ref={el => lineRefs.current[i] = el}
+                onClick={() => speakText(i)}
+                style={{
+                  padding: "8px",
+                  margin: "4px 0",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  opacity: i === currentLine ? 1 : 0.4,
+                  background: i === currentLine ? "#dbeafe" : "transparent",
+                  fontWeight: i === currentLine ? "600" : "400"
+                }}
+              >
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {result && (
+        <div style={{ textAlign: "center", marginTop: "20px" }}>
+          <button
+            onClick={downloadResult}
+            style={{
+              padding: "15px",
+              background: "#0ea5e9",
+              color: "white",
+              border: "none",
+              borderRadius: "12px",
+              cursor: "pointer"
+            }}
+          >
+            {t.download}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
+
+const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
