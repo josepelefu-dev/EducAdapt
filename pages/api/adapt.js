@@ -5,22 +5,26 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVELES REALES (CLAVE DEL PRODUCTO)
+    // 🧠 NIVELES (DIFERENCIA REAL Y CONTROLADA)
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
 
 REGLAS OBLIGATORIAS:
-- Reduce el contenido al 40% del original.
-- Quédate SOLO con las ideas más importantes.
-- Elimina detalles secundarios.
-- Usa lenguaje claro pero NO infantil.
-- Frases cortas.
+- Reduce el contenido al 30-40% del original.
+- Quédate SOLO con lo esencial.
+- Elimina ejemplos, detalles y evolución compleja.
+- NO incluyas listas largas de conceptos.
+- Frases muy claras y cortas.
+
+OBJETIVO:
+- Debe leerse rápido.
+- Debe entenderse sin esfuerzo.
+- Debe ser claramente más corto que los otros niveles.
 
 MUY IMPORTANTE:
-- Debe ser claramente más corto que los otros niveles.
-- No expliques todo, simplifica.
-- NO añadas títulos ni introducciones.
+- NO añadas títulos.
+- NO expliques lo que haces.
 - Empieza directamente con el contenido.
 `;
     }
@@ -30,16 +34,19 @@ MUY IMPORTANTE:
 Adapta el contenido para un estudiante de 13-14 años.
 
 REGLAS:
-- Reduce el contenido al 60% del original.
+- Reduce el contenido al 55-65% del original.
 - Mantén ideas importantes.
-- Explica lo necesario sin exceso.
-- Lenguaje claro y educativo.
+- Explica lo necesario sin profundizar demasiado.
+- Puedes incluir ejemplos simples.
+
+OBJETIVO:
+- Explicación clara + algo de desarrollo.
 
 MUY IMPORTANTE:
 - Debe ser más largo que el básico.
 - Debe ser más corto que el avanzado.
-- NO añadas títulos ni introducciones.
-- Empieza directamente con el contenido.
+- NO añadas títulos.
+- Empieza directamente.
 `;
     }
 
@@ -48,99 +55,107 @@ MUY IMPORTANTE:
 Adapta el contenido para un estudiante de 15-16 años.
 
 REGLAS:
-- Mantén el 80-90% del contenido original.
+- Mantén el 80-90% del contenido.
+- Incluye detalles relevantes.
 - Explicación completa pero clara.
 - Usa lenguaje académico sencillo.
 
+OBJETIVO:
+- Comprensión profunda.
+
 MUY IMPORTANTE:
-- Debe ser el nivel más completo.
-- NO añadas títulos ni introducciones.
-- Empieza directamente con el contenido.
+- Debe ser el más largo.
+- NO añadas títulos.
+- Empieza directamente.
 `;
     }
 
-    // 🎯 TIPOS DE ADAPTACIÓN
+    // 🎯 TIPOS
     if (type === "facil") {
       typePrompt = `
-Haz un resumen adaptado al nivel indicado.
+Haz un resumen adaptado al nivel.
 
 REGLAS:
-- Respeta la longitud según nivel.
-- Mantén ideas principales.
-- No conviertas todo en pocas líneas.
-- No añadas información nueva.
+- Respeta la longitud según nivel (MUY IMPORTANTE).
+- Mantén coherencia.
+- No inventes información.
+- No reduzcas todo a pocas líneas.
 
-MUY IMPORTANTE:
-- NO añadas títulos.
-- Empieza directamente con el contenido.
+OBJETIVO:
+- Que cada nivel sea claramente diferente.
 `;
     }
 
     if (type === "tdah") {
       typePrompt = `
-Adapta el texto para TDAH.
+Adapta para TDAH.
 
 REGLAS:
 - Una idea por línea.
-- Frases muy cortas.
-- Espaciado claro.
-- Evita bloques largos.
-- Usa formato visual fácil.
+- Frases cortas.
+- Espacios entre líneas.
+- Evita texto largo.
 
-MUY IMPORTANTE:
-- Mantén contenido importante.
-- NO añadas títulos.
+OBJETIVO:
+- Lectura rápida y clara.
 `;
     }
 
     if (type === "dislexia") {
       typePrompt = `
-Adapta el texto para dislexia.
+Adapta para dislexia.
 
 REGLAS:
 - Frases cortas.
 - Palabras simples.
-- Estructura muy clara.
-- Evita términos complejos innecesarios.
+- Estructura clara.
+- Evita complejidad.
 
-MUY IMPORTANTE:
-- Mantén ideas clave.
-- NO añadas títulos.
+OBJETIVO:
+- Facilitar lectura.
 `;
     }
 
-    // 🌳 ESQUEMA PRO REAL
+    // 🌳 ESQUEMA PRO LIMPIO
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un ESQUEMA EN FORMA DE ÁRBOL.
+Convierte el contenido en un esquema tipo árbol CLARO y LIMPIO.
 
 REGLAS OBLIGATORIAS:
-- Usa estructura jerárquica clara (tipo árbol).
-- Máximo 3 niveles de profundidad.
-- Usa SOLO palabras clave (máx 6 palabras por línea).
-- NO escribas frases largas.
-- NO redactes párrafos.
+- SOLO usar estos símbolos:
+  - "📌" para tema principal
+  - "-" para nivel 1
+  - "  -" para nivel 2
+  - "    -" para nivel 3
 
-FORMATO EXACTO:
+FORMATO EJEMPLO:
 
-📌 TEMA PRINCIPAL
-├── Bloque
-│   ├── Idea clave
-│   ├── Idea clave
-│
-├── Otro bloque
-│   ├── Idea clave
-│   └── Idea clave
+📌 PREHISTORIA
+- Definición
+  - Antes escritura
+- Etapas
+  - Edad Piedra
+    - Paleolítico
+    - Neolítico
+- Características
+  - Herramientas
+  - Fuego
 
-REGLAS IMPORTANTES:
-- Agrupa la información correctamente.
-- No mezcles niveles (tema / subtema / detalle).
-- Debe ser visual y fácil de estudiar.
-- No expliques, SOLO organiza.
+REGLAS CLAVE:
+- SOLO palabras clave (máx 5-6 palabras)
+- NO frases largas
+- NO símbolos raros (↳, │, ├, etc.)
+- NO repetir títulos
+- NO escribir párrafos
+- Máximo 3 niveles
+
+OBJETIVO:
+- Esquema visual para estudiar
+- Fácil de memorizar
+- Limpio y ordenado
 
 MUY IMPORTANTE:
-- Debe parecer un esquema de examen.
-- Empieza directamente con el esquema.
+- Empieza directamente con el esquema
 `;
     }
 
