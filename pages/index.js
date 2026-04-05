@@ -145,10 +145,8 @@ export default function Home() {
       const data = await res.json();
       let finalResult = data.result || "";
 
-      if (type === "esquema") {
-        finalResult = generateSmartSchema(finalResult);
-      }
-
+      
+      
       setResult(finalResult);
       setCurrentLine(0);
     } catch {
