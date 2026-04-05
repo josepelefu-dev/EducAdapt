@@ -16,6 +16,11 @@ IMPORTANTE:
 - Usa frases cortas y comprensibles.
 - Mantén las ideas importantes.
 - Reduce ligeramente el contenido, pero sin eliminar información clave.
+
+MUY IMPORTANTE:
+- NO añadas títulos como "Resumen de..." o "Adaptado para..."
+- NO expliques lo que estás haciendo.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -29,6 +34,10 @@ IMPORTANTE:
 - Explicación estructurada.
 - No simplifiques en exceso.
 - Mantén buena parte del contenido original.
+
+MUY IMPORTANTE:
+- NO añadas títulos ni explicaciones.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -42,6 +51,10 @@ IMPORTANTE:
 - No simplifiques en exceso.
 - Conserva la mayor parte del contenido.
 - Prioriza claridad y estructura.
+
+MUY IMPORTANTE:
+- NO añadas títulos ni explicaciones.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -58,6 +71,10 @@ REGLAS IMPORTANTES:
 - NO reduzcas todo a pocas líneas.
 - NO añadas información nueva.
 - Mantén coherencia y claridad.
+
+MUY IMPORTANTE:
+- NO añadas títulos ni introducciones.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -72,6 +89,10 @@ REGLAS:
 - Usa listas si es posible.
 - Evita bloques largos de texto.
 - Mantén el contenido importante.
+
+MUY IMPORTANTE:
+- NO añadas títulos ni explicaciones.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -85,6 +106,10 @@ REGLAS:
 - Estructura limpia.
 - Evita palabras complejas innecesarias.
 - Mantén las ideas clave.
+
+MUY IMPORTANTE:
+- NO añadas títulos ni explicaciones.
+- Empieza directamente con el contenido.
 `;
     }
 
@@ -98,6 +123,10 @@ REGLAS:
 - Usa viñetas o niveles.
 - Mantén la información importante.
 - No reduzcas en exceso.
+
+MUY IMPORTANTE:
+- NO añadas títulos explicativos.
+- Empieza directamente con el esquema.
 `;
     }
 
