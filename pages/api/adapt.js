@@ -58,7 +58,7 @@ MUY IMPORTANTE:
 `;
     }
 
-    // 🎯 TIPO (MEJORADO)
+    // 🎯 TIPO
     if (type === "facil") {
       typePrompt = `
 Haz un resumen adaptado al nivel indicado.
@@ -113,20 +113,33 @@ MUY IMPORTANTE:
 `;
     }
 
+    // 🔥 ESQUEMA PRO (NUEVO)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema estructurado.
+Convierte el contenido en un ESQUEMA DE ESTUDIO claro y visual.
 
-REGLAS:
-- Organización jerárquica.
-- Ideas claras.
-- Usa viñetas o niveles.
-- Mantén la información importante.
-- No reduzcas en exceso.
+REGLAS OBLIGATORIAS:
+- Usa estructura jerárquica.
+- Organiza la información en niveles (tema → subtema → ideas).
+- Usa este formato EXACTO:
+
+📌 TÍTULO PRINCIPAL
+↳ Subtema
+   • Idea clave
+   • Idea clave
+
+↳ Otro subtema
+   • Idea clave
+
+- Frases muy cortas.
+- NO redactes párrafos.
+- NO expliques, solo estructura.
+- NO conviertas esto en un resumen.
+- El objetivo es que sirva para estudiar y memorizar.
 
 MUY IMPORTANTE:
-- NO añadas títulos explicativos.
 - Empieza directamente con el esquema.
+- NO añadas introducciones ni explicaciones.
 `;
     }
 
