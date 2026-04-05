@@ -5,21 +5,22 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVEL (CONTROL DE LONGITUD REAL)
+    // 🧠 NIVELES REALES (CLAVE DEL PRODUCTO)
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
 
-IMPORTANTE:
-- Lenguaje claro pero NO infantil.
-- Explica de forma sencilla.
-- Reduce el contenido aproximadamente al 40-50% del original.
-- Quédate solo con lo esencial.
-- Frases cortas y fáciles.
+REGLAS OBLIGATORIAS:
+- Reduce el contenido al 40% del original.
+- Quédate SOLO con las ideas más importantes.
+- Elimina detalles secundarios.
+- Usa lenguaje claro pero NO infantil.
+- Frases cortas.
 
 MUY IMPORTANTE:
-- Debe ser claramente más corto que el intermedio y avanzado.
-- NO añadas títulos ni explicaciones.
+- Debe ser claramente más corto que los otros niveles.
+- No expliques todo, simplifica.
+- NO añadas títulos ni introducciones.
 - Empieza directamente con el contenido.
 `;
     }
@@ -28,15 +29,16 @@ MUY IMPORTANTE:
       levelPrompt = `
 Adapta el contenido para un estudiante de 13-14 años.
 
-IMPORTANTE:
-- Lenguaje claro y educativo.
+REGLAS:
+- Reduce el contenido al 60% del original.
 - Mantén ideas importantes.
-- Reduce el contenido al 60-70% del original.
-- Explicación estructurada.
+- Explica lo necesario sin exceso.
+- Lenguaje claro y educativo.
 
 MUY IMPORTANTE:
-- Debe ser más largo que el básico y más corto que el avanzado.
-- NO añadas títulos ni explicaciones.
+- Debe ser más largo que el básico.
+- Debe ser más corto que el avanzado.
+- NO añadas títulos ni introducciones.
 - Empieza directamente con el contenido.
 `;
     }
@@ -45,32 +47,31 @@ MUY IMPORTANTE:
       levelPrompt = `
 Adapta el contenido para un estudiante de 15-16 años.
 
-IMPORTANTE:
-- Lenguaje académico pero claro.
-- Mantén casi todo el contenido.
-- Reduce solo ligeramente (80-90% del original).
-- Alta precisión.
+REGLAS:
+- Mantén el 80-90% del contenido original.
+- Explicación completa pero clara.
+- Usa lenguaje académico sencillo.
 
 MUY IMPORTANTE:
-- Debe ser el más largo de los tres niveles.
-- NO añadas títulos ni explicaciones.
+- Debe ser el nivel más completo.
+- NO añadas títulos ni introducciones.
 - Empieza directamente con el contenido.
 `;
     }
 
-    // 🎯 TIPO
+    // 🎯 TIPOS DE ADAPTACIÓN
     if (type === "facil") {
       typePrompt = `
 Haz un resumen adaptado al nivel indicado.
 
 REGLAS:
+- Respeta la longitud según nivel.
 - Mantén ideas principales.
-- Ajusta longitud según el nivel (NO todos iguales).
-- No reduzcas todo a pocas líneas.
+- No conviertas todo en pocas líneas.
 - No añadas información nueva.
 
 MUY IMPORTANTE:
-- NO añadas títulos ni introducciones.
+- NO añadas títulos.
 - Empieza directamente con el contenido.
 `;
     }
@@ -80,13 +81,14 @@ MUY IMPORTANTE:
 Adapta el texto para TDAH.
 
 REGLAS:
-- Frases cortas.
 - Una idea por línea.
+- Frases muy cortas.
 - Espaciado claro.
 - Evita bloques largos.
-- Mantén contenido importante.
+- Usa formato visual fácil.
 
 MUY IMPORTANTE:
+- Mantén contenido importante.
 - NO añadas títulos.
 `;
     }
@@ -96,40 +98,48 @@ MUY IMPORTANTE:
 Adapta el texto para dislexia.
 
 REGLAS:
-- Lenguaje simple.
 - Frases cortas.
-- Estructura clara.
-- Mantén ideas clave.
+- Palabras simples.
+- Estructura muy clara.
+- Evita términos complejos innecesarios.
 
 MUY IMPORTANTE:
+- Mantén ideas clave.
 - NO añadas títulos.
 `;
     }
 
-    // 🔥 ESQUEMA ÁRBOL (NUEVO NIVEL PRO)
+    // 🌳 ESQUEMA PRO REAL
     if (type === "esquema") {
       typePrompt = `
 Convierte el contenido en un ESQUEMA EN FORMA DE ÁRBOL.
 
 REGLAS OBLIGATORIAS:
-- Usa estructura tipo árbol.
-- Organiza la información en niveles jerárquicos.
-- Usa este formato EXACTO:
+- Usa estructura jerárquica clara (tipo árbol).
+- Máximo 3 niveles de profundidad.
+- Usa SOLO palabras clave (máx 6 palabras por línea).
+- NO escribas frases largas.
+- NO redactes párrafos.
 
-📌 TÍTULO PRINCIPAL
-├── Subtema
+FORMATO EXACTO:
+
+📌 TEMA PRINCIPAL
+├── Bloque
 │   ├── Idea clave
 │   ├── Idea clave
 │
-├── Otro subtema
+├── Otro bloque
 │   ├── Idea clave
+│   └── Idea clave
 
-- Usa palabras clave, NO frases largas.
-- NO redactes párrafos.
-- NO conviertas en resumen.
+REGLAS IMPORTANTES:
+- Agrupa la información correctamente.
+- No mezcles niveles (tema / subtema / detalle).
+- Debe ser visual y fácil de estudiar.
+- No expliques, SOLO organiza.
 
 MUY IMPORTANTE:
-- Debe parecer un esquema visual de estudio.
+- Debe parecer un esquema de examen.
 - Empieza directamente con el esquema.
 `;
     }
