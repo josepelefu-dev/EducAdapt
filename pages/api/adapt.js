@@ -13,11 +13,11 @@ Adapta el contenido para un estudiante de 11-12 años.
 REGLAS:
 - Elimina la mayoría de detalles.
 - Quédate solo con ideas esenciales.
-- Lenguaje claro.
+- Lenguaje claro y fácil.
 - Frases cortas.
 
 IMPORTANTE:
-- Debe ser claramente más corto.
+- Debe ser claramente más corto que el original.
 - NO añadas títulos.
 `;
     }
@@ -33,6 +33,7 @@ REGLAS:
 
 IMPORTANTE:
 - Más completo que básico.
+- Más corto que avanzado.
 - NO añadas títulos.
 `;
     }
@@ -42,8 +43,8 @@ IMPORTANTE:
 Adapta el contenido para un estudiante de 15-16 años.
 
 REGLAS:
-- Mantén la mayoría del contenido.
-- Explicación clara.
+- Mantén la mayor parte del contenido.
+- Explica de forma clara.
 
 IMPORTANTE:
 - Debe ser el más completo.
@@ -57,8 +58,9 @@ IMPORTANTE:
 Haz un resumen adaptado al nivel.
 
 REGLAS:
-- Respeta diferencias entre niveles.
-- No hacer todos iguales.
+- Respeta la diferencia entre niveles.
+- No hagas todos los resúmenes iguales.
+- Mantén coherencia.
 `;
     }
 
@@ -69,6 +71,7 @@ Adapta para TDAH.
 REGLAS:
 - Una idea por línea.
 - Frases cortas.
+- Espaciado claro.
 `;
     }
 
@@ -79,42 +82,36 @@ Adapta para dislexia.
 REGLAS:
 - Frases cortas.
 - Palabras simples.
+- Estructura clara.
 `;
     }
 
-    // 🌳 ESQUEMA FORZADO (ESTE ES EL CAMBIO REAL)
+    // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema EXACTAMENTE con esta estructura.
+Convierte el contenido en un esquema visual tipo árbol.
 
-DEBES COPIAR ESTE FORMATO:
+IMPORTANTE:
+- Usa este formato:
 
-📌 TEMA PRINCIPAL
-↳ Idea principal 1
-   ↳ Subidea 1
-   ↳ Subidea 2
-↳ Idea principal 2
+📌 TEMA
+↳ Idea principal
    ↳ Subidea
+↳ Otra idea principal
 
-REGLAS OBLIGATORIAS (NO ROMPER):
-- Usa SIEMPRE "📌" para el título
-- Usa SIEMPRE "↳" para cada nivel
-- Usa EXACTAMENTE 3 espacios antes de subideas
-- Máximo 2 niveles (no más)
-- Máximo 6 líneas en total
+REGLAS:
+- Usa frases MUY cortas o palabras clave
+- Reduce bastante la información
+- Agrupa las ideas importantes
 
-CONTENIDO:
-- SOLO palabras clave o frases muy cortas
-- Elimina toda explicación
-- Reduce muchísimo la información
+IMPORTANTE:
+- No repitas el mismo nivel
+- No hagas listas largas
+- No escribas frases completas
 
-PROHIBIDO:
-- Párrafos
-- Texto largo
-- Listas normales (- o *)
-- Explicaciones
-
-SI NO SIGUES ESTE FORMATO, LA RESPUESTA ES INCORRECTA.
+OBJETIVO:
+- Que sea visual
+- Que parezca un esquema de estudio real
 `;
     }
 
