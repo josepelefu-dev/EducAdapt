@@ -5,7 +5,7 @@ export default async function handler(req, res) {
     let levelPrompt = "";
     let typePrompt = "";
 
-    // 🧠 NIVELES (CONTROL REAL)
+    // 🧠 NIVELES (YA FUNCIONAN BIEN)
     if (level === "basico") {
       levelPrompt = `
 Adapta el contenido para un estudiante de 11-12 años.
@@ -14,12 +14,12 @@ REGLAS:
 - Reduce el contenido al 30%.
 - Quédate SOLO con lo esencial.
 - Elimina evolución detallada y listas largas.
-- Usa frases muy claras y cortas.
+- Usa frases claras y cortas.
 
 IMPORTANTE:
-- Máximo 8-10 líneas.
-- Debe ser MUCHO más corto que los otros niveles.
+- Debe ser corto.
 - NO añadas títulos.
+- Empieza directamente.
 `;
     }
 
@@ -33,7 +33,7 @@ REGLAS:
 - Explica sin exceso.
 
 IMPORTANTE:
-- Debe ser más largo que el básico.
+- Más largo que básico.
 - NO añadas títulos.
 `;
     }
@@ -47,7 +47,7 @@ REGLAS:
 - Explicación completa pero clara.
 
 IMPORTANTE:
-- Debe ser el más largo.
+- Debe ser el más completo.
 - NO añadas títulos.
 `;
     }
@@ -58,8 +58,8 @@ IMPORTANTE:
 Haz un resumen adaptado al nivel.
 
 REGLAS:
-- Respeta MUCHO la longitud según nivel.
-- No hagas todos los niveles parecidos.
+- Respeta la longitud según nivel.
+- No hagas todos los niveles iguales.
 - Mantén coherencia.
 
 IMPORTANTE:
@@ -74,7 +74,7 @@ Adapta para TDAH.
 REGLAS:
 - Una idea por línea.
 - Frases cortas.
-- Espacios entre líneas.
+- Espaciado claro.
 `;
     }
 
@@ -85,38 +85,49 @@ Adapta para dislexia.
 REGLAS:
 - Frases cortas.
 - Palabras simples.
+- Estructura clara.
 `;
     }
 
-    // 🌳 ESQUEMA V3 (SIMPLIFICADO Y FUNCIONAL)
+    // 🌳 ESQUEMA V4 (FINAL BUENO)
     if (type === "esquema") {
       typePrompt = `
-Convierte el contenido en un esquema claro para estudiar.
+Convierte el contenido en un ESQUEMA DE ESTUDIO MUY SIMPLIFICADO.
 
 REGLAS OBLIGATORIAS:
-- Usa SOLO guiones (-)
-- Usa sangrías con espacios
-- NO uses símbolos raros (↳, │, ├, etc.)
+- Reduce el contenido al 20-30%.
+- Quédate SOLO con conceptos clave.
+- Elimina explicaciones y detalles.
 
 FORMATO:
 
 📌 TEMA
 - Idea principal
-  - Idea secundaria
-  - Idea secundaria
-- Otra idea principal
-  - Idea secundaria
+  - Subidea
+  - Subidea
+- Otra idea
+  - Subidea
 
 REGLAS CLAVE:
-- SOLO palabras clave (máx 4-5 palabras)
+- SOLO palabras clave (máx 3-4 palabras)
 - NO frases largas
 - NO párrafos
-- Máximo 3 niveles
-- Agrupa bien la información
+- Máximo 2-3 niveles
+- Agrupar bien
+
+MUY IMPORTANTE:
+- Debe ser corto
+- Debe poder estudiarse rápido
+- Debe parecer un esquema real, no un texto
+
+PROHIBIDO:
+- Explicar
+- Redactar
+- Repetir contenido
 
 OBJETIVO:
-- Que se entienda rápido
-- Que sirva para estudiar
+- Memorizar rápido
+- Ver estructura clara
 `;
     }
 
