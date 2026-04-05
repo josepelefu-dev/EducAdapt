@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import jsPDF from "jspdf";
 
 export default function Home() {
   const [text, setText] = useState("");
@@ -246,6 +247,60 @@ export default function Home() {
 
   const downloadResult = () => {
   if (!result) return;
+
+  const doc = new jsPDF();
+
+  const marginLeft = 15;
+  let y = 20;
+
+  const colorMap = {
+    facil: [99, 102, 241],
+    tdah: [245, 158, 11],
+    dislexia: [16, 185, 129],
+    esquema: [14, 165, 233]
+  };
+
+  const color = colorMap[type] || [99, 102, 241];
+
+  doc.setFont("helvetica", "bold");
+  doc.setFontSize(20);
+  doc.setTextColor(...color);
+  doc.text("EducAdapt", marginLeft, y);
+
+  y += 10;
+
+  doc.setFontSize(10);
+  doc.setTextColor(100);
+
+  doc.text(`Tipo: ${type}`, marginLeft, y); y += 6;
+  doc.text(`Nivel: ${level}`, marginLeft, y); y += 6;
+  doc.text(`Modo: ${mode}`, marginLeft, y); y += 6;
+  doc.text(`Fecha: ${new Date().toLocaleDateString()}`, marginLeft, y);
+
+  y += 10;
+
+  doc.setDrawColor(...color);
+  doc.line(marginLeft, y, 195, y);
+
+  y += 10;
+
+  doc.setFont("helvetica", "normal");
+  doc.setFontSize(12);
+  doc.setTextColor(0);
+
+  const lines = doc.splitTextToSize(formatResult(result), 180);
+
+  lines.forEach(line => {
+    if (y > 280) {
+      doc.addPage();
+      y = 20;
+    }
+    doc.text(line, marginLeft, y);
+    y += 6;
+  });
+
+  doc.save("educadapt.pdf");
+};
 
   const content = `
 EDUCADAPT
