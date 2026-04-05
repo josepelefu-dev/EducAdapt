@@ -262,7 +262,6 @@ export default function Home() {
 
   const formatted = formatResult(result).replace(/\n/g, "<br>");
 
-  // 🎨 color según tipo
   const colorMap = {
     facil: "#6366f1",
     tdah: "#f59e0b",
@@ -271,6 +270,9 @@ export default function Home() {
   };
 
   const color = colorMap[type] || "#6366f1";
+
+  // ✅ URL absoluta del logo
+  const logoUrl = window.location.origin + "/logo.jpg";
 
   const win = window.open("", "_blank");
 
@@ -290,7 +292,6 @@ export default function Home() {
             page-break-after: always;
           }
 
-          /* PORTADA */
           .cover {
             display: flex;
             flex-direction: column;
@@ -307,16 +308,6 @@ export default function Home() {
             margin-bottom: 20px;
           }
 
-          .cover h1 {
-            font-size: 40px;
-            margin-bottom: 10px;
-          }
-
-          .cover p {
-            font-size: 18px;
-          }
-
-          /* CONTENIDO */
           .header {
             display: flex;
             align-items: center;
@@ -357,7 +348,7 @@ export default function Home() {
 
         <!-- PORTADA -->
         <div class="cover page">
-          <img src="/logo.jpg" />
+          <img src="${logoUrl}" />
           <h1>EducAdapt</h1>
           <p>${type.toUpperCase()} - ${level.toUpperCase()}</p>
           <p>${new Date().toLocaleDateString()}</p>
@@ -367,7 +358,7 @@ export default function Home() {
         <div class="page">
 
           <div class="header">
-            <img src="/logo.jpg" />
+            <img src="${logoUrl}" />
             <h2 class="title">EducAdapt</h2>
           </div>
 
@@ -390,6 +381,10 @@ export default function Home() {
       </body>
     </html>
   `);
+
+  win.document.close();
+  win.print();
+};
 
   win.document.close();
   win.print();
