@@ -267,57 +267,14 @@ export default function Home() {
     return;
   }
 
-  const content = formatResult(result);
+  win.document.write("<html><body>");
+  win.document.write("<h1>EducAdapt</h1>");
+  win.document.write("<pre>" + result + "</pre>");
+  win.document.write("</body></html>");
+  win.document.close();
 
-  const html = `
-<!DOCTYPE html>
-<html>
-<head>
-  <title>EducAdapt</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      padding: 40px;
-      line-height: 1.6;
-      color: #111;
-    }
-
-    h1 {
-      color: #6366f1;
-    }
-
-    .meta {
-      font-size: 14px;
-      color: #555;
-      margin-bottom: 20px;
-    }
-
-    .content {
-      margin-top: 20px;
-      white-space: pre-wrap;
-    }
-  </style>
-</head>
-<body>
-
-  <h1>EducAdapt</h1>
-
-  <div class="meta">
-    Tipo: ${type} <br>
-    Nivel: ${level} <br>
-    Modo: ${mode} <br>
-    Fecha: ${new Date().toLocaleDateString()}
-  </div>
-
-  <hr>
-
-  <div class="content">
-    ${content}
-  </div>
-
-</body>
-</html>
-`;
+  win.print();
+};
 
   win.document.open();
   win.document.write(html);
