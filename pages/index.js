@@ -33,6 +33,7 @@ export default function Home() {
     if (!file) return;
 
     const extension = file.name.split(".").pop().toLowerCase();
+
     if (extension !== "txt") {
       alert("Solo se permite .txt por ahora");
       return;
@@ -45,17 +46,27 @@ export default function Home() {
 
   const generateSmartSchema = (text) => {
     const lines = text.split("\n").filter(l => l.trim() !== "");
+
     let result = "";
+    let currentTitle = "";
 
     lines.forEach(line => {
       const t = line.trim();
 
-      if (t.length < 60 && (t === t.toUpperCase() || t.endsWith(":"))) {
-        result += `\n📌 ${t.replace(":", "")}\n`;
-      } else if (t.length < 120) {
+      if (
+        t.length < 60 &&
+        (t === t.toUpperCase() || t.endsWith(":"))
+      ) {
+        currentTitle = t.replace(":", "");
+        result += `\n📌 ${currentTitle}\n`;
+      }
+
+      else if (t.length < 120) {
         result += `  ↳ ${t}\n`;
-      } else {
-        result += `   • ${t}\n`;
+      }
+
+      else {
+        result += `    • ${t}\n`;
       }
     });
 
@@ -135,6 +146,7 @@ export default function Home() {
       });
 
       const data = await res.json();
+
       let finalResult = data.result || "";
 
       if (type === "esquema") {
@@ -143,6 +155,7 @@ export default function Home() {
 
       setResult(finalResult);
       setCurrentLine(0);
+
     } catch {
       setResult("Error procesando");
     }
@@ -168,6 +181,16 @@ export default function Home() {
   const speakText = (startIndex = currentLine) => {
     if (!result || typeof window === "undefined") return;
 
+    const voices = window.speechSynthesis.getVoices();
+
+    const hasCatalan = voices.some(v =>
+      v.lang.toLowerCase().includes("ca")
+    );
+
+    if (lang === "ca" && !hasCatalan) {
+      alert("⚠️ Tu dispositivo no tiene voz catalana. Prueba con Edge o Safari.");
+    }
+
     const lines = getLines();
     let index = startIndex;
 
@@ -190,6 +213,13 @@ export default function Home() {
       };
 
       window.speechSynthesis.speak(utterance);
+
+      setTimeout(() => {
+        lineRefs.current[index]?.scrollIntoView({
+          behavior: "smooth",
+          block: "center"
+        });
+      }, 200);
     };
 
     window.speechSynthesis.cancel();
@@ -215,79 +245,92 @@ export default function Home() {
   };
 
   const downloadResult = () => {
-    if (!result) return;
+  if (!result) return;
 
-    const blob = new Blob([formatResult(result)], {
-      type: "text/plain;charset=utf-8;"
-    });
+  const content = `
+EDUCADAPT
 
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "educadapt.txt";
-    link.click();
-  };
+Tipo: ${type}
+Nivel: ${level}
+Modo: ${mode}
+Fecha: ${new Date().toLocaleDateString()}
 
-  // ✅ PDF bonito y estable
+----------------------------------------
+
+${formatResult(result)}
+
+----------------------------------------
+
+Documento generado con EducAdapt
+`;
+
+  const blob = new Blob([content], {
+    type: "text/plain;charset=utf-8;"
+  });
+
+  const link = document.createElement("a");
+  link.href = URL.createObjectURL(blob);
+  link.download = "educadapt.txt";
+  link.click();
+};
+
   const exportPDF = () => {
-    if (!result) return;
+  if (!result) return;
 
-    const content = formatResult(result).replace(/\n/g, "<br>");
+  const formatted = formatResult(result).replace(/\n/g, "<br>");
 
-    const win = window.open("", "_blank");
+  const win = window.open("", "_blank");
 
-    if (!win) {
-      alert("Permite ventanas emergentes");
-      return;
-    }
+  win.document.write(`
+    <html>
+      <head>
+        <title>EducAdapt PDF</title>
+        <style>
+          body {
+            font-family: Arial;
+            padding: 40px;
+            line-height: 1.6;
+            color: #111;
+          }
+          h1 {
+            color: #6366f1;
+          }
+          .meta {
+            margin-bottom: 20px;
+            font-size: 14px;
+            color: #555;
+          }
+          .content {
+            margin-top: 20px;
+            font-size: 16px;
+          }
+          hr {
+            margin: 20px 0;
+          }
+        </style>
+      </head>
+      <body>
+        <h1>EducAdapt</h1>
 
-    win.document.open();
-    win.document.write(`
-      <html>
-        <head>
-          <title>EducAdapt</title>
-          <style>
-            body {
-              font-family: Arial, sans-serif;
-              padding: 40px;
-              line-height: 1.6;
-              color: #111;
-            }
-            h1 {
-              color: #6366f1;
-            }
-            .meta {
-              margin-bottom: 20px;
-              font-size: 14px;
-              color: #555;
-            }
-            .content {
-              margin-top: 20px;
-              font-size: 16px;
-            }
-          </style>
-        </head>
-        <body>
-          <h1>EducAdapt</h1>
-          <div class="meta">
-            <strong>Tipo:</strong> ${type}<br>
-            <strong>Nivel:</strong> ${level}<br>
-            <strong>Modo:</strong> ${mode}<br>
-            <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
-          </div>
-          <hr>
-          <div class="content">
-            ${content}
-          </div>
-        </body>
-      </html>
-    `);
+        <div class="meta">
+          <strong>Tipo:</strong> ${type} <br>
+          <strong>Nivel:</strong> ${level} <br>
+          <strong>Modo:</strong> ${mode} <br>
+          <strong>Fecha:</strong> ${new Date().toLocaleDateString()}
+        </div>
 
-    win.document.close();
+        <hr />
 
-    setTimeout(() => {
-      win.print();
-    }, 300);
-  };
+        <div class="content">
+          ${formatted}
+        </div>
+      </body>
+    </html>
+  `);
+
+  win.document.close();
+  win.print();
+};
 
   useEffect(() => {
     if (!autoPlay || !guidedMode) return;
@@ -333,11 +376,40 @@ export default function Home() {
         <br /><br />
 
         <div>
-          <label style={{ color: "#111827", fontWeight: "600" }}>{t.file}</label>
-          <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} />
+          <label style={{ color: "#111827", fontWeight: "600" }}>
+            {t.file}
+          </label>
+          <input 
+            type="file" 
+            accept=".txt" 
+            onChange={(e) => handleFileUpload(e.target.files[0])} 
+            style={{ marginTop: "5px" }}
+          />
         </div>
 
         <br /><br />
+
+        <div style={{ display: "flex", gap: "10px", flexWrap: "wrap" }}>
+          <select value={type} onChange={(e) => setType(e.target.value)} style={selectStyle}>
+            <option value="facil">{t.resumen}</option>
+            <option value="tdah">{t.tdah}</option>
+            <option value="dislexia">{t.dislexia}</option>
+            <option value="esquema">{t.esquema}</option>
+          </select>
+
+          <select value={level} onChange={(e) => setLevel(e.target.value)} style={selectStyle}>
+            <option value="basico">{t.basico}</option>
+            <option value="intermedio">{t.intermedio}</option>
+            <option value="avanzado">{t.avanzado}</option>
+          </select>
+
+          <select value={mode} onChange={(e) => setMode(e.target.value)} style={selectStyle}>
+            <option value="alumno">{t.alumno}</option>
+            <option value="profesor">{t.profesor}</option>
+          </select>
+        </div>
+
+        <br />
 
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
@@ -347,9 +419,49 @@ export default function Home() {
           {t.pdf}
         </button>
 
+        <button onClick={() => { setGuidedMode(!guidedMode); setCurrentLine(0); }} style={{ marginTop: "10px", ...mainButton }}>
+          {guidedMode ? t.normal : t.guided}
+        </button>
+
+        {guidedMode && (
+          <div>
+            <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
+              {autoPlay ? t.stop : t.auto}
+            </button>
+
+            <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
+              {t.speak}
+            </button>
+
+            <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              ⏸ Pausa
+            </button>
+
+            <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.resume}
+            </button>
+
+            <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
+              {t.stopSpeak}
+            </button>
+
+            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
+          </div>
+        )}
+
         <br /><br />
 
-        {result && <div style={resultStyle}>{formatResult(result)}</div>}
+        {!guidedMode && result && <div style={resultStyle}>{formatResult(result)}</div>}
+
+        {guidedMode && result && (
+          <div style={resultStyle}>
+            {getLines().map((line, i) => (
+              <div key={i} ref={el => lineRefs.current[i] = el} onClick={() => speakText(i)} style={{ padding: "8px", margin: "4px 0", borderRadius: "6px", cursor: "pointer", opacity: i === currentLine ? 1 : 0.4, background: i === currentLine ? "#dbeafe" : "transparent", fontWeight: i === currentLine ? "600" : "400" }}>
+                {line}
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {result && (
@@ -367,5 +479,6 @@ const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", 
 const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
 const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
 const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
 const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
 const langBtn = { margin: "5px" };
