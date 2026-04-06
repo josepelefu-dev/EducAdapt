@@ -8,13 +8,10 @@ export default function Home() {
   const [lang, setLang] = useState("es");
   const [result, setResult] = useState("");
   const [loading, setLoading] = useState(false);
-
   const [guidedMode, setGuidedMode] = useState(false);
   const [currentLine, setCurrentLine] = useState(0);
-
   const [autoPlay, setAutoPlay] = useState(false);
   const [speed, setSpeed] = useState(2000);
-
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
 
@@ -23,7 +20,8 @@ export default function Home() {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const link = document.createElement("link");
-      link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
+      link.href =
+        "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
       link.rel = "stylesheet";
       document.head.appendChild(link);
     }
@@ -42,33 +40,29 @@ export default function Home() {
   };
 
   const generateSmartSchema = (text) => {
-  if (!text) return "";
+    if (!text) return "";
+    const lines = text
+      .split("\n")
+      .map((l) => l.trim())
+      .filter((l) => l.length > 20);
 
-  const lines = text
-    .split("\n")
-    .map(l => l.trim())
-    .filter(l => l.length > 20);
+    let schema = "";
 
-  let schema = "";
-
-  // título principal
-  if (lines[0]) {
-    schema += `📌 ${lines[0].toUpperCase()}\n`;
-  }
-
-  // estructura tipo árbol REAL
-  lines.slice(1, 6).forEach((line, i) => {
-    const short = line.split(" ").slice(0, 3).join(" ");
-
-    if (i % 2 === 0) {
-      schema += `↳ ${short}\n`;
-    } else {
-      schema += `   ↳ ${short}\n`;
+    if (lines[0]) {
+      schema += `📌 ${lines[0].toUpperCase()}\n`;
     }
-  });
 
-  return schema;
-};
+    lines.slice(1, 6).forEach((line, i) => {
+      const short = line.split(" ").slice(0, 3).join(" ");
+      if (i % 2 === 0) {
+        schema += `↳ ${short}\n`;
+      } else {
+        schema += `   ↳ ${short}\n`;
+      }
+    });
+
+    return schema;
+  };
 
   const translations = {
     es: {
@@ -132,27 +126,21 @@ export default function Home() {
       alert(t.error);
       return;
     }
-
     setLoading(true);
-
     try {
       const res = await fetch("/api/adapt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ text, type, level, mode, lang })
       });
-
       const data = await res.json();
       let finalResult = data.result || "";
 
-      
-      
       setResult(finalResult);
       setCurrentLine(0);
     } catch {
       setResult("Error procesando");
     }
-
     setLoading(false);
   };
 
@@ -168,7 +156,7 @@ export default function Home() {
   const getLines = () => {
     return formatResult(result)
       .split("\n")
-      .filter(l => l.trim() !== "");
+      .filter((l) => l.trim() !== "");
   };
 
   const speakText = (startIndex = currentLine) => {
@@ -224,18 +212,13 @@ export default function Home() {
     if (!result) return;
 
     const content = `EDUCADAPT
-
 Tipo: ${type}
 Nivel: ${level}
 Modo: ${mode}
 Fecha: ${new Date().toLocaleDateString()}
-
 ----------------------------------------
-
 ${formatResult(result)}
-
 ----------------------------------------
-
 Documento generado con EducAdapt`;
 
     const blob = new Blob([content], {
@@ -248,7 +231,6 @@ Documento generado con EducAdapt`;
     link.click();
   };
 
-  // ✅ SOLO MEJORADO (NO TOCA NADA MÁS)
   const exportPDF = () => {
     if (!result) return;
 
@@ -318,7 +300,7 @@ Documento generado con EducAdapt`;
     if (!autoPlay || !guidedMode) return;
 
     const interval = setInterval(() => {
-      setCurrentLine(prev => {
+      setCurrentLine((prev) => {
         const lines = getLines();
         return prev < lines.length - 1 ? prev + 1 : prev;
       });
@@ -332,9 +314,15 @@ Documento generado con EducAdapt`;
     padding: "20px",
     borderRadius: "12px",
     whiteSpace: "pre-wrap",
-    lineHeight: type === "dislexia" ? "1.25" : type === "tdah" ? "1.65" : "1.6",
+    lineHeight:
+      type === "dislexia"
+        ? "1.25"
+        : type === "tdah"
+        ? "1.65"
+        : "1.6",
     letterSpacing: type === "dislexia" ? "1px" : "normal",
-    fontFamily: type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
+    fontFamily:
+      type === "dislexia" ? "OpenDyslexic, Arial" : "Arial",
     color: "#111827"
   };
 
@@ -345,21 +333,54 @@ Documento generado con EducAdapt`;
           <img src="/logo.jpg" style={{ width: "50px" }} />
           <h2>{t.title}</h2>
         </div>
-
         <div>
-          <button onClick={() => setLang("es")} style={langBtn}>ES</button>
-          <button onClick={() => setLang("ca")} style={langBtn}>CAT</button>
+          <button onClick={() => setLang("es")} style={langBtn}>
+            ES
+          </button>
+          <button onClick={() => setLang("ca")} style={langBtn}>
+            CAT
+          </button>
         </div>
       </div>
 
       <div style={cardStyle}>
-        <textarea rows="8" style={textareaStyle} placeholder={t.placeholder} value={text} onChange={(e) => setText(e.target.value)} />
+        <textarea
+          rows="8"
+          style={textareaStyle}
+          placeholder={t.placeholder}
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+        />
 
         <br /><br />
 
+        {/* ✅ AQUÍ EL ÚNICO CAMBIO REAL */}
         <div>
-          <label style={{ color: "#111827", fontWeight: "600" }}>{t.file}</label>
-          <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} style={{ marginTop: "5px" }} />
+          <label style={{ color: "#111827", fontWeight: "600" }}>
+            {t.file}
+          </label>
+
+          <br />
+
+          <label
+            style={{
+              display: "inline-block",
+              padding: "10px 15px",
+              background: "#6366f1",
+              color: "white",
+              borderRadius: "8px",
+              cursor: "pointer",
+              marginTop: "5px"
+            }}
+          >
+            {t.file}
+            <input
+              type="file"
+              accept=".txt"
+              onChange={(e) => handleFileUpload(e.target.files[0])}
+              style={{ display: "none" }}
+            />
+          </label>
         </div>
 
         <br /><br />
@@ -403,24 +424,28 @@ Documento generado con EducAdapt`;
             <button onClick={() => setAutoPlay(!autoPlay)} style={{ marginTop: "10px", ...mainButton }}>
               {autoPlay ? t.stop : t.auto}
             </button>
-
             <button onClick={() => speakText()} style={{ marginTop: "10px", ...mainButton }}>
               {t.speak}
             </button>
-
             <button onClick={pauseSpeech} style={{ marginTop: "10px", ...mainButton }}>
               ⏸ Pausa
             </button>
-
             <button onClick={resumeSpeech} style={{ marginTop: "10px", ...mainButton }}>
               {t.resume}
             </button>
-
             <button onClick={stopSpeech} style={{ marginTop: "10px", ...mainButton }}>
               {t.stopSpeak}
             </button>
 
-            <input type="range" min="1000" max="5000" step="500" value={speed} onChange={(e) => setSpeed(Number(e.target.value))} style={{ width: "100%", marginTop: "10px" }} />
+            <input
+              type="range"
+              min="1000"
+              max="5000"
+              step="500"
+              value={speed}
+              onChange={(e) => setSpeed(Number(e.target.value))}
+              style={{ width: "100%", marginTop: "10px" }}
+            />
           </div>
         )}
 
@@ -433,7 +458,7 @@ Documento generado con EducAdapt`;
             {getLines().map((line, i) => (
               <div
                 key={i}
-                ref={el => lineRefs.current[i] = el}
+                ref={(el) => (lineRefs.current[i] = el)}
                 onClick={() => speakText(i)}
                 style={{
                   padding: "8px",
