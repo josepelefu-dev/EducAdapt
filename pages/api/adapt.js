@@ -89,34 +89,23 @@ REGLAS:
     // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
     if (type === "esquema") {
   typePrompt = `
-Convierte el contenido en un esquema tipo árbol MUY VISUAL.
+Convierte el texto en un esquema tipo árbol.
 
-FORMATO OBLIGATORIO:
-📌 TEMA PRINCIPAL
+IMPORTANTE:
+- NO resumas el contenido
+- Mantén TODA la información relevante
+- Divide el contenido en ideas principales y secundarias
+- Usa estructura jerárquica clara
+
+Formato obligatorio:
+📌 TÍTULO PRINCIPAL
 ↳ Idea principal
-   ↳ Palabra clave
-↳ Otra idea
-   ↳ Palabra clave
+   ↳ Subidea
+      • Detalle
 
-REGLAS CLAVE:
-- SOLO 3-4 ideas principales (no más)
-- Cada idea: máximo 1 subnivel
-- Máximo total: 8 líneas
-- Máximo 3 palabras por línea
-- SOLO palabras clave
-- NO frases
-- NO explicaciones
-
-MUY IMPORTANTE:
-- ELIMINA información secundaria
-- QUÉDATE solo con lo MÁS IMPORTANTE del texto
-
-PROHIBIDO:
-- Listar todo
-- Hacer resumen
-- Escribir frases
-
-Debe parecer un esquema de estudio rápido.
+- Usa frases cortas, no párrafos largos
+- El esquema puede ser largo si el texto lo es
+- Prioriza claridad y estructura sobre brevedad
 `;
 }
 
