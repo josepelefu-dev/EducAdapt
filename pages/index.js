@@ -358,25 +358,9 @@ Documento generado con EducAdapt`;
         <br /><br />
 
         <div>
-          <label
-  style={{
-    display: "inline-block",
-    padding: "10px 15px",
-    background: "#6366f1",
-    color: "white",
-    borderRadius: "8px",
-    cursor: "pointer",
-    marginTop: "5px"
-  }}
->
-  {t.file}
-  <input
-    type="file"
-    accept=".txt"
-    onChange={(e) => handleFileUpload(e.target.files[0])}
-    style={{ display: "none" }}
-  />
-</label>
+          <label style={{ color: "#111827", fontWeight: "600" }}>{t.file}</label>
+          <input type="file" accept=".txt" onChange={(e) => handleFileUpload(e.target.files[0])} style={{ marginTop: "5px" }} />
+        </div>
 
         <br /><br />
 
