@@ -356,13 +356,8 @@ Documento generado con EducAdapt`;
 
         {/* ✅ AQUÍ EL ÚNICO CAMBIO REAL */}
         <div>
-          <label style={{ color: "#111827", fontWeight: "600" }}>
-            {t.file}
-          </label>
-
-          <br />
-
-          <label
+          
+            <label
             style={{
               display: "inline-block",
               padding: "10px 15px",
