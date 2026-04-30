@@ -1,12 +1,11 @@
-// 🔒 Control simple de uso (en memoria)
-// ⚠️ En producción usar base de datos
+// 🔒 NUEVO: control simple de uso (en memoria)
 let usageStore = {};
 
 export default async function handler(req, res) {
   try {
     const { text, type, level, mode, lang, userId = "anon" } = req.body;
 
-    // 🔒 LÍMITE GRATIS
+    // 🔒 NUEVO: límite gratis
     if (!usageStore[userId]) usageStore[userId] = 0;
 
     const FREE_LIMIT = 5;
@@ -130,7 +129,7 @@ Formato obligatorio:
     const response = await fetch("https://api.openai.com/v1/chat/completions", {
       method: "POST",
       headers: {
-        Authorization: `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
