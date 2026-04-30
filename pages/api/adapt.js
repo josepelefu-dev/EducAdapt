@@ -1,23 +1,6 @@
-// 🔒 NUEVO: control simple de uso (en memoria)
-let usageStore = {};
-
 export default async function handler(req, res) {
   try {
-    const { text, type, level, mode, lang, userId = "anon" } = req.body;
-
-    // 🔒 NUEVO: límite gratis
-    if (!usageStore[userId]) usageStore[userId] = 0;
-
-    const FREE_LIMIT = 5;
-
-    if (usageStore[userId] >= FREE_LIMIT) {
-      return res.status(403).json({
-        error: "Límite gratuito alcanzado",
-        paywall: true
-      });
-    }
-
-    usageStore[userId]++;
+    const { text, type, level, mode, lang } = req.body;
 
     let levelPrompt = "";
     let typePrompt = "";
@@ -103,8 +86,9 @@ REGLAS:
 `;
     }
 
+    // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
     if (type === "esquema") {
-      typePrompt = `
+  typePrompt = `
 Convierte el texto en un esquema tipo árbol.
 
 IMPORTANTE:
@@ -118,8 +102,12 @@ Formato obligatorio:
 ↳ Idea principal
    ↳ Subidea
       • Detalle
+
+- Usa frases cortas, no párrafos largos
+- El esquema puede ser largo si el texto lo es
+- Prioriza claridad y estructura sobre brevedad
 `;
-    }
+}
 
     const languageInstruction =
       lang === "ca"
@@ -139,7 +127,9 @@ Formato obligatorio:
             role: "user",
             content: `
 ${languageInstruction}
+
 ${levelPrompt}
+
 ${typePrompt}
 
 Texto:
