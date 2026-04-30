@@ -135,9 +135,19 @@ export default function Home() {
     
     // 🔒 BLOQUEO ESQUEMA
     if (!isPro && type === "esquema") {
-      alert("El modo esquema es PRO");
-      return;
-    }
+  const go = confirm("El modo esquema es PRO 🚀 ¿Quieres desbloquearlo?");
+  
+  if (go) {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+    window.location.href = data.url;
+  }
+
+  return;
+}
 
 setLoading(true);
     setLoading(true);
