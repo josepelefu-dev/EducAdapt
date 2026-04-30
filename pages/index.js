@@ -1,131 +1,153 @@
-import { useState, useEffect, useRef } from "react";
+export default async function handler(req, res) {
+  try {
+    const { text, type, level, mode, lang } = req.body;
 
-export default function Home() {
-  const [text, setText] = useState("");
-  const [type, setType] = useState("facil");
-  const [level, setLevel] = useState("basico");
-  const [mode, setMode] = useState("alumno");
-  const [lang, setLang] = useState("es");
-  const [result, setResult] = useState("");
-  const [loading, setLoading] = useState(false);
+    let levelPrompt = "";
+    let typePrompt = "";
 
-  const [guidedMode, setGuidedMode] = useState(false);
-  const [currentLine, setCurrentLine] = useState(0);
-  const [autoPlay, setAutoPlay] = useState(false);
-  const [speed, setSpeed] = useState(2000);
-  const [speaking, setSpeaking] = useState(false);
-  const [paused, setPaused] = useState(false);
+    // 🧠 NIVELES
+    if (level === "basico") {
+      levelPrompt = `
+Adapta el contenido para un estudiante de 11-12 años.
 
-  // 🔒 NUEVO
-  const userId = "demo-user";
-  const [isPro, setIsPro] = useState(false);
+REGLAS:
+- Elimina la mayoría de detalles.
+- Quédate solo con ideas esenciales.
+- Lenguaje claro y fácil.
+- Frases cortas.
 
-  const lineRefs = useRef([]);
-
-  useEffect(() => {
-    const link = document.createElement("link");
-    link.href = "https://cdn.jsdelivr.net/npm/opendyslexic@1.0.3/opendyslexic.css";
-    link.rel = "stylesheet";
-    document.head.appendChild(link);
-  }, []);
-
-  const handleAdapt = async () => {
-    if (!text.trim()) {
-      alert("Introduce texto");
-      return;
+IMPORTANTE:
+- Debe ser claramente más corto que el original.
+- NO añadas títulos.
+`;
     }
 
-    // 🔒 BLOQUEO PRO
-    if (!isPro && level === "avanzado") {
-      alert("Nivel avanzado es PRO 🚀");
-      return;
+    if (level === "intermedio") {
+      levelPrompt = `
+Adapta el contenido para un estudiante de 13-14 años.
+
+REGLAS:
+- Mantén ideas importantes.
+- Elimina detalles secundarios.
+- Explicación clara.
+
+IMPORTANTE:
+- Más completo que básico.
+- Más corto que avanzado.
+- NO añadas títulos.
+`;
     }
 
-    setLoading(true);
+    if (level === "avanzado") {
+      levelPrompt = `
+Adapta el contenido para un estudiante de 15-16 años.
 
-    try {
-      const res = await fetch("/api/adapt", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, type, level, mode, lang, userId })
-      });
+REGLAS:
+- Mantén la mayor parte del contenido.
+- Explica de forma clara.
 
-      const data = await res.json();
-
-      if (data.paywall) {
-        alert("Has alcanzado el límite gratuito. Pásate a PRO 🚀");
-        setLoading(false);
-        return;
-      }
-
-      setResult(data.result || "");
-      setCurrentLine(0);
-
-    } catch {
-      setResult("Error");
+IMPORTANTE:
+- Debe ser el más completo.
+- NO añadas títulos.
+`;
     }
 
-    setLoading(false);
-  };
+    // 🎯 TIPOS
+    if (type === "facil") {
+      typePrompt = `
+Haz un resumen adaptado al nivel.
 
-  const exportPDF = () => {
-    if (!isPro) {
-      alert("Exportar PDF es PRO 🚀");
-      return;
+REGLAS:
+- Respeta la diferencia entre niveles.
+- No hagas todos los resúmenes iguales.
+- Mantén coherencia.
+`;
     }
 
-    if (!result) return;
+    if (type === "tdah") {
+      typePrompt = `
+Adapta para TDAH.
 
-    const formatted = result.replace(/\n/g, "<br>");
+REGLAS:
+- Una idea por línea.
+- Frases cortas.
+- Espaciado claro.
+`;
+    }
 
-    const win = window.open("", "_blank");
-    win.document.write(`<html><body>${formatted}</body></html>`);
-    win.document.close();
+    if (type === "dislexia") {
+      typePrompt = `
+Adapta para dislexia.
 
-    setTimeout(() => win.print(), 300);
-  };
+REGLAS:
+- Frases cortas.
+- Palabras simples.
+- Estructura clara.
+`;
+    }
 
-  return (
-    <div style={{ padding: "20px" }}>
-      <h1>EducAdapt</h1>
+    // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
+    if (type === "esquema") {
+  typePrompt = `
+Convierte el texto en un esquema tipo árbol.
 
-      <textarea
-        rows="8"
-        style={{ width: "100%" }}
-        value={text}
-        onChange={(e) => setText(e.target.value)}
-      />
+IMPORTANTE:
+- NO resumas el contenido
+- Mantén TODA la información relevante
+- Divide el contenido en ideas principales y secundarias
+- Usa estructura jerárquica clara
 
-      <br /><br />
+Formato obligatorio:
+📌 TÍTULO PRINCIPAL
+↳ Idea principal
+   ↳ Subidea
+      • Detalle
 
-      <select value={level} onChange={(e) => setLevel(e.target.value)}>
-        <option value="basico">Básico</option>
-        <option value="intermedio">Intermedio</option>
-        <option value="avanzado">Avanzado 🔒</option>
-      </select>
+- Usa frases cortas, no párrafos largos
+- El esquema puede ser largo si el texto lo es
+- Prioriza claridad y estructura sobre brevedad
+`;
+}
 
-      <br /><br />
+    const languageInstruction =
+      lang === "ca"
+        ? "Respon en català."
+        : "Responde en español.";
 
-      <button onClick={handleAdapt}>
-        {loading ? "Procesando..." : "Adaptar"}
-      </button>
+    const response = await fetch("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        messages: [
+          {
+            role: "user",
+            content: `
+${languageInstruction}
 
-      <button
-        onClick={() => setIsPro(true)}
-        style={{ marginLeft: "10px", background: "green", color: "white" }}
-      >
-        Activar PRO (demo)
-      </button>
+${levelPrompt}
 
-      <button onClick={exportPDF} style={{ marginLeft: "10px" }}>
-        Exportar PDF 🔒
-      </button>
+${typePrompt}
 
-      <br /><br />
+Texto:
+${text}
+`
+          }
+        ]
+      })
+    });
 
-      <div style={{ whiteSpace: "pre-wrap" }}>
-        {result}
-      </div>
-    </div>
-  );
+    const data = await response.json();
+
+    res.status(200).json({
+      result: data.choices?.[0]?.message?.content || "Error generando respuesta"
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Error procesando" });
+  }
 }
