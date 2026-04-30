@@ -134,6 +134,13 @@ export default function Home() {
         body: JSON.stringify({ text, type, level, mode, lang, userId: "demo-user" })
       });
       const data = await res.json();
+
+      if (data.paywall) {
+      alert("Has alcanzado el límite gratuito 🚀");
+      setLoading(false);
+      return;
+      }
+
       let finalResult = data.result || "";
 
       setResult(finalResult);
