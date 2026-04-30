@@ -135,13 +135,19 @@ export default function Home() {
       });
       const data = await res.json();
 
-      if (data.paywall) {
-      alert("Has alcanzado el límite gratuito 🚀");
-      setLoading(false);
-      return;
-      }
+if (data.paywall) {
+  alert("Has alcanzado el límite gratuito");
+  setLoading(false);
+  return;
+}
 
-      let finalResult = data.result || "";
+if (!data.result) {
+  setResult("Error procesando");
+  setLoading(false);
+  return;
+}
+
+let finalResult = data.result;
 
       setResult(finalResult);
       setCurrentLine(0);
