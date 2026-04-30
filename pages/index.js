@@ -266,7 +266,17 @@ Documento generado con EducAdapt`;
 
   const exportPDF = () => {
     if (!isPro) {
-  alert("Exportar PDF es PRO");
+  const go = confirm("Exportar PDF es PRO 🚀 ¿Quieres desbloquearlo?");
+  
+  if (go) {
+    const res = await fetch("/api/checkout", {
+      method: "POST",
+    });
+
+    const data = await res.json();
+    window.location.href = data.url;
+  }
+
   return;
 }
     if (!result) return;
