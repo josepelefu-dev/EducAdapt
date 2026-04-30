@@ -429,11 +429,11 @@ Documento generado con EducAdapt`;
           {loading ? t.loading : t.adapt}
         </button>
 
-         <button
+        <button
   onClick={() => setIsPro(true)}
-  style={{ ...mainButton, marginTop: "10px", background: "#16a34a" }}
+  style={{ ...mainButton, marginTop: "10px", background: isPro ? "#16a34a" : "#16a34a" }}
 >
-  Activar PRO (demo)
+  {isPro ? "PRO activado ✅" : "Activar PRO (demo)"}
 </button>
 
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
