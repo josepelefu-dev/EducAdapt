@@ -251,6 +251,10 @@ Documento generado con EducAdapt`;
   };
 
   const exportPDF = () => {
+    if (!isPro) {
+  alert("Exportar PDF es PRO");
+  return;
+}
     if (!result) return;
 
     const formatted = formatResult(result).replace(/\n/g, "<br>");
@@ -424,6 +428,13 @@ Documento generado con EducAdapt`;
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
+
+         <button
+  onClick={() => setIsPro(true)}
+  style={{ ...mainButton, marginTop: "10px", background: "#16a34a" }}
+>
+  Activar PRO (demo)
+</button>
 
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
