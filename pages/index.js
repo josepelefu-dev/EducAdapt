@@ -264,9 +264,9 @@ Documento generado con EducAdapt`;
     link.click();
   };
 
-  const exportPDF = () => {
+  const exportPDF = async () => {
     if (!isPro) {
-  const go = confirm("Exportar PDF es PRO 🚀 ¿Quieres desbloquearlo?");
+  const go = confirm("Exportar PDF es PRO ¿Quieres desbloquearlo?");
   
   if (go) {
     const res = await fetch("/api/checkout", {
