@@ -150,7 +150,7 @@ setLoading(true);
       const data = await res.json();
 
 if (data.paywall) {
-  const go = confirm("Has alcanzado el límite gratuito 🚀 ¿Quieres pasar a PRO?");
+  const go = confirm("Has alcanzado el límite gratuito ¿Quieres pasar a PRO?");
   
   if (go) {
     const res = await fetch("/api/checkout", { method: "POST" });
