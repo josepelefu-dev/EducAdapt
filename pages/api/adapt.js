@@ -86,6 +86,7 @@ REGLAS:
 `;
     }
 
+    // 🌳 ESQUEMA (VERSIÓN SIMPLIFICADA Y FUNCIONAL)
     if (type === "esquema") {
   typePrompt = `
 Convierte el texto en un esquema tipo árbol.
