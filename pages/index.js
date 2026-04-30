@@ -150,8 +150,14 @@ setLoading(true);
       const data = await res.json();
 
 if (data.paywall) {
-  alert("Has alcanzado el límite gratuito");
-  setLoading(false);
+  const go = confirm("Has alcanzado el límite gratuito 🚀 ¿Quieres pasar a PRO?");
+  
+  if (go) {
+    const res = await fetch("/api/checkout", { method: "POST" });
+    const checkout = await res.json();
+    window.location.href = checkout.url;
+  }
+
   return;
 }
 
