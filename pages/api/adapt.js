@@ -10,6 +10,15 @@ if (!usageStore[userId]) {
 
 usageStore[userId]++;
 console.log("Usos:", usageStore[userId]);
+    // 🔒 LÍMITE GRATIS (AÑADIR AQUÍ)
+const FREE_LIMIT = 3;
+
+if (usageStore[userId] > FREE_LIMIT) {
+  return res.status(200).json({
+    paywall: true,
+    result: ""
+  });
+}
 
     let levelPrompt = "";
     let typePrompt = "";
