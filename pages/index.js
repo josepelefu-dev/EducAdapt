@@ -131,7 +131,7 @@ export default function Home() {
       const res = await fetch("/api/adapt", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ text, type, level, mode, lang })
+        body: JSON.stringify({ text, type, level, mode, lang, userId: "demo-user" })
       });
       const data = await res.json();
       let finalResult = data.result || "";
