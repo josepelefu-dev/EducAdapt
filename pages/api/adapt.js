@@ -1,6 +1,15 @@
+let usageStore = {};
 export default async function handler(req, res) {
   try {
     const { text, type, level, mode, lang } = req.body;
+    const { userId = "anon" } = req.body;
+
+if (!usageStore[userId]) {
+  usageStore[userId] = 0;
+}
+
+usageStore[userId]++;
+console.log("Usos:", usageStore[userId]);
 
     let levelPrompt = "";
     let typePrompt = "";
