@@ -132,6 +132,14 @@ export default function Home() {
       alert("Nivel avanzado es PRO");
       return;
     }
+    
+    // 🔒 BLOQUEO ESQUEMA
+    if (!isPro && type === "esquema") {
+      alert("El modo esquema es PRO");
+      return;
+    }
+
+setLoading(true);
     setLoading(true);
     try {
       const res = await fetch("/api/adapt", {
