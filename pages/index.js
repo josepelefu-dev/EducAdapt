@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
+  const [isPro, setIsPro] = useState(false);
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
@@ -124,6 +125,11 @@ export default function Home() {
   const handleAdapt = async () => {
     if (!text.trim()) {
       alert(t.error);
+      return;
+    }
+    // 🔒 BLOQUEO NIVEL AVANZADO (AÑADIR AQUÍ)
+    if (!isPro && level === "avanzado") {
+      alert("Nivel avanzado es PRO");
       return;
     }
     setLoading(true);
