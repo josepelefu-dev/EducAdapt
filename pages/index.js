@@ -2,6 +2,9 @@ import { useState, useEffect, useRef } from "react";
 
 export default function Home() {
   const [isPro, setIsPro] = useState(false);
+  setTimeout(() => {
+  console.log("isPro =", isPro);
+}, 1000);
   const [text, setText] = useState("");
   const [type, setType] = useState("facil");
   const [level, setLevel] = useState("basico");
