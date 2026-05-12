@@ -473,6 +473,20 @@ Documento generado con EducAdapt`;
         <button onClick={handleAdapt} style={mainButton}>
           {loading ? t.loading : t.adapt}
         </button>
+          <input
+  type="text"
+  placeholder="Código PRO"
+  value={devCode}
+  onChange={(e) => setDevCode(e.target.value)}
+  style={{ ...selectStyle, marginTop: "10px", width: "100%" }}
+/>
+
+<button
+  onClick={unlockPro}
+  style={{ ...mainButton, marginTop: "10px", background: "#ff9800" }}
+>
+  Desbloquear PRO
+</button>
 
         <button
   onClick={() => setIsPro(true)}
