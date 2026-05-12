@@ -505,13 +505,6 @@ Documento generado con EducAdapt`;
   Desbloquear PRO
 </button>
 
-        <button
-  onClick={() => setIsPro(true)}
-  style={{ ...mainButton, marginTop: "10px", background: isPro ? "#16a34a" : "#16a34a" }}
->
-  {isPro ? "PRO activado ✅" : "Activar PRO (demo)"}
-</button>
-
         <button onClick={exportPDF} style={{ marginTop: "10px", ...mainButton }}>
           {t.pdf}
         </button>
