@@ -281,6 +281,16 @@ Documento generado con EducAdapt`;
     link.download = "educadapt.txt";
     link.click();
   };
+  
+  const unlockPro = () => {
+  if (devCode === "EDUCADAPTDEV") {
+    localStorage.setItem("isPro", "true");
+    setIsPro(true);
+    alert("Modo PRO activado");
+  } else {
+    alert("Codigo incorrecto");
+  }
+};
 
   const exportPDF = async () => {
     if (!isPro) {
@@ -298,16 +308,7 @@ Documento generado con EducAdapt`;
 
   return;
 }
-    };
-    const unlockPro = () => {
-  if (devCode === "EDUCADAPTDEV") {
-    localStorage.setItem("isPro", "true");
-    setIsPro(true);
-    alert("Modo PRO activado");
-  } else {
-    alert("Codigo incorrecto");
-  }
-};
+    
     if (!result) return;
 
     const formatted = formatResult(result).replace(/\n/g, "<br>");
