@@ -297,7 +297,7 @@ Documento generado con EducAdapt`;
     setIsPro(true);
     alert("Modo PRO activado");
   } else {
-    alert("Código incorrecto");
+    alert("Codigo incorrecto");
   }
 };
     if (!result) return;
@@ -475,7 +475,7 @@ Documento generado con EducAdapt`;
         </button>
           <input
   type="text"
-  placeholder="Código PRO"
+  placeholder="Codigo PRO"
   value={devCode}
   onChange={(e) => setDevCode(e.target.value)}
   style={{ ...selectStyle, marginTop: "10px", width: "100%" }}
