@@ -15,7 +15,8 @@ export default function Home() {
   const [speed, setSpeed] = useState(2000);
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
-
+  const [devCode, setDevCode] = useState("");
+  
   const lineRefs = useRef([]);
 
   useEffect(() => {
@@ -282,6 +283,7 @@ Documento generado con EducAdapt`;
     const res = await fetch("/api/checkout", {
       method: "POST",
     });
+    
 
     const data = await res.json();
     window.location.href = data.url;
@@ -289,6 +291,15 @@ Documento generado con EducAdapt`;
 
   return;
 }
+    const unlockPro = () => {
+  if (devCode === "EDUCADAPTDEV") {
+    localStorage.setItem("isPro", "true");
+    setIsPro(true);
+    alert("Modo PRO activado");
+  } else {
+    alert("Código incorrecto");
+  }
+};
     if (!result) return;
 
     const formatted = formatResult(result).replace(/\n/g, "<br>");
