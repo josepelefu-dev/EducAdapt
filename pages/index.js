@@ -291,6 +291,7 @@ Documento generado con EducAdapt`;
 
   return;
 }
+    };
     const unlockPro = () => {
   if (devCode === "EDUCADAPTDEV") {
     localStorage.setItem("isPro", "true");
