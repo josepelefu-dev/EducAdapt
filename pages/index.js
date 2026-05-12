@@ -36,6 +36,14 @@ const langBtn = { margin: "5px" };
     }
   }, []);
 
+  useEffect(() => {
+  const savedPro = localStorage.getItem("isPro");
+
+  if (savedPro === "true") {
+    setIsPro(true);
+  }
+}, []);
+
   const handleFileUpload = (file) => {
     if (!file) return;
     const extension = file.name.split(".").pop().toLowerCase();
