@@ -16,6 +16,13 @@ export default function Home() {
   const [speaking, setSpeaking] = useState(false);
   const [paused, setPaused] = useState(false);
   const [devCode, setDevCode] = useState("");
+  const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
+const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
+const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
+const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
+const selectStyle = { padding: "10px", borderRadius: "8px" };
+const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
+const langBtn = { margin: "5px" };
   
   const lineRefs = useRef([]);
 
@@ -582,11 +589,3 @@ Documento generado con EducAdapt`;
     </div>
   );
 }
-
-const pageStyle = { minHeight: "100vh", background: "#0f172a", padding: "20px", color: "white" };
-const headerStyle = { maxWidth: "900px", margin: "auto", display: "flex", justifyContent: "space-between" };
-const cardStyle = { maxWidth: "900px", margin: "auto", background: "white", padding: "30px", borderRadius: "20px" };
-const textareaStyle = { width: "100%", padding: "15px", borderRadius: "10px" };
-const selectStyle = { padding: "10px", borderRadius: "8px" };
-const mainButton = { width: "100%", padding: "15px", background: "#6366f1", color: "white", border: "none" };
-const langBtn = { margin: "5px" };
