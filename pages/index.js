@@ -167,7 +167,7 @@ setLoading(true);
       });
       const data = await res.json();
 
-if (data.paywall) {
+if (data.paywall && !isPro) {
   const go = confirm("Has alcanzado el límite gratuito ¿Quieres pasar a PRO?");
   
   if (go) {
